@@ -2,7 +2,6 @@
 
 To start:
 
-  * `mix deps.get`
   * `mix setup`
   * `mix phx.server`
 
