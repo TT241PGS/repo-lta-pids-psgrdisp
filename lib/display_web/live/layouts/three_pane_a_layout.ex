@@ -15,6 +15,7 @@ defmodule ThreePaneALayout do
         <DateTimeHorizontal />
       </div>
     </div>
+    <PredictionsTwoColumn stopPredictions={{@prop.stop_predictions}} />
     """
   end
 end

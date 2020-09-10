@@ -8,7 +8,7 @@ defmodule DisplayWeb.Display do
     socket =
       assign(socket,
         bus_stop_no: bus_stop_no,
-        bus_stop_name: "TBD",
+        bus_stop_name: "Bus Stop Name #",
         stop_predictions: [],
         sheduled_message: nil
       )
@@ -21,6 +21,13 @@ defmodule DisplayWeb.Display do
   def handle_info(:update_stops, socket) do
     case RealTime.get_predictions_cached(socket.assigns.bus_stop_no) do
       {:ok, cached_predictions} ->
+        cached_predictions = 
+        Enum.map(cached_predictions, fn service -> 
+          service
+          |> update_estimated_arrival("NextBus")
+          |> update_estimated_arrival("NextBus2")
+          |> update_estimated_arrival("NextBus3")
+        end)
         socket = assign(socket, :stop_predictions, cached_predictions)
         Process.send_after(self(), :update_stops, 60_000)
         {:noreply, socket}
@@ -29,6 +36,15 @@ defmodule DisplayWeb.Display do
         Logger.error("Error fetching cached_predictions #{inspect(error)}")
         Process.send_after(self(), :update_stops, 60_000)
         {:noreply, socket}
+    end
+  end
+
+  defp update_estimated_arrival(nil), do: ""
+
+  defp update_estimated_arrival(service, next_bus) do
+    case Access.get(service, next_bus) do
+      nil -> service
+      _ -> update_in(service, [next_bus, "EstimatedArrival"], &(format_to_mins(&1)))
     end
   end
 
@@ -72,50 +88,6 @@ defmodule DisplayWeb.Display do
     <div class="full-page-wrapper #{theme}">
       <ThreePaneALayout prop={{assigns}}/>
     </div>
-    """
-  end
-
-  def render1(assigns) do
-    ~L"""
-    <div>
-      <h1><%= @bus_stop %></h1>
-    </div>
-
-    <%= for service <- @stop_predictions do %>
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style="font-weight: bold; font-size: 34px;"><%= service["ServiceNo"] %></td>
-          <%= for next_bus <- ["NextBus", "NextBus2", "NextBus3"] do %>
-            <td>
-              <div>
-                <div style="font-weight: bold; font-size: 24px;">
-                  <%= service[next_bus]["EstimatedArrival"] |> format_to_mins %>
-                </div>
-                <div>
-                  <%= service[next_bus]["Load"] %> |
-                  <%= service[next_bus]["Feature"] %> |
-                  <%= service[next_bus]["Type"] %>
-                </div>
-              </div>
-          </td>
-          <% end %>
-        </tr>
-      </tbody>
-    </table>
-    <% end %>
-    <div>
-    <p><strong>Scheduled Message:</strong> <%= @sheduled_message %></p>
-    </div>
-
     """
   end
 end

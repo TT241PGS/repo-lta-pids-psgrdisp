@@ -9,7 +9,7 @@
   @apply absolute left-0;
 }
 
-.next-bus svg {
+.next-bus img {
   @apply h-4rem;
 }
 
