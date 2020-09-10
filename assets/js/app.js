@@ -31,3 +31,20 @@ liveSocket.connect()
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)
 window.liveSocket = liveSocket
+
+
+// Date Time component start
+const now = new Date()
+
+const day = now.toLocaleString('en-SG', { weekday: 'long' });
+
+const date = now.toLocaleString('en-SG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: false });
+
+setInterval(() => {
+  document.querySelector("#day").innerHTML = day
+  document.querySelector("#date").innerHTML = date
+  document.querySelector("#time").innerHTML = time
+}, 5000);
+// Date Time component  end

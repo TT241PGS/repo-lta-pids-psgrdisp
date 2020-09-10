@@ -1,0 +1,57 @@
+.destination-card,
+.instruction-card,
+.destination-card-with-multiple-tags {
+  @apply px-3rem py-2rem;
+}
+
+.destination-card {
+  @apply bg-charcoal rounded-35 h-full;
+
+  .text {
+    @apply text-white text-4rem mb-1rem;
+  }
+}
+
+.bus-card {
+  @apply flex flex-col items-center bg-charcoal px-5rem rounded-35 h-full justify-between pt-1rem;
+
+  &.light {
+    @apply bg-offWhite;
+
+    .number {
+      @apply text-body;
+    }
+  }
+
+  &.no-bottom-border {
+    @apply rounded-b-0;
+  }
+
+  .number {
+    @apply text-5rem text-white font-bold;
+  }
+
+  .status {
+    @apply text-5rem text-white font-bold px-1rem bg-darkMode rounded-t-10;
+  }
+}
+
+.instruction-card {
+  @apply items-center justify-center h-full bg-charcoal px-3rem py-2rem rounded-35 text-3rem text-white justify-center w-full flex h-full;
+
+  .tag {
+    @apply ml-3rem;
+  }
+}
+
+.destination-card-with-multiple-tags {
+  @apply flex flex-col rounded-35 bg-charcoal h-full text-white px-3rem py-2rem justify-between;
+
+  .text {
+    @apply text-white text-4rem font-medium;
+  }
+
+  .tags .tag {
+    @apply mr-1rem;
+  }
+}

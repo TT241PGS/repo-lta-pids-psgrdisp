@@ -1,0 +1,21 @@
+.clock-with-date-horizontal {
+  @apply w-full flex justify-between items-center rounded-l-25 rounded-br-25 overflow-hidden border-solid border-3 border-darkModeBorder h-full;
+
+  .date,
+  .time {
+    @apply leading-none flex items-center text-white;
+    height: calc(100% + 6px);
+  }
+
+  .with-border {
+    @apply border-solid border-darkModeBorder border-t-3 border-l-3 rounded-bl-5rem;
+  }
+
+  .date {
+    @apply text-5rem font-medium px-6rem;
+  }
+
+  .time {
+    @apply text-5rem font-bold pl-4rem pr-3rem bg-charcoal;
+  }
+}
