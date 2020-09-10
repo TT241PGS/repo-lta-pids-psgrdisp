@@ -21,7 +21,7 @@ defmodule PredictionsTwoColumn do
       </div>
     </div>
     <div class="grid grid-rows-5 grid-flow-col gap-4rem mb-4rem">
-      <div class="flex" :for={{ service <- @stopPredictions }}>
+      <div class={{"flex", "w-1/2": length(@stopPredictions) <= 5}} :for={{ service <- @stopPredictions }}>
         <div class="bus-info">{{service["ServiceNo"]}}</div>
         <div class="next-buses">
           <div class="heading">
