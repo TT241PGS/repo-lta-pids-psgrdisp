@@ -7,17 +7,20 @@ defmodule HTTPWrapper do
 
   defp decode_body(body) do
     case Jason.decode(body) do
-      {:ok, decoded} -> 
+      {:ok, decoded} ->
         {:ok, decoded}
-      {:error, %Jason.DecodeError{data: data}} -> {:ok, data}
-      {:error, error} -> {:error, error}
+
+      {:error, %Jason.DecodeError{data: data}} ->
+        {:ok, data}
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 
   defp handle_response(response) do
     case response do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-
         {:ok, decode_body(body)}
 
       {:ok, %HTTPoison.Response{status_code: status_code}} ->

@@ -9,6 +9,16 @@ config :display, Display.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+# Husky
+config :husky,
+  pre_commit: "mix format && mix credo --strict",
+  pre_push: "mix format --check-formatted && mix credo --strict && mix test",
+  json_codec: Jason
+
+config :redix,
+  host: System.get_env("REDIS_HOST"),
+  port: System.get_env("REDIS_PORT")
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

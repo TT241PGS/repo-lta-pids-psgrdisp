@@ -9,6 +9,8 @@ defmodule Display.Application do
     children = [
       # Start the Ecto repository
       Display.Repo,
+      # Start redix
+      Display.Redix,
       # Start the Telemetry supervisor
       DisplayWeb.Telemetry,
       # Start the PubSub system

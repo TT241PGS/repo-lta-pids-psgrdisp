@@ -48,7 +48,14 @@ defmodule Display.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:httpoison, "~> 1.4"},
-      {:ok, "~>2.3.0"}
+      {:ok, "~>2.3.0"},
+      {:mock, "~> 0.3.0", only: :test},
+      {:distillery, "~> 2.0"},
+      {:redix, ">= 0.0.0"},
+      {:timex, "~> 3.5"},
+      {:surface, "~> 0.1.0-alpha.2"},
+      {:husky, "~> 1.0", only: :dev, runtime: false},
+      {:credo, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
   end
 
