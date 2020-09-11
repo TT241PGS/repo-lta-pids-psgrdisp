@@ -2,18 +2,13 @@ defmodule Display.RealTime do
   @moduledoc false
 
   def get_predictions_realtime(bus_stop_id) do
-    base_url = "http://datamall2.mytransport.sg/ltaodataservice"
+    base_url = Application.get_env(:display, :datamall_base_url)
     url = "#{base_url}/BusArrivalv2?BusStopCode=#{bus_stop_id}"
 
     headers = [
-      {
-        "content-type",
-        "application/json"
-      },
-      {
-        "accountKey",
-        "ksy0XzCCRyCnOXTAFKC13w=="
-      }
+      {"accountKey", Application.get_env(:display, :datamall_account_key)},
+      {"content-type", "application/json"},
+      {"Accept", "application/json"}
     ]
 
     {:ok, predictons} = HTTPWrapper.get(url, headers, [])
