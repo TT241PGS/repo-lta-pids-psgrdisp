@@ -1,0 +1,8 @@
+<svg id="Group_13" data-name="Group 13" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+  <path id="Icon_awesome-wheelchair" data-name="Icon awesome-wheelchair" d="M27.95,21.729l.8,1.615a.9.9,0,0,1-.407,1.208L24.657,26.4a1.8,1.8,0,0,1-2.433-.848l-3.537-7.527h-7.87a1.8,1.8,0,0,1-1.785-1.548C7.123,3.116,7.233,3.946,7.212,3.606a3.606,3.606,0,1,1,4.134,3.567l.263,1.842H18.93a.9.9,0,0,1,.9.9v1.8a.9.9,0,0,1-.9.9H12.123l.258,1.8h7.451a1.8,1.8,0,0,1,1.632,1.036l3.24,6.9,2.038-1.034a.9.9,0,0,1,1.208.407Zm-10.408-1.9H16.161a6.31,6.31,0,1,1-9.382-6.375L6.245,9.719a9.916,9.916,0,1,0,12.748,13.2Z" transform="translate(11.539 9.615)" fill="#fff"/>
+  <g id="Ellipse_26" data-name="Ellipse 26" fill="none" stroke="#fff" stroke-width="3">
+    <circle cx="25" cy="25" r="25" stroke="none"/>
+    <circle cx="25" cy="25" r="23.5" fill="none"/>
+  </g>
+  <path id="Path_114" data-name="Path 114" d="M-6200.484-9303.2l33.651,35.367" transform="translate(6208.615 9310.895)" fill="none" stroke="#fff" stroke-width="3"/>
+</svg>

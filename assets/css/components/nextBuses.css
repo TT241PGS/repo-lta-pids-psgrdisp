@@ -1,0 +1,42 @@
+.next-bus {
+  @apply border-charcoal border-r-3 border-b-3 border-t-3 border-solid relative pl-3rem pr-2rem rounded-br-50;
+}
+
+.next-bus .indicator {
+  width: 10px;
+  height: calc(100% + 6px);
+  top: -3px;
+  @apply absolute left-0;
+}
+
+.next-bus img {
+  @apply h-4rem;
+}
+
+.next-bus.small {
+  @apply flex flex-col w-1/4 py-1rem;
+}
+
+.next-bus.small .label {
+  @apply text-6rem text-white font-medium leading-none mb-1rem;
+}
+
+.next-bus.big {
+  @apply flex flex-row justify-between items-center w-1/2;
+}
+
+.next-bus.big .label {
+  @apply text-8rem text-white font-bold w-4/5;
+}
+
+.next-buses {
+  @apply flex flex-col w-full justify-between;
+}
+
+.next-buses .stops {
+  @apply bg-charcoal rounded-br-25 text-4rem text-white pl-5rem pr-3rem inline-block leading-none py-0.5rem;
+}
+
+.next-buses .details {
+  @apply flex flex-row overflow-hidden;
+}

@@ -1,0 +1,96 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "display-nightly",
+      "image": "485380287493.dkr.ecr.ap-southeast-1.amazonaws.com/display-nightly:latest",
+      "portMappings": [],
+      "essential": true,
+      "entryPoint": null,
+      "command": null,
+      "environment": [
+        {
+          "name": "API_PORT",
+          "value": "80"
+        },
+        {
+          "name": "APP_VERSION",
+          "value": "1.0.0"
+        },
+        {
+          "name": "HOST",
+          "value": "fargate-display-nightly-alb-788525104.ap-southeast-1.elb.amazonaws.com"
+        },
+        {
+          "name": "MIX_ENV",
+          "value": "prod"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "POSTGRES_DB",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_POSTGRES_DB"
+        },
+        {
+          "name": "POSTGRES_HOST",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_POSTGRES_HOST"
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_POSTGRES_PASSWORD"
+        },
+        {
+          "name": "POSTGRES_POOL_SIZE",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_POSTGRES_POOL_SIZE"
+        },
+        {
+          "name": "POSTGRES_PORT",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_POSTGRES_PORT"
+        },
+        {
+          "name": "POSTGRES_USER",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_POSTGRES_USER"
+        },
+        {
+          "name": "REDIS_HOST",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_REDIS_HOST"
+        },
+        {
+          "name": "REDIS_PORT",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_REDIS_PORT"
+        },
+        {
+          "name": "DATAMALL_BASE_URL",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_DATAMALL_BASE_URL"
+        },
+        {
+          "name": "DATAMALL_ACCOUNT_KEY",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_DATAMALL_ACCOUNT_KEY"
+        },
+        {
+          "name": "SECRET_KEY_BASE",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_SECRET_KEY_BASE"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "secretOptions": null,
+        "options": {
+          "awslogs-group": "/ecs/td-display-nightly",
+          "awslogs-region": "ap-southeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "mountPoints": [],
+      "volumesFrom": []
+    }
+  ],
+  "family": "td-display-nightly",
+  "taskRoleArn": "arn:aws:iam::485380287493:role/ecs-full-access",
+  "executionRoleArn": "arn:aws:iam::485380287493:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "volumes": [],
+  "placementConstraints": [],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024"
+}

@@ -1,4 +1,5 @@
 defmodule DisplayWeb.PageLive do
+  @moduledoc false
   use DisplayWeb, :live_view
 
   @impl true

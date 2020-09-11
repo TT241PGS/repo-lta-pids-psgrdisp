@@ -1,0 +1,29 @@
+.full-page-wrapper {
+  @apply w-screen min-h-screen;
+
+  padding: 4.166rem; /* 50px if reference is 12px, 25px reference is 6px */
+  padding-bottom: 0;
+
+  &.dark {
+    @apply bg-darkMode;
+  }
+}
+
+.pane {
+  @apply flex flex-col;
+
+  .pane-row {
+    @apply w-full flex flex-row mb-2rem;
+    > div {
+      @apply mr-2rem;
+    }
+
+    > div:last-child {
+      @apply m-0;
+    }
+  }
+
+  .pane-row:last-child {
+    @apply m-0;
+  }
+}

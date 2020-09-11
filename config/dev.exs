@@ -1,13 +1,18 @@
 use Mix.Config
 
-# Configure your database
-config :display, Display.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "display_dev",
-  hostname: "localhost",
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+# Husky
+config :husky,
+  pre_commit: "mix format && mix credo --strict",
+  pre_push: "mix format --check-formatted && mix credo --strict && mix test",
+  json_codec: Jason
+
+config :redix,
+  host: System.get_env("REDIS_HOST"),
+  port: System.get_env("REDIS_PORT")
+
+config :display,
+  datamall_base_url: System.get_env("DATAMALL_BASE_URL"),
+  datamall_account_key: System.get_env("DATAMALL_ACCOUNT_KEY")
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

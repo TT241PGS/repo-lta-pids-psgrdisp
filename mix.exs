@@ -4,7 +4,7 @@ defmodule Display.MixProject do
   def project do
     [
       app: :display,
-      version: "0.1.0",
+      version: "1.0.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
@@ -48,7 +48,15 @@ defmodule Display.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:httpoison, "~> 1.4"},
-      {:ok, "~>2.3.0"}
+      {:ok, "~>2.3.0"},
+      {:mock, "~> 0.3.0", only: :test},
+      {:distillery, "~> 2.0"},
+      {:redix, ">= 0.0.0"},
+      {:timex, "~> 3.5"},
+      {:surface, "~> 0.1.0-alpha.2"},
+      {:health_checkup, "~> 0.1.0"},
+      {:husky, "~> 1.0", only: :dev, runtime: false},
+      {:credo, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
   end
 
