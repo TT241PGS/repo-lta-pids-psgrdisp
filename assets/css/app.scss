@@ -1,21 +1,27 @@
 /* This file is for your main application css. */
 /* @import "./phoenix.css" */
 /* purgecss start ignore */
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
+@import "tailwindcss/base";
+@import "tailwindcss/components";
 /* purgecss end ignore */
 
-@import 'tailwindcss/utilities';
+@import "tailwindcss/utilities";
 
-@import './fonts';
-@import './layout/wrapper';
+/*
 
-@import './components/busStop';
-@import './components/busInfo';
-@import './components/nextBuses';
-@import './components/clock';
-@import './components/tag';
-@import './components/cards';
+@import "./fonts";
+@import "./layout/wrapper";
+
+@import "./components/busStop";
+@import "./components/busInfo";
+@import "./components/nextBuses";
+@import "./components/clock";
+@import "./components/tag";
+@import "./components/cards";
+
+*/
+
+@import "./default.css";
 
 @import "../node_modules/nprogress/nprogress.css";
 
@@ -26,7 +32,8 @@
   margin: -1rem 0 2rem;
 }
 
-.phx-no-feedback.invalid-feedback, .phx-no-feedback .invalid-feedback {
+.phx-no-feedback.invalid-feedback,
+.phx-no-feedback .invalid-feedback {
   display: none;
 }
 
@@ -35,9 +42,9 @@
   transition: opacity 1s ease-out;
 }
 
-.phx-disconnected{
+.phx-disconnected {
   cursor: wait;
 }
-.phx-disconnected *{
+.phx-disconnected * {
   pointer-events: none;
 }
