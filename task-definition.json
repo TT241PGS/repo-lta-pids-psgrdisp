@@ -3,7 +3,13 @@
     {
       "name": "display-nightly",
       "image": "485380287493.dkr.ecr.ap-southeast-1.amazonaws.com/display-nightly:latest",
-      "portMappings": [],
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
+        }
+      ],
       "essential": true,
       "entryPoint": null,
       "command": null,
@@ -18,7 +24,7 @@
         },
         {
           "name": "HOST",
-          "value": "fargate-display-nightly-alb-788525104.ap-southeast-1.elb.amazonaws.com"
+          "value": "display-nightly-alb-1360041460.ap-southeast-1.elb.amazonaws.com"
         },
         {
           "name": "MIX_ENV",
