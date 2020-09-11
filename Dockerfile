@@ -1,18 +1,36 @@
-FROM elixir:1.10.3-alpine as build-stage
+FROM elixir:1.10.3-alpine as base
 
 ENV HOME=/opt/app
-WORKDIR $HOME
 
 RUN mix do local.hex --force, local.rebar --force
 
 COPY config/ $HOME/config/
 COPY mix.exs mix.lock $HOME/
 
-ENV MIX_ENV=prod
-RUN mix do deps.get --only prod, deps.compile
+WORKDIR $HOME
 
-COPY . .
+# Deps such as phoenix are required during asset-builder phase
+RUN mix do deps.get --only prod
 
+########################################################################
+FROM node:12-alpine as asset-builder
+
+ENV HOME=/opt/app
+WORKDIR $HOME
+
+COPY --from=base $HOME/deps $HOME/deps
+
+# Prepare assets
+WORKDIR $HOME/assets
+COPY assets/ ./
+RUN npm i
+RUN npm run deploy
+
+########################################################################
+FROM elixir:1.10.3-alpine as releaser
+
+# The following are build arguments used to change variable parts of the image.
+# The name of your application/release (required)
 ARG APP_NAME=display
 # The version of the application we are building (required)
 ARG APP_VERSION=1.0.0
@@ -20,9 +38,33 @@ ARG APP_VERSION=1.0.0
 ARG MIX_ENV=prod
 
 ENV APP_NAME=${APP_NAME} \
+  APP_VERSION=${APP_VERSION} \
   MIX_ENV=${MIX_ENV}
 
-RUN mix compile
+ENV HOME=/opt/app
+
+ARG ERLANG_COOKIE
+ENV ERLANG_COOKIE $ERLANG_COOKIE
+
+# dependencies for comeonin
+# RUN apk add --no-cache build-base cmake
+
+ENV MIX_ENV=prod
+ENV SECRET_KEY_BASE=yq2XDL2EK7JCIQTsUmT+G4DNn9omjTN+5hko0IKJB+RxxzwaEtYliKIU/L1EIH57
+
+WORKDIR $HOME
+
+COPY . .
+
+# Digest precompiled assets
+COPY --from=asset-builder $HOME/priv/static/ $HOME/priv/static/
+
+# telemetry fails during digest hence installing hex rebar and deps again
+RUN mix do local.hex --force, local.rebar --force
+
+RUN mix do deps.get --only prod, deps.compile, compile
+
+RUN mix phx.digest
 
 # Release
 RUN \
@@ -52,7 +94,7 @@ ENV MIX_ENV=prod \
 
 WORKDIR $HOME
 
-COPY --from=build-stage /opt/built .
+COPY --from=releaser /opt/built .
 
 EXPOSE 80
 
