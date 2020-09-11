@@ -1,4 +1,5 @@
 defmodule BusStopInfo do
+  @moduledoc false
   use Surface.LiveComponent
 
   property busStopNo, :string, default: ""

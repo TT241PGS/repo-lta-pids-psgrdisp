@@ -1,4 +1,5 @@
 defmodule DisplayWeb.Display do
+  @moduledoc false
   use Phoenix.LiveView
   import Surface
   require Logger
@@ -8,7 +9,7 @@ defmodule DisplayWeb.Display do
     socket =
       assign(socket,
         bus_stop_no: bus_stop_no,
-        bus_stop_name: "Bus Stop Name #",
+        bus_stop_name: "Bus stop name #",
         stop_predictions: [],
         sheduled_message: nil
       )
@@ -21,13 +22,14 @@ defmodule DisplayWeb.Display do
   def handle_info(:update_stops, socket) do
     case RealTime.get_predictions_cached(socket.assigns.bus_stop_no) do
       {:ok, cached_predictions} ->
-        cached_predictions = 
-        Enum.map(cached_predictions, fn service -> 
-          service
-          |> update_estimated_arrival("NextBus")
-          |> update_estimated_arrival("NextBus2")
-          |> update_estimated_arrival("NextBus3")
-        end)
+        cached_predictions =
+          Enum.map(cached_predictions, fn service ->
+            service
+            |> update_estimated_arrival("NextBus")
+            |> update_estimated_arrival("NextBus2")
+            |> update_estimated_arrival("NextBus3")
+          end)
+
         socket = assign(socket, :stop_predictions, cached_predictions)
         Process.send_after(self(), :update_stops, 60_000)
         {:noreply, socket}
@@ -44,7 +46,7 @@ defmodule DisplayWeb.Display do
   defp update_estimated_arrival(service, next_bus) do
     case Access.get(service, next_bus) do
       nil -> service
-      _ -> update_in(service, [next_bus, "EstimatedArrival"], &(format_to_mins(&1)))
+      _ -> update_in(service, [next_bus, "EstimatedArrival"], &format_to_mins(&1))
     end
   end
 

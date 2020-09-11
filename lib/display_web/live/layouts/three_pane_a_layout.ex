@@ -1,6 +1,5 @@
-# Defining the component
-
 defmodule ThreePaneALayout do
+  @moduledoc false
   use Surface.LiveComponent
 
   property prop, :map, default: %{}

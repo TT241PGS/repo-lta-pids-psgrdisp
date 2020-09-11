@@ -1,4 +1,5 @@
 defmodule PredictionsTwoColumn do
+  @moduledoc false
   use Surface.LiveComponent
 
   property stopPredictions, :list, default: %{}

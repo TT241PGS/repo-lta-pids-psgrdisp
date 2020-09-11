@@ -1,4 +1,6 @@
 defmodule Display.RealTime do
+  @moduledoc false
+
   def get_predictions_realtime(bus_stop_id) do
     base_url = "http://datamall2.mytransport.sg/ltaodataservice"
     url = "#{base_url}/BusArrivalv2?BusStopCode=#{bus_stop_id}"

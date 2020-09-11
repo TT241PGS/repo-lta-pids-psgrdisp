@@ -1,6 +1,5 @@
-# Defining the component
-
 defmodule DateTimeHorizontal do
+  @moduledoc false
   use Surface.LiveComponent
 
   def render(assigns) do
