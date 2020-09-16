@@ -1,4 +1,4 @@
-defmodule ThreePaneALayout do
+defmodule LandscapeOnePaneLayout do
   @moduledoc false
   use Surface.LiveComponent
 
@@ -14,7 +14,7 @@ defmodule ThreePaneALayout do
         <DateTimeHorizontal />
       </div>
     </div>
-    <PredictionsTwoColumn stopPredictions={{@prop.stop_predictions}} />
+    <PredictionsTwoColumn stopPredictions={{@prop.stop_predictions}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}}/>
     """
   end
 end
