@@ -23,7 +23,7 @@ defmodule DisplayWeb.Display do
         sheduled_message: nil
       )
 
-    Process.send_after(self(), :update_stops, 0)
+    Process.send_after(self(), :update_stops, 0)    
     Process.send_after(self(), :update_messages, 0)
     Process.send_after(self(), :update_layout, 0)
     {:ok, socket}
@@ -41,12 +41,12 @@ defmodule DisplayWeb.Display do
           end)
 
         socket = assign(socket, :stop_predictions, cached_predictions)
-        Process.send_after(self(), :update_stops, 60_000)
+        Process.send_after(self(), :update_stops, 20_000)
         {:noreply, socket}
 
       {:error, error} ->
         Logger.error("Error fetching cached_predictions #{inspect(error)}")
-        Process.send_after(self(), :update_stops, 60_000)
+        Process.send_after(self(), :update_stops, 20_000)
         {:noreply, socket}
     end
   end
