@@ -3,19 +3,21 @@ defmodule DisplayWeb.Display do
   use Phoenix.LiveView
   import Surface
   require Logger
-  alias Display.{RealTime, ScheduledAdhocMessage}
+  alias Display.{RealTime, ScheduledAdhocMessage, Templates}
 
   defp get_template_details_from_cms(panel_id) do
-    "{\"orientation\":{\"label\":\"Portrait\",\"value\":\"portrait\"},\"layouts\":[{\"label\":\"Two-Pane Layout A\",\"value\":\"landscape_two_pane_a\",\"duration\":\"10\",\"id\":\"landscape_two_pane_a_1\",\"chosen\":false,\"selected\":false,\"panes\":{\"pane1\":{\"type\":{\"value\":\"quickest_way_to\",\"label\":\"Quickest Way To\"},\"config\":{\"font\":{\"style\":{\"label\":\"sans-serif\",\"value\":\"sans-serif\"},\"color\":{\"label\":\"blue\",\"value\":\"blue\"}}}},\"pane2\":{\"type\":{\"value\":\"quickest_way_to\",\"label\":\"Quickest Way To\"},\"config\":{\"font\":{\"style\":{\"label\":\"serif\",\"value\":\"serif\"},\"color\":{\"label\":\"green\",\"value\":\"green\"}}}}}},{\"label\":\"One-Pane Layout\",\"value\":\"landscape_one_pane\",\"duration\":\"10\",\"id\":\"landscape_one_pane_0\",\"chosen\":false,\"selected\":false,\"panes\":{\"pane1\":{\"type\":{\"value\":\"predictions_by_service\",\"label\":\"Predictions and Points of Interest by Service\",\"description\":\"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium hic optio tempora harum placeat itaque a architecto exercitationem atque soluta ducimus, esse, laboriosam adipisci, quam ut! Necessitatibus aperiam architecto quis. \"},\"config\":{\"font\":{\"style\":{\"label\":\"monospace\",\"value\":\"monospace\"},\"color\":{\"label\":\"red\",\"value\":\"red\"}}}}}}],\"name\":\"x\"}"
+    Templates.list_templates_by_panel_id(panel_id)
+    |> Enum.at(0)
+    |> get_in([:template_detail])
     |> Jason.decode!()
   end
 
-  def mount(%{"bus_stop_no" => bus_stop_no}, _session, socket) do
+  def mount(%{"panel_id" => panel_id}, _session, socket) do
     socket =
       assign(socket,
-        bus_stop_no: bus_stop_no,
+        bus_stop_no: nil,
         bus_stop_name: "Bus stop name #",
-        panel_id: "dummy-panel-id",
+        panel_id: panel_id,
         current_layout_value: nil,
         current_layout_index: nil,
         current_layout_panes: nil,
@@ -23,14 +25,20 @@ defmodule DisplayWeb.Display do
         sheduled_message: nil
       )
 
-    Process.send_after(self(), :update_stops, 0)    
+    Process.send_after(self(), :update_stops, 0)
     Process.send_after(self(), :update_messages, 0)
     Process.send_after(self(), :update_layout, 0)
     {:ok, socket}
   end
 
   def handle_info(:update_stops, socket) do
-    case RealTime.get_predictions_cached(socket.assigns.bus_stop_no) do
+    bus_stop_no =
+      Templates.get_bus_stop_from_panel_id(socket.assigns.panel_id)
+      |> get_in([:bus_stop_no])
+
+    socket = assign(socket, :bus_stop_no, bus_stop_no)
+
+    case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
         cached_predictions =
           Enum.map(cached_predictions, fn service ->
@@ -67,8 +75,9 @@ defmodule DisplayWeb.Display do
   end
 
   def handle_info(:update_layout, socket) do
-    template_details = get_template_details_from_cms(socket.assigns.panel_id)
-    layouts = Map.get(template_details, "layouts")
+    layouts =
+      get_template_details_from_cms(socket.assigns.panel_id)
+      |> Map.get("layouts")
 
     case socket.assigns.current_layout_index do
       nil ->
@@ -79,7 +88,11 @@ defmodule DisplayWeb.Display do
           |> assign(:current_layout_index, 0)
           |> assign(:current_layout_panes, Map.get(next_layout, "panes"))
 
-        Process.send_after(self(), :update_layout, (Map.get(next_layout, "duration") |> String.to_integer) * 1000)
+        Process.send_after(
+          self(),
+          :update_layout,
+          (Map.get(next_layout, "duration") |> String.to_integer()) * 1000
+        )
 
         {:noreply, socket}
 
@@ -92,7 +105,11 @@ defmodule DisplayWeb.Display do
           |> assign(:current_layout_index, next_index)
           |> assign(:current_layout_panes, Map.get(next_layout, "panes"))
 
-        Process.send_after(self(), :update_layout, (Map.get(next_layout, "duration") |> String.to_integer) * 1000)
+        Process.send_after(
+          self(),
+          :update_layout,
+          (Map.get(next_layout, "duration") |> String.to_integer()) * 1000
+        )
 
         {:noreply, socket}
     end
