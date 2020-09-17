@@ -6,7 +6,7 @@ defmodule DisplayWeb.Display do
   alias Display.{RealTime, ScheduledAdhocMessage}
 
   defp get_template_details_from_cms(panel_id) do
-    "{\"orientation\":{\"label\":\"Landscape\",\"value\":\"landscape\"},\"templates\":[{\"label\":\"One-Pane Layout\",\"value\":\"landscape_one_pane\",\"duration\":10,\"id\":\"landscape_one_pane_0\",\"chosen\":false,\"selected\":false,\"panes\":{\"pane1\":{\"type\":{\"value\":\"predictions_by_service\",\"label\":\"Predictions and Points of Interest by Service\",\"description\":\"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium hic optio tempora harum placeat itaque a architecto exercitationem atque soluta ducimus, esse, laboriosam adipisci, quam ut! Necessitatibus aperiam architecto quis. \"},\"config\":{\"font\":{\"style\":\"monospace\",\"color\":\"red\"}}}}},{\"label\":\"Two-Pane Layout A\",\"value\":\"landscape_two_pane_a\",\"duration\":10,\"id\":\"landscape_two_pane_a_1\",\"chosen\":false,\"selected\":false,\"panes\":{\"pane1\":{\"type\":{\"value\":\"quickest_way_to\",\"label\":\"Quickest Way To\"},\"config\":{\"font\":{\"style\":\"sans-serif\",\"color\":\"blue\"}}},\"pane2\":{\"type\":{\"value\":\"scheduled_and_ad_hoc_messages\",\"label\":\"Scheduled and ad-hoc messages\"},\"config\":{\"scheduled_messages_font\":{\"style\":\"monospace\",\"color\":\"green\"},\"adhoc_messages_font\":{\"style\":\"sans-serif\",\"color\":\"green\"}}}}}]}"
+    "{\"orientation\":{\"label\":\"Portrait\",\"value\":\"portrait\"},\"layouts\":[{\"label\":\"Two-Pane Layout A\",\"value\":\"landscape_two_pane_a\",\"duration\":\"10\",\"id\":\"landscape_two_pane_a_1\",\"chosen\":false,\"selected\":false,\"panes\":{\"pane1\":{\"type\":{\"value\":\"quickest_way_to\",\"label\":\"Quickest Way To\"},\"config\":{\"font\":{\"style\":{\"label\":\"sans-serif\",\"value\":\"sans-serif\"},\"color\":{\"label\":\"blue\",\"value\":\"blue\"}}}},\"pane2\":{\"type\":{\"value\":\"quickest_way_to\",\"label\":\"Quickest Way To\"},\"config\":{\"font\":{\"style\":{\"label\":\"serif\",\"value\":\"serif\"},\"color\":{\"label\":\"green\",\"value\":\"green\"}}}}}},{\"label\":\"One-Pane Layout\",\"value\":\"landscape_one_pane\",\"duration\":\"10\",\"id\":\"landscape_one_pane_0\",\"chosen\":false,\"selected\":false,\"panes\":{\"pane1\":{\"type\":{\"value\":\"predictions_by_service\",\"label\":\"Predictions and Points of Interest by Service\",\"description\":\"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium hic optio tempora harum placeat itaque a architecto exercitationem atque soluta ducimus, esse, laboriosam adipisci, quam ut! Necessitatibus aperiam architecto quis. \"},\"config\":{\"font\":{\"style\":{\"label\":\"monospace\",\"value\":\"monospace\"},\"color\":{\"label\":\"red\",\"value\":\"red\"}}}}}}],\"name\":\"x\"}"
     |> Jason.decode!()
   end
 
@@ -68,7 +68,7 @@ defmodule DisplayWeb.Display do
 
   def handle_info(:update_layout, socket) do
     template_details = get_template_details_from_cms(socket.assigns.panel_id)
-    layouts = Map.get(template_details, "templates")
+    layouts = Map.get(template_details, "layouts")
 
     case socket.assigns.current_layout_index do
       nil ->
@@ -79,7 +79,7 @@ defmodule DisplayWeb.Display do
           |> assign(:current_layout_index, 0)
           |> assign(:current_layout_panes, Map.get(next_layout, "panes"))
 
-        Process.send_after(self(), :update_layout, Map.get(next_layout, "duration") * 1000)
+        Process.send_after(self(), :update_layout, (Map.get(next_layout, "duration") |> String.to_integer) * 1000)
 
         {:noreply, socket}
 
@@ -92,7 +92,7 @@ defmodule DisplayWeb.Display do
           |> assign(:current_layout_index, next_index)
           |> assign(:current_layout_panes, Map.get(next_layout, "panes"))
 
-        Process.send_after(self(), :update_layout, Map.get(next_layout, "duration") * 1000)
+        Process.send_after(self(), :update_layout, (Map.get(next_layout, "duration") |> String.to_integer) * 1000)
 
         {:noreply, socket}
     end
