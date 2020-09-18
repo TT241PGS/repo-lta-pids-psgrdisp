@@ -55,14 +55,34 @@ function setDateTime() {
     hour12: false
   });
 
-  document.querySelector("#day").innerHTML = day;
-  document.querySelector("#date").innerHTML = date;
-  document.querySelector("#time").innerHTML = time;
+  const dayNode = document.querySelector("#day");
+  const dateNode = document.querySelector("#date");
+  const timeNode = document.querySelector("#time");
+  if (dayNode && dateNode && timeNode) {
+    dayNode.innerHTML = day;
+    dateNode.innerHTML = date;
+    timeNode.innerHTML = time;
+  }
 }
 
-setDateTime();
+function refreshDateTime() {
+  setInterval(() => {
+    setDateTime();
+  }, 100);
+}
 
-setInterval(() => {
-  setDateTime();
-}, 100);
+onDocReady(refreshDateTime);
 // Date Time component  end
+
+function onDocReady(fn) {
+  // see if DOM is already available
+  if (
+    document.readyState === "complete" ||
+    document.readyState === "interactive"
+  ) {
+    // call on next available tick
+    setTimeout(fn, 1);
+  } else {
+    document.addEventListener("DOMContentLoaded", fn);
+  }
+}
