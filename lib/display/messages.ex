@@ -47,10 +47,10 @@ defmodule Display.Messages do
     end)
   end
 
-  def get_messages_option1(nil), do: nil
+  defp get_messages_option1(nil), do: nil
 
   # These messages have only start date and end date
-  def get_messages_option1(panel_id) do
+  defp get_messages_option1(panel_id) do
     now = TimeUtil.get_time_now()
 
     from(cmd in MessageData,
@@ -77,10 +77,10 @@ defmodule Display.Messages do
     |> Repo.all()
   end
 
-  def get_messages_option2(nil), do: nil
+  defp get_messages_option2(nil), do: nil
 
   # These messages have start time and end time to show on weekdays, saturday and sunday - public holidays
-  def get_messages_option2(panel_id) do
+  defp get_messages_option2(panel_id) do
     current_time = TimeUtil.get_current_time()
 
     from(cmd in MessageData,
@@ -116,7 +116,6 @@ defmodule Display.Messages do
 
     messages
     |> Enum.filter(fn m ->
-      # TODO public holiday check with Sunday
       (m.day_type_1 == true and day_of_week_name == "Sunday") or
         (m.day_type_2 == true and day_of_week_name == "Saturday") or
         (m.day_type_3 == true and day_of_week_no >= 1 and day_of_week_no <= 5) or
