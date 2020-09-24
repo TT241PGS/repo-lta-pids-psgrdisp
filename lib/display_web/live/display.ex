@@ -114,7 +114,7 @@ defmodule DisplayWeb.Display do
       |> Map.get("layouts")
 
     # Just for development
-    layouts = [Enum.at(layouts, 0)]
+    # layouts = [Enum.at(layouts, 0)]
 
     case socket.assigns.current_layout_index do
       nil ->
