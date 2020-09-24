@@ -234,6 +234,13 @@ defmodule DisplayWeb.Display do
         </div>
         """
 
+      nil ->
+        ~H"""
+        <div class="full-page-wrapper #{theme}">
+        <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
+        </div>
+        """
+
       unknown_layout ->
         ~H"""
         <div class="full-page-wrapper #{theme}">
