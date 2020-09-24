@@ -16,6 +16,15 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import NProgress from "nprogress";
 import { LiveSocket } from "phoenix_live_view";
+import { tns } from "tiny-slider/src/tiny-slider";
+
+// messagesSlider init
+window.messagesSlider = null;
+window.currentMessagesSlides = null;
+
+// predictionsSlider init
+window.predictionsSlider = null;
+window.currentPredictionsSlides = null;
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
@@ -71,8 +80,54 @@ function refreshDateTime() {
   }, 100);
 }
 
+function playMessages() {
+  setInterval(() => {
+    const nextSlides = document.querySelector(".message-slides");
+    if (
+      (nextSlides && !messagesSlider) ||
+      currentMessagesSlides !== nextSlides
+    ) {
+      nextSlides.classList.remove("hidden");
+      messagesSlider = tns({
+        container: ".message-slides",
+        controls: false,
+        speed: 500,
+        autoplay: true,
+        autoplayButtonOutput: false,
+        autoplayTimeout: 2000
+      });
+      currentMessagesSlides = nextSlides;
+    }
+  }, 100);
+}
+
+function playBusStopPredictions() {
+  setInterval(() => {
+    const nextSlides = document.querySelector(".bus-stop-predictions");
+    if (
+      (nextSlides && !predictionsSlider) ||
+      currentPredictionsSlides !== nextSlides
+    ) {
+      nextSlides.classList.remove("hidden");
+      predictionsSlider = tns({
+        container: ".bus-stop-predictions",
+        controls: false,
+        speed: 500,
+        autoplay: true,
+        autoplayButtonOutput: false,
+        autoplayTimeout: 5000
+      });
+      currentPredictionsSlides = nextSlides;
+    }
+  }, 100);
+}
+
 onDocReady(refreshDateTime);
 // Date Time component  end
+
+// Register sliders
+onDocReady(playMessages);
+onDocReady(playBusStopPredictions);
 
 function onDocReady(fn) {
   // see if DOM is already available

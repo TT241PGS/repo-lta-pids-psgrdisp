@@ -3,7 +3,7 @@ defmodule DisplayWeb.Display do
   use Phoenix.LiveView
   import Surface
   require Logger
-  alias Display.{RealTime, ScheduledAdhocMessage, Templates}
+  alias Display.{Messages, RealTime, Templates}
 
   defp get_template_details_from_cms(panel_id) do
     Templates.list_templates_by_panel_id(panel_id)
@@ -21,8 +21,9 @@ defmodule DisplayWeb.Display do
         current_layout_value: nil,
         current_layout_index: nil,
         current_layout_panes: nil,
-        stop_predictions: [],
-        sheduled_message: nil
+        stop_predictions_set_1_column: [],
+        stop_predictions_set_2_column: [],
+        messages: nil
       )
 
     Process.send_after(self(), :update_stops, 0)
@@ -48,7 +49,17 @@ defmodule DisplayWeb.Display do
             |> update_estimated_arrival("NextBus3")
           end)
 
-        socket = assign(socket, :stop_predictions, cached_predictions)
+        socket =
+          socket
+          |> assign(
+            :stop_predictions_set_1_column,
+            create_stop_predictions_set_1_column(cached_predictions)
+          )
+          |> assign(
+            :stop_predictions_set_2_column,
+            create_stop_predictions_set_2_column(cached_predictions)
+          )
+
         Process.send_after(self(), :update_stops, 20_000)
         {:noreply, socket}
 
@@ -57,6 +68,27 @@ defmodule DisplayWeb.Display do
         Process.send_after(self(), :update_stops, 20_000)
         {:noreply, socket}
     end
+  end
+
+  defp create_stop_predictions_set_1_column(cached_predictions) do
+    create_stop_predictions_columnwise(cached_predictions, 5)
+  end
+
+  defp create_stop_predictions_set_2_column(cached_predictions) do
+    create_stop_predictions_columnwise(cached_predictions, 10)
+  end
+
+  defp create_stop_predictions_columnwise(cached_predictions, max_rows) do
+    cached_predictions
+    |> Enum.with_index()
+    |> Enum.reduce([], fn {prediction, index}, acc ->
+      remainder = rem(index, max_rows)
+      quotient = div(index, max_rows)
+
+      if remainder == 0,
+        do: List.insert_at(acc, quotient, [prediction]),
+        else: List.update_at(acc, quotient, &(&1 ++ [prediction]))
+    end)
   end
 
   defp update_estimated_arrival(nil), do: ""
@@ -69,8 +101,9 @@ defmodule DisplayWeb.Display do
   end
 
   def handle_info(:update_messages, socket) do
-    message = ScheduledAdhocMessage.get_message(socket.assigns.bus_stop_no)
-    socket = assign(socket, :sheduled_message, message)
+    messages = Messages.get_messages(socket.assigns.panel_id)
+    socket = assign(socket, :messages, messages)
+    Process.send_after(self(), :update_messages, 20_000)
     {:noreply, socket}
   end
 
@@ -78,6 +111,9 @@ defmodule DisplayWeb.Display do
     layouts =
       get_template_details_from_cms(socket.assigns.panel_id)
       |> Map.get("layouts")
+
+    # Just for development
+    layouts = [Enum.at(layouts, 0)]
 
     case socket.assigns.current_layout_index do
       nil ->

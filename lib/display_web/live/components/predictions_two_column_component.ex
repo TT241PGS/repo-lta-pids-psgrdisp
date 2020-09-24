@@ -2,7 +2,7 @@ defmodule PredictionsTwoColumn do
   @moduledoc false
   use Surface.LiveComponent
 
-  property stopPredictions, :list, default: %{}
+  property stopPredictionsSet, :list, default: %{}
 
   def render(assigns) do
     ~H"""
@@ -21,23 +21,27 @@ defmodule PredictionsTwoColumn do
         </div>
       </div>
     </div>
-    <div class="grid grid-rows-5 grid-flow-col gap-4rem mb-4rem">
-      <div class={{"flex", "w-1/2": length(@stopPredictions) <= 5}} :for={{ service <- @stopPredictions }}>
-        <div class="bus-info">{{service["ServiceNo"]}}</div>
-        <div class="next-buses">
-          <div class="heading">
-            <span class="stops"> no of stops # <i class="ml-1rem fas fa-arrow-right"></i></span>
-          </div>
-          <div class="details">
-            <div :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2", "NextBus3"] }}  class={{"next-bus", "mr-4rem": next_bus != "NextBus3", "big": next_bus == "NextBus", "small": next_bus == "NextBus2" or next_bus == "NextBus3"}}>
-              <span class={{"indicator", "bg-red": service["NextBus"]["Load"] == "LSD", "bg-yellow-1": service["NextBus"]["Load"] == "SDA", "bg-green-1": service["NextBus"]["Load"] == "SEA"}}></span>
-              <span class="label">{{service[next_bus]["EstimatedArrival"]}}</span>
-              <span>
-                <img src="/images/bus_no_wab.svg" :if={{ service[next_bus]["Feature"] == "" }}>
-                <img src="/images/bus_sd.svg" :if={{ service[next_bus]["Type"] == "SD" }}>
-                <img src="/images/bus_dd.svg" :if={{ service[next_bus]["Type"] == "DD" }}>
-                <img src="/images/bus_bd.svg" :if={{ service[next_bus]["Type"] == "BD" }}>
-              </span>
+    <div class="bus-stop-predictions hidden">
+      <div :for={{ stopPredictions <- @stopPredictionsSet }}>
+        <div class="grid grid-rows-5 grid-flow-col gap-4rem mb-4rem">
+          <div class={{"flex", "w-1/2": length(stopPredictions) <= 5}} :for={{ service <- stopPredictions }}>
+            <div class="bus-info">{{service["ServiceNo"]}}</div>
+            <div class="next-buses">
+              <div class="heading">
+                <span class="stops"> no of stops # <i class="ml-1rem fas fa-arrow-right"></i></span>
+              </div>
+              <div class="details">
+                <div :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2", "NextBus3"] }}  class={{"next-bus", "mr-4rem": next_bus != "NextBus3", "big": next_bus == "NextBus", "small": next_bus == "NextBus2" or next_bus == "NextBus3"}}>
+                  <span class={{"indicator", "bg-red": service["NextBus"]["Load"] == "LSD", "bg-yellow-1": service["NextBus"]["Load"] == "SDA", "bg-green-1": service["NextBus"]["Load"] == "SEA"}}></span>
+                  <span class="label">{{service[next_bus]["EstimatedArrival"]}}</span>
+                  <span>
+                    <img src="/images/bus_no_wab.svg" :if={{ service[next_bus]["Feature"] == "" }}>
+                    <img src="/images/bus_sd.svg" :if={{ service[next_bus]["Type"] == "SD" }}>
+                    <img src="/images/bus_dd.svg" :if={{ service[next_bus]["Type"] == "DD" }}>
+                    <img src="/images/bus_bd.svg" :if={{ service[next_bus]["Type"] == "BD" }}>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

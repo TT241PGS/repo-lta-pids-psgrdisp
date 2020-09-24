@@ -42,7 +42,7 @@ defmodule Display.Messages do
           acc
 
         {:ok, result} ->
-          acc ++ result
+          acc ++ [result |> Enum.at(0) |> get_in([:message_content])]
       end
     end)
   end
@@ -58,7 +58,7 @@ defmodule Display.Messages do
       on: cma.message_data_id == cmd.message_data_id,
       where:
         cma.bus_stop_panel_id == ^panel_id and
-          cmd.start_date <= ^now and cmd.end_date >= ^now,
+          cmd.start_date_time <= ^now and cmd.end_date_time >= ^now,
       select: %{
         type: cmd.type,
         priority: cmd.priority,
@@ -66,12 +66,10 @@ defmodule Display.Messages do
         day_type_1: cmd.day_type_1,
         day_type_2: cmd.day_type_2,
         day_type_3: cmd.day_type_3,
-        start_date: cmd.start_date,
-        end_date: cmd.end_date,
+        start_date_time: cmd.start_date_time,
+        end_date_time: cmd.end_date_time,
         start_time_1: cmd.start_time_1,
-        end_time_1: cmd.end_time_1,
-        start_time_2: cmd.start_time_2,
-        end_time_2: cmd.end_time_2
+        end_time_1: cmd.end_time_1
       }
     )
     |> Repo.all()
@@ -88,8 +86,8 @@ defmodule Display.Messages do
       on: cma.message_data_id == cmd.message_data_id,
       where:
         cma.bus_stop_panel_id == ^panel_id and
-          cmd.start_time_2 <= ^current_time and
-          cmd.end_time_2 >= ^current_time,
+          cmd.start_time_1 <= ^current_time and
+          cmd.end_time_1 >= ^current_time,
       select: %{
         type: cmd.type,
         priority: cmd.priority,
@@ -97,12 +95,10 @@ defmodule Display.Messages do
         day_type_1: cmd.day_type_1,
         day_type_2: cmd.day_type_2,
         day_type_3: cmd.day_type_3,
-        start_date: cmd.start_date,
-        end_date: cmd.end_date,
+        start_date_time: cmd.start_date_time,
+        end_date_time: cmd.end_date_time,
         start_time_1: cmd.start_time_1,
-        end_time_1: cmd.end_time_1,
-        start_time_2: cmd.start_time_2,
-        end_time_2: cmd.end_time_2
+        end_time_1: cmd.end_time_1
       }
     )
     |> Repo.all()

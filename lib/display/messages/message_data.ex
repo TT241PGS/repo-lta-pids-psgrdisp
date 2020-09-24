@@ -8,12 +8,10 @@ defmodule Display.Messages.MessageData do
     field :name, :string
     field :type, :string
     field :priority, :string
-    field :start_date, :naive_datetime
-    field :end_date, :naive_datetime
+    field :start_date_time, :naive_datetime
+    field :end_date_time, :naive_datetime
     field :start_time_1, :string
     field :end_time_1, :string
-    field :start_time_2, :string
-    field :end_time_2, :string
     field :day_type_1, :boolean
     field :day_type_2, :boolean
     field :day_type_3, :boolean
@@ -29,12 +27,10 @@ defmodule Display.Messages.MessageData do
       :name,
       :type,
       :priority,
-      :start_date,
-      :end_date,
+      :start_date_time,
+      :end_date_time,
       :start_time_1,
       :end_time_1,
-      :start_time_2,
-      :end_time_2,
       :day_type_1,
       :day_type_2,
       :day_type_3,
