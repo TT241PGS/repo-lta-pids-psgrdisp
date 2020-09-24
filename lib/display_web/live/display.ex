@@ -48,6 +48,7 @@ defmodule DisplayWeb.Display do
             |> update_estimated_arrival("NextBus2")
             |> update_estimated_arrival("NextBus3")
           end)
+          |> Enum.sort_by(fn p -> p["ServiceNo"] |> String.to_integer() end)
 
         socket =
           socket
