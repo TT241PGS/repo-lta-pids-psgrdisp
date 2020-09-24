@@ -3,7 +3,7 @@ defmodule DisplayWeb.Display do
   use Phoenix.LiveView
   import Surface
   require Logger
-  alias Display.{Messages, RealTime, Templates}
+  alias Display.{Buses, Messages, RealTime, Templates}
 
   defp get_template_details_from_cms(panel_id) do
     Templates.list_templates_by_panel_id(panel_id)
@@ -37,18 +37,40 @@ defmodule DisplayWeb.Display do
       Templates.get_bus_stop_from_panel_id(socket.assigns.panel_id)
       |> get_in([:bus_stop_no])
 
-    socket = assign(socket, :bus_stop_no, bus_stop_no)
+    bus_stop_name = Buses.get_bus_stop_name_by_no(bus_stop_no)
+
+    socket =
+      socket
+      |> assign(:bus_stop_no, bus_stop_no)
+      |> assign(:bus_stop_name, bus_stop_name)
 
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
         cached_predictions =
-          Enum.map(cached_predictions, fn service ->
+          cached_predictions
+          |> Flow.from_enumerable()
+          |> Flow.map(fn service ->
             service
             |> update_estimated_arrival("NextBus")
             |> update_estimated_arrival("NextBus2")
             |> update_estimated_arrival("NextBus3")
           end)
           |> Enum.sort_by(fn p -> p["ServiceNo"] |> String.to_integer() end)
+
+        bus_stop_map =
+          cached_predictions
+          |> Enum.map(fn service ->
+            service
+            |> get_in(["NextBus", "DestinationCode"])
+          end)
+          |> Buses.get_bus_stop_map_by_nos()
+
+        cached_predictions =
+          cached_predictions
+          |> Enum.map(fn service ->
+            service
+            |> update_destination(bus_stop_map)
+          end)
 
         socket =
           socket
@@ -92,12 +114,24 @@ defmodule DisplayWeb.Display do
     end)
   end
 
-  defp update_estimated_arrival(nil), do: ""
-
   defp update_estimated_arrival(service, next_bus) do
     case Access.get(service, next_bus) do
       nil -> service
       _ -> update_in(service, [next_bus, "EstimatedArrival"], &format_to_mins(&1))
+    end
+  end
+
+  defp update_destination(service, bus_stop_map) do
+    case Access.get(service, "NextBus") do
+      nil ->
+        service
+
+      _ ->
+        update_in(
+          service,
+          ["NextBus", "DestinationCode"],
+          &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1 |> String.to_integer())
+        )
     end
   end
 

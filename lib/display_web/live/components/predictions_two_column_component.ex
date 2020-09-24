@@ -29,6 +29,7 @@ defmodule PredictionsTwoColumn do
             <div class="next-buses">
               <div class="heading">
                 <span class="stops"> no of stops # <i class="ml-1rem fas fa-arrow-right"></i></span>
+                <span class="stops">{{service["NextBus"]["DestinationCode"]}}</span>
               </div>
               <div class="details">
                 <div :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2", "NextBus3"] }}  class={{"next-bus", "mr-4rem": next_bus != "NextBus3", "big": next_bus == "NextBus", "small": next_bus == "NextBus2" or next_bus == "NextBus3"}}>
