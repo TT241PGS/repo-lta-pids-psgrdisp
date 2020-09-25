@@ -15,14 +15,6 @@ defmodule Display.Messages do
   def get_messages(panel_id) do
     # get scheduled and adhoc messages from db
 
-    day_of_week_name =
-      TimeUtil.get_time_now()
-      |> TimeUtil.get_weekday_name()
-
-    day_of_week_no =
-      TimeUtil.get_time_now()
-      |> TimeUtil.get_weekday_no()
-
     tasks = [
       Task.async(fn -> get_messages_option1(panel_id) end),
       Task.async(fn -> get_messages_option2(panel_id) end)
@@ -110,9 +102,12 @@ defmodule Display.Messages do
     day_of_week_no = now |> TimeUtil.get_weekday_no()
     day_of_week_name = now |> TimeUtil.get_weekday_name()
 
+    is_today_public_holiday = TimeUtil.get_today_date_string() |> TimeUtil.is_public_holiday?()
+
     messages
     |> Enum.filter(fn m ->
       (m.day_type_1 == true and day_of_week_name == "Sunday") or
+        (m.day_type_1 == true and is_today_public_holiday) or
         (m.day_type_2 == true and day_of_week_name == "Saturday") or
         (m.day_type_3 == true and day_of_week_no >= 1 and day_of_week_no <= 5) or
         (m.day_type_1 != true and m.day_type_2 != true and m.day_type_3 != true)

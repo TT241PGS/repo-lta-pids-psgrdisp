@@ -8,7 +8,7 @@
         excluded: []
       },
       checks: [
-        {Credo.Check.Refactor.CyclomaticComplexity, max_complexity: 10}
+        {Credo.Check.Refactor.CyclomaticComplexity, max_complexity: 12}
       ]
     }
   ]
