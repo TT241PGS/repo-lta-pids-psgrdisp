@@ -29,7 +29,8 @@ defmodule Display.Templates do
         template_data_id: cta.template_data_id,
         template_set_code: cta.template_set_code,
         template_detail: ctd.template_detail
-      }
+      },
+      order_by: cta.template_set_code
     )
     |> Repo.all()
   end

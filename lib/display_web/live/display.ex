@@ -7,9 +7,11 @@ defmodule DisplayWeb.Display do
 
   defp get_template_details_from_cms(panel_id) do
     Templates.list_templates_by_panel_id(panel_id)
-    |> Enum.at(0)
-    |> get_in([:template_detail])
-    |> Jason.decode!()
+    |> Enum.map(fn template ->
+      template
+      |> get_in([:template_detail])
+      |> Jason.decode!()
+    end)
   end
 
   def mount(%{"panel_id" => panel_id}, _session, socket) do
@@ -23,7 +25,7 @@ defmodule DisplayWeb.Display do
         current_layout_panes: nil,
         stop_predictions_set_1_column: [],
         stop_predictions_set_2_column: [],
-        messages: nil
+        messages: []
       )
 
     Process.send_after(self(), :update_stops, 0)
@@ -138,17 +140,18 @@ defmodule DisplayWeb.Display do
   def handle_info(:update_messages, socket) do
     messages = Messages.get_messages(socket.assigns.panel_id)
     socket = assign(socket, :messages, messages)
-    Process.send_after(self(), :update_messages, 20_000)
+    Process.send_after(self(), :update_messages, 10_000)
+    Process.send_after(self(), :update_layout, 0)
     {:noreply, socket}
   end
 
   def handle_info(:update_layout, socket) do
-    layouts =
-      get_template_details_from_cms(socket.assigns.panel_id)
-      |> Map.get("layouts")
+    templates = get_template_details_from_cms(socket.assigns.panel_id)
 
-    # Just for development
-    # layouts = [Enum.at(layouts, 0)]
+    # If messages are present, show template A
+    elected_template_index = if length(socket.assigns.messages) > 0, do: 0, else: 1
+
+    layouts = templates |> Enum.at(elected_template_index) |> Map.get("layouts")
 
     case socket.assigns.current_layout_index do
       nil ->
@@ -162,7 +165,7 @@ defmodule DisplayWeb.Display do
         Process.send_after(
           self(),
           :update_layout,
-          (Map.get(next_layout, "duration") |> String.to_integer()) * 1000
+          Map.get(next_layout, "duration") * 1000
         )
 
         {:noreply, socket}
@@ -179,7 +182,7 @@ defmodule DisplayWeb.Display do
         Process.send_after(
           self(),
           :update_layout,
-          (Map.get(next_layout, "duration") |> String.to_integer()) * 1000
+          Map.get(next_layout, "duration") * 1000
         )
 
         {:noreply, socket}
