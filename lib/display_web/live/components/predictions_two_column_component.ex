@@ -28,7 +28,7 @@ defmodule PredictionsTwoColumn do
             <div class="bus-info">{{service["ServiceNo"]}}</div>
             <div class="next-buses">
               <div class="heading">
-                <span class="stops"> no of stops # <i class="ml-1rem fas fa-arrow-right"></i></span>
+                <span class="stops" style="display: none"> no of stops # <i class="ml-1rem fas fa-arrow-right"></i></span>
                 <span class="stops">{{service["NextBus"]["DestinationCode"]}}</span>
               </div>
               <div class="details">

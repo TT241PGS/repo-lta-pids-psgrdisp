@@ -1,4 +1,4 @@
-defmodule LandscapeOnePaneLayout do
+defmodule LandscapeTwoPaneBLayout do
   @moduledoc false
   use Surface.LiveComponent
 
@@ -15,6 +15,7 @@ defmodule LandscapeOnePaneLayout do
       </div>
     </div>
     <PredictionsTwoColumn stopPredictionsSet={{@prop.stop_predictions_set_2_column}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}}/>
+    <AdvisoriesTwoColumn messages={{@prop.messages}} :if={{get_in(@prop.current_layout_panes, ["pane2", "type", "value"]) == "scheduled_and_ad_hoc_messages"}} />
     """
   end
 end

@@ -237,6 +237,13 @@ defmodule DisplayWeb.Display do
         </div>
         """
 
+      "landscape_two_pane_b" ->
+        ~H"""
+        <div class="full-page-wrapper #{theme}">
+          <LandscapeTwoPaneBLayout prop={{assigns}}/>
+        </div>
+        """
+
       nil ->
         ~H"""
         <div class="full-page-wrapper #{theme}">
