@@ -53,15 +53,34 @@
 @keyframes slideInFromLeft {
   0% {
     transform: translateX(100%);
+    opacity: 0;
   }
   100% {
     transform: translateX(0);
+    opacity: 1;
   }
 }
 
+@keyframes fadeInFromLeft {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* All types of layouts should be added here to get slide in animation */
 .slide-in {
-  /* Full page wrapper */
   animation: 1s ease-out 0s 1 slideInFromLeft;
+}
+
+.fade-in {
+  animation: 0.5s ease-out 0s 1 fadeInFromLeft;
+}
+
+.hide {
+  opacity: 0;
 }
 
 body {

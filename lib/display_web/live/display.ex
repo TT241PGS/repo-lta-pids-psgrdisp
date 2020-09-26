@@ -23,6 +23,7 @@ defmodule DisplayWeb.Display do
         current_layout_value: nil,
         current_layout_index: nil,
         current_layout_panes: nil,
+        is_multi_layout: false,
         stop_predictions_set_1_column: [],
         stop_predictions_set_2_column: [],
         messages: []
@@ -141,7 +142,6 @@ defmodule DisplayWeb.Display do
     messages = Messages.get_messages(socket.assigns.panel_id)
     socket = assign(socket, :messages, messages)
     Process.send_after(self(), :update_messages, 10_000)
-    Process.send_after(self(), :update_layout, 0)
     {:noreply, socket}
   end
 
@@ -152,6 +152,10 @@ defmodule DisplayWeb.Display do
     elected_template_index = if length(socket.assigns.messages) > 0, do: 0, else: 1
 
     layouts = templates |> Enum.at(elected_template_index) |> Map.get("layouts")
+
+    is_multi_layout = if length(layouts) > 1, do: true, else: false
+
+    socket = assign(socket, :is_multi_layout, is_multi_layout)
 
     case socket.assigns.current_layout_index do
       nil ->
@@ -229,31 +233,33 @@ defmodule DisplayWeb.Display do
   def render(assigns) do
     theme = "dark"
 
+    is_multi_layout = assigns.is_multi_layout
+
     case assigns.current_layout_value do
       "landscape_one_pane" ->
         ~H"""
-        <div class="full-page-wrapper #{theme} slide-in">
+        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
           <LandscapeOnePaneLayout prop={{assigns}}/>
         </div>
         """
 
       "landscape_two_pane_b" ->
         ~H"""
-        <div class="full-page-wrapper #{theme} slide-in">
+        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
           <LandscapeTwoPaneBLayout prop={{assigns}}/>
         </div>
         """
 
       nil ->
         ~H"""
-        <div class="full-page-wrapper #{theme} slide-in">
+        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
         <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
         </div>
         """
 
       unknown_layout ->
         ~H"""
-        <div class="full-page-wrapper #{theme} slide-in">
+        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
         <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
         </div>
         """

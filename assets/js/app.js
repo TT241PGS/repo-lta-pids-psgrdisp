@@ -45,8 +45,6 @@ liveSocket.connect();
 // >> liveSocket.enableLatencySim(1000)
 window.liveSocket = liveSocket;
 
-// Date Time component start
-
 function setDateTime() {
   const now = new Date();
 
@@ -80,14 +78,14 @@ function refreshDateTime() {
   }, 100);
 }
 
-function playMessages() {
+function slideInMessages() {
   setInterval(() => {
     const nextSlides = document.querySelector(".message-slides");
     if (
       (nextSlides && !messagesSlider) ||
-      currentMessagesSlides !== nextSlides
+      (nextSlides && currentMessagesSlides !== nextSlides)
     ) {
-      nextSlides.classList.remove("hidden");
+      nextSlides && nextSlides.classList.remove("hidden");
       messagesSlider = tns({
         container: ".message-slides",
         controls: false,
@@ -101,12 +99,12 @@ function playMessages() {
   }, 100);
 }
 
-function playBusStopPredictions() {
+function slideInBusStopPredictions() {
   setInterval(() => {
     const nextSlides = document.querySelector(".bus-stop-predictions");
     if (
       (nextSlides && !predictionsSlider) ||
-      currentPredictionsSlides !== nextSlides
+      (nextSlides && currentPredictionsSlides !== nextSlides)
     ) {
       nextSlides.classList.remove("hidden");
       predictionsSlider = tns({
@@ -122,12 +120,26 @@ function playBusStopPredictions() {
   }, 100);
 }
 
+function slideInLayouts() {
+  setInterval(() => {
+    const wrapperHidden = document.querySelector(".full-page-wrapper.hide");
+    wrapperHidden && wrapperHidden.classList.remove("hide");
+    if (wrapperHidden && wrapperHidden.classList.contains("multi-layout")) {
+      // Slide in for multi layout
+      wrapperHidden.classList.add("slide-in");
+    } else {
+      // Fade in for single layout
+      wrapperHidden && wrapperHidden.classList.add("fade-in");
+    }
+  }, 100);
+}
+
 onDocReady(refreshDateTime);
-// Date Time component  end
 
 // Register sliders
-onDocReady(playMessages);
-onDocReady(playBusStopPredictions);
+onDocReady(slideInMessages);
+onDocReady(slideInBusStopPredictions);
+onDocReady(slideInLayouts);
 
 function onDocReady(fn) {
   // see if DOM is already available
