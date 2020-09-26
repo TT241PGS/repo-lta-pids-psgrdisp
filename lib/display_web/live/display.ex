@@ -232,28 +232,28 @@ defmodule DisplayWeb.Display do
     case assigns.current_layout_value do
       "landscape_one_pane" ->
         ~H"""
-        <div class="full-page-wrapper #{theme}">
+        <div class="full-page-wrapper #{theme} slide-in">
           <LandscapeOnePaneLayout prop={{assigns}}/>
         </div>
         """
 
       "landscape_two_pane_b" ->
         ~H"""
-        <div class="full-page-wrapper #{theme}">
+        <div class="full-page-wrapper #{theme} slide-in">
           <LandscapeTwoPaneBLayout prop={{assigns}}/>
         </div>
         """
 
       nil ->
         ~H"""
-        <div class="full-page-wrapper #{theme}">
+        <div class="full-page-wrapper #{theme} slide-in">
         <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
         </div>
         """
 
       unknown_layout ->
         ~H"""
-        <div class="full-page-wrapper #{theme}">
+        <div class="full-page-wrapper #{theme} slide-in">
         <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
         </div>
         """
