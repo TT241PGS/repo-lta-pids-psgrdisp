@@ -16,6 +16,15 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import NProgress from "nprogress";
 import { LiveSocket } from "phoenix_live_view";
+import { tns } from "tiny-slider/src/tiny-slider";
+
+// messagesSlider init
+window.messagesSlider = null;
+window.currentMessagesSlides = null;
+
+// predictionsSlider init
+window.predictionsSlider = null;
+window.currentPredictionsSlides = null;
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
@@ -35,8 +44,6 @@ liveSocket.connect();
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)
 window.liveSocket = liveSocket;
-
-// Date Time component start
 
 function setDateTime() {
   const now = new Date();
@@ -71,8 +78,68 @@ function refreshDateTime() {
   }, 100);
 }
 
+function slideInMessages() {
+  setInterval(() => {
+    const nextSlides = document.querySelector(".message-slides");
+    if (
+      (nextSlides && !messagesSlider) ||
+      (nextSlides && currentMessagesSlides !== nextSlides)
+    ) {
+      nextSlides && nextSlides.classList.remove("hidden");
+      messagesSlider = tns({
+        container: ".message-slides",
+        controls: false,
+        speed: 500,
+        autoplay: true,
+        autoplayButtonOutput: false,
+        autoplayTimeout: 2000
+      });
+      currentMessagesSlides = nextSlides;
+    }
+  }, 100);
+}
+
+function slideInBusStopPredictions() {
+  setInterval(() => {
+    const nextSlides = document.querySelector(".bus-stop-predictions");
+    if (
+      (nextSlides && !predictionsSlider) ||
+      (nextSlides && currentPredictionsSlides !== nextSlides)
+    ) {
+      nextSlides.classList.remove("hidden");
+      predictionsSlider = tns({
+        container: ".bus-stop-predictions",
+        controls: false,
+        speed: 500,
+        autoplay: true,
+        autoplayButtonOutput: false,
+        autoplayTimeout: 5000
+      });
+      currentPredictionsSlides = nextSlides;
+    }
+  }, 100);
+}
+
+function slideInLayouts() {
+  setInterval(() => {
+    const wrapperHidden = document.querySelector(".full-page-wrapper.hide");
+    wrapperHidden && wrapperHidden.classList.remove("hide");
+    if (wrapperHidden && wrapperHidden.classList.contains("multi-layout")) {
+      // Slide in for multi layout
+      wrapperHidden.classList.add("slide-in");
+    } else {
+      // Fade in for single layout
+      wrapperHidden && wrapperHidden.classList.add("fade-in");
+    }
+  }, 100);
+}
+
 onDocReady(refreshDateTime);
-// Date Time component  end
+
+// Register sliders
+onDocReady(slideInMessages);
+onDocReady(slideInBusStopPredictions);
+onDocReady(slideInLayouts);
 
 function onDocReady(fn) {
   // see if DOM is already available

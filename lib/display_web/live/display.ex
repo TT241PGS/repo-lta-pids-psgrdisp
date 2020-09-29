@@ -3,13 +3,15 @@ defmodule DisplayWeb.Display do
   use Phoenix.LiveView
   import Surface
   require Logger
-  alias Display.{RealTime, ScheduledAdhocMessage, Templates}
+  alias Display.{Buses, Messages, RealTime, Templates}
 
   defp get_template_details_from_cms(panel_id) do
     Templates.list_templates_by_panel_id(panel_id)
-    |> Enum.at(0)
-    |> get_in([:template_detail])
-    |> Jason.decode!()
+    |> Enum.map(fn template ->
+      template
+      |> get_in([:template_detail])
+      |> Jason.decode!()
+    end)
   end
 
   def mount(%{"panel_id" => panel_id}, _session, socket) do
@@ -21,8 +23,10 @@ defmodule DisplayWeb.Display do
         current_layout_value: nil,
         current_layout_index: nil,
         current_layout_panes: nil,
-        stop_predictions: [],
-        sheduled_message: nil
+        is_multi_layout: false,
+        stop_predictions_set_1_column: [],
+        stop_predictions_set_2_column: [],
+        messages: []
       )
 
     Process.send_after(self(), :update_stops, 0)
@@ -33,22 +37,55 @@ defmodule DisplayWeb.Display do
 
   def handle_info(:update_stops, socket) do
     bus_stop_no =
-      Templates.get_bus_stop_from_panel_id(socket.assigns.panel_id)
+      Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
       |> get_in([:bus_stop_no])
 
-    socket = assign(socket, :bus_stop_no, bus_stop_no)
+    bus_stop_name = Buses.get_bus_stop_name_by_no(bus_stop_no)
+
+    socket =
+      socket
+      |> assign(:bus_stop_no, bus_stop_no)
+      |> assign(:bus_stop_name, bus_stop_name)
 
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
         cached_predictions =
-          Enum.map(cached_predictions, fn service ->
+          cached_predictions
+          |> Flow.from_enumerable()
+          |> Flow.map(fn service ->
             service
             |> update_estimated_arrival("NextBus")
             |> update_estimated_arrival("NextBus2")
             |> update_estimated_arrival("NextBus3")
           end)
+          |> Enum.sort_by(fn p -> p["ServiceNo"] |> String.to_integer() end)
 
-        socket = assign(socket, :stop_predictions, cached_predictions)
+        bus_stop_map =
+          cached_predictions
+          |> Enum.map(fn service ->
+            service
+            |> get_in(["NextBus", "DestinationCode"])
+          end)
+          |> Buses.get_bus_stop_map_by_nos()
+
+        cached_predictions =
+          cached_predictions
+          |> Enum.map(fn service ->
+            service
+            |> update_destination(bus_stop_map)
+          end)
+
+        socket =
+          socket
+          |> assign(
+            :stop_predictions_set_1_column,
+            create_stop_predictions_set_1_column(cached_predictions)
+          )
+          |> assign(
+            :stop_predictions_set_2_column,
+            create_stop_predictions_set_2_column(cached_predictions)
+          )
+
         Process.send_after(self(), :update_stops, 20_000)
         {:noreply, socket}
 
@@ -59,25 +96,24 @@ defmodule DisplayWeb.Display do
     end
   end
 
-  defp update_estimated_arrival(nil), do: ""
-
-  defp update_estimated_arrival(service, next_bus) do
-    case Access.get(service, next_bus) do
-      nil -> service
-      _ -> update_in(service, [next_bus, "EstimatedArrival"], &format_to_mins(&1))
-    end
-  end
-
   def handle_info(:update_messages, socket) do
-    message = ScheduledAdhocMessage.get_message(socket.assigns.bus_stop_no)
-    socket = assign(socket, :sheduled_message, message)
+    messages = Messages.get_messages(socket.assigns.panel_id)
+    socket = assign(socket, :messages, messages)
+    Process.send_after(self(), :update_messages, 10_000)
     {:noreply, socket}
   end
 
   def handle_info(:update_layout, socket) do
-    layouts =
-      get_template_details_from_cms(socket.assigns.panel_id)
-      |> Map.get("layouts")
+    templates = get_template_details_from_cms(socket.assigns.panel_id)
+
+    # If messages are present, show template A
+    elected_template_index = if length(socket.assigns.messages) > 0, do: 0, else: 1
+
+    layouts = templates |> Enum.at(elected_template_index) |> Map.get("layouts")
+
+    is_multi_layout = if length(layouts) > 1, do: true, else: false
+
+    socket = assign(socket, :is_multi_layout, is_multi_layout)
 
     case socket.assigns.current_layout_index do
       nil ->
@@ -91,7 +127,7 @@ defmodule DisplayWeb.Display do
         Process.send_after(
           self(),
           :update_layout,
-          (Map.get(next_layout, "duration") |> String.to_integer()) * 1000
+          Map.get(next_layout, "duration") * 1000
         )
 
         {:noreply, socket}
@@ -108,10 +144,52 @@ defmodule DisplayWeb.Display do
         Process.send_after(
           self(),
           :update_layout,
-          (Map.get(next_layout, "duration") |> String.to_integer()) * 1000
+          Map.get(next_layout, "duration") * 1000
         )
 
         {:noreply, socket}
+    end
+  end
+
+  defp create_stop_predictions_set_1_column(cached_predictions) do
+    create_stop_predictions_columnwise(cached_predictions, 5)
+  end
+
+  defp create_stop_predictions_set_2_column(cached_predictions) do
+    create_stop_predictions_columnwise(cached_predictions, 10)
+  end
+
+  defp create_stop_predictions_columnwise(cached_predictions, max_rows) do
+    cached_predictions
+    |> Enum.with_index()
+    |> Enum.reduce([], fn {prediction, index}, acc ->
+      remainder = rem(index, max_rows)
+      quotient = div(index, max_rows)
+
+      if remainder == 0,
+        do: List.insert_at(acc, quotient, [prediction]),
+        else: List.update_at(acc, quotient, &(&1 ++ [prediction]))
+    end)
+  end
+
+  defp update_estimated_arrival(service, next_bus) do
+    case Access.get(service, next_bus) do
+      nil -> service
+      _ -> update_in(service, [next_bus, "EstimatedArrival"], &format_to_mins(&1))
+    end
+  end
+
+  defp update_destination(service, bus_stop_map) do
+    case Access.get(service, "NextBus") do
+      nil ->
+        service
+
+      _ ->
+        update_in(
+          service,
+          ["NextBus", "DestinationCode"],
+          &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1 |> String.to_integer())
+        )
     end
   end
 
@@ -155,17 +233,33 @@ defmodule DisplayWeb.Display do
   def render(assigns) do
     theme = "dark"
 
+    is_multi_layout = assigns.is_multi_layout
+
     case assigns.current_layout_value do
       "landscape_one_pane" ->
         ~H"""
-        <div class="full-page-wrapper #{theme}">
+        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
           <LandscapeOnePaneLayout prop={{assigns}}/>
+        </div>
+        """
+
+      "landscape_two_pane_b" ->
+        ~H"""
+        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
+          <LandscapeTwoPaneBLayout prop={{assigns}}/>
+        </div>
+        """
+
+      nil ->
+        ~H"""
+        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
+        <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
         </div>
         """
 
       unknown_layout ->
         ~H"""
-        <div class="full-page-wrapper #{theme}">
+        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
         <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
         </div>
         """

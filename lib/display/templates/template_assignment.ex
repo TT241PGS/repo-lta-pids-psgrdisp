@@ -9,8 +9,6 @@ defmodule Display.Templates.TemplateAssignment do
     field :bus_stop_panel_id, :string
     field :template_data_id, :string
     field :template_set_code, :string
-
-    timestamps()
   end
 
   @doc false

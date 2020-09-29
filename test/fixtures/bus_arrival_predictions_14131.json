@@ -1,0 +1,113 @@
+[
+  {
+    "ServiceNo": "15",
+    "Operator": "GAS",
+    "NextBus": {
+      "OriginCode": "77009",
+      "DestinationCode": "77009",
+      "EstimatedArrival": "2020-08-26T20:30:01+08:00",
+      "Latitude": "1.3291618333333333",
+      "Longitude": "103.90520766666667",
+      "VisitNumber": "1",
+      "Load": "SEA",
+      "Feature": "WAB",
+      "Type": "SD"
+    },
+    "NextBus2": {
+      "OriginCode": "77009",
+      "DestinationCode": "77009",
+      "EstimatedArrival": "2020-08-26T20:40:20+08:00",
+      "Latitude": "1.3499933333333334",
+      "Longitude": "103.92627516666667",
+      "VisitNumber": "1",
+      "Load": "SEA",
+      "Feature": "WAB",
+      "Type": "SD"
+    },
+    "NextBus3": {
+      "OriginCode": "77009",
+      "DestinationCode": "77009",
+      "EstimatedArrival": "2020-08-26T20:53:48+08:00",
+      "Latitude": "1.3567366666666667",
+      "Longitude": "103.94583416666667",
+      "VisitNumber": "1",
+      "Load": "SEA",
+      "Feature": "WAB",
+      "Type": "SD"
+    }
+  },
+  {
+    "ServiceNo": "150",
+    "Operator": "SBST",
+    "NextBus": {
+      "OriginCode": "77009",
+      "DestinationCode": "77009",
+      "EstimatedArrival": "2020-08-26T20:30:21+08:00",
+      "Latitude": "0",
+      "Longitude": "0",
+      "VisitNumber": "1",
+      "Load": "SEA",
+      "Feature": "WAB",
+      "Type": "SD"
+    },
+    "NextBus2": {
+      "OriginCode": "77009",
+      "DestinationCode": "77009",
+      "EstimatedArrival": "2020-08-26T20:44:21+08:00",
+      "Latitude": "0",
+      "Longitude": "0",
+      "VisitNumber": "1",
+      "Load": "SEA",
+      "Feature": "WAB",
+      "Type": "SD"
+    },
+    "NextBus3": {
+      "OriginCode": "77009",
+      "DestinationCode": "77009",
+      "EstimatedArrival": "2020-08-26T20:59:21+08:00",
+      "Latitude": "0",
+      "Longitude": "0",
+      "VisitNumber": "1",
+      "Load": "SEA",
+      "Feature": "WAB",
+      "Type": "SD"
+    }
+  },
+  {
+    "ServiceNo": "155",
+    "Operator": "SBST",
+    "NextBus": {
+      "OriginCode": "77009",
+      "DestinationCode": "77009",
+      "EstimatedArrival": "2020-08-26T20:32:31+08:00",
+      "Latitude": "1.3171881666666667",
+      "Longitude": "103.892326",
+      "VisitNumber": "1",
+      "Load": "SEA",
+      "Feature": "WAB",
+      "Type": "SD"
+    },
+    "NextBus2": {
+      "OriginCode": "77009",
+      "DestinationCode": "77009",
+      "EstimatedArrival": "2020-08-26T20:51:21+08:00",
+      "Latitude": "1.3275988333333333",
+      "Longitude": "103.8812615",
+      "VisitNumber": "1",
+      "Load": "SEA",
+      "Feature": "WAB",
+      "Type": "SD"
+    },
+    "NextBus3": {
+      "OriginCode": "77009",
+      "DestinationCode": "77009",
+      "EstimatedArrival": "2020-08-26T21:03:58+08:00",
+      "Latitude": "1.343522",
+      "Longitude": "103.85770383333333",
+      "VisitNumber": "1",
+      "Load": "SEA",
+      "Feature": "WAB",
+      "Type": "SD"
+    }
+  }
+]

@@ -1,4 +1,4 @@
-defmodule Display.Templates.PanelBus do
+defmodule Display.Buses.PanelBus do
   @moduledoc false
   use Ecto.Schema
   import Ecto.Changeset

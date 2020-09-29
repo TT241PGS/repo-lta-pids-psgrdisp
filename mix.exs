@@ -55,8 +55,10 @@ defmodule Display.MixProject do
       {:timex, "~> 3.5"},
       {:surface, "~> 0.1.0-alpha.2"},
       {:health_checkup, "~> 0.1.0"},
+      {:flow, "~> 1.0"},
       {:husky, "~> 1.0", only: :dev, runtime: false},
-      {:credo, "~> 1.0", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:cortex, "~> 0.1", only: [:dev]}
     ]
   end
 
@@ -68,10 +70,16 @@ defmodule Display.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
+      setup: ["deps.get", "cmd npm install --prefix assets"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      test: [
+        "ecto.drop",
+        "ecto.create --quiet",
+        "ecto.migrate --quiet",
+        "run priv/repo/seeds_test.exs",
+        "test"
+      ]
     ]
   end
 end
