@@ -16,8 +16,6 @@ defmodule Display.Messages.MessageData do
     field :day_type_2, :boolean
     field :day_type_3, :boolean
     field :message_content, :string
-
-    has_many :cms_message_assignment, MessageAssignment, foreign_key: :message_data_id
   end
 
   @doc false

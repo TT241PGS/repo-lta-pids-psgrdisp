@@ -19,6 +19,19 @@ defmodule Display.Buses do
     |> get_in([:point_desc])
   end
 
+  def get_bus_stop_from_panel_id(nil), do: nil
+
+  def get_bus_stop_from_panel_id(panel_id) do
+    from(pb in Buses.PanelBus,
+      where: pb.panel_id == ^panel_id,
+      select: %{
+        panel_id: pb.panel_id,
+        bus_stop_no: pb.bus_stop_no
+      }
+    )
+    |> Repo.one()
+  end
+
   def get_bus_stop_map_by_nos(bus_stop_nos) do
     from(bs in Buses.BusStop,
       where: bs.point_no in ^bus_stop_nos,

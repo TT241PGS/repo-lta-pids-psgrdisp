@@ -12,6 +12,10 @@ config :display, Display.Repo,
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
+config :redix,
+  host: System.get_env("REDIS_HOST"),
+  port: System.get_env("REDIS_PORT")
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :display, DisplayWeb.Endpoint,

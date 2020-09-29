@@ -6,18 +6,7 @@ defmodule Display.Templates do
   import Ecto.Query, warn: false
   alias Display.Repo
 
-  alias Display.Templates.{PanelBus, TemplateAssignment, TemplateData}
-
-  def get_bus_stop_from_panel_id(panel_id) do
-    from(pb in PanelBus,
-      where: pb.panel_id == ^panel_id,
-      select: %{
-        panel_id: pb.panel_id,
-        bus_stop_no: pb.bus_stop_no
-      }
-    )
-    |> Repo.one()
-  end
+  alias Display.Templates.{TemplateAssignment, TemplateData}
 
   def list_templates_by_panel_id(panel_id) do
     from(ctd in TemplateData,

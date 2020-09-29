@@ -37,7 +37,7 @@ defmodule DisplayWeb.Display do
 
   def handle_info(:update_stops, socket) do
     bus_stop_no =
-      Templates.get_bus_stop_from_panel_id(socket.assigns.panel_id)
+      Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
       |> get_in([:bus_stop_no])
 
     bus_stop_name = Buses.get_bus_stop_name_by_no(bus_stop_no)
@@ -96,48 +96,6 @@ defmodule DisplayWeb.Display do
     end
   end
 
-  defp create_stop_predictions_set_1_column(cached_predictions) do
-    create_stop_predictions_columnwise(cached_predictions, 5)
-  end
-
-  defp create_stop_predictions_set_2_column(cached_predictions) do
-    create_stop_predictions_columnwise(cached_predictions, 10)
-  end
-
-  defp create_stop_predictions_columnwise(cached_predictions, max_rows) do
-    cached_predictions
-    |> Enum.with_index()
-    |> Enum.reduce([], fn {prediction, index}, acc ->
-      remainder = rem(index, max_rows)
-      quotient = div(index, max_rows)
-
-      if remainder == 0,
-        do: List.insert_at(acc, quotient, [prediction]),
-        else: List.update_at(acc, quotient, &(&1 ++ [prediction]))
-    end)
-  end
-
-  defp update_estimated_arrival(service, next_bus) do
-    case Access.get(service, next_bus) do
-      nil -> service
-      _ -> update_in(service, [next_bus, "EstimatedArrival"], &format_to_mins(&1))
-    end
-  end
-
-  defp update_destination(service, bus_stop_map) do
-    case Access.get(service, "NextBus") do
-      nil ->
-        service
-
-      _ ->
-        update_in(
-          service,
-          ["NextBus", "DestinationCode"],
-          &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1 |> String.to_integer())
-        )
-    end
-  end
-
   def handle_info(:update_messages, socket) do
     messages = Messages.get_messages(socket.assigns.panel_id)
     socket = assign(socket, :messages, messages)
@@ -190,6 +148,48 @@ defmodule DisplayWeb.Display do
         )
 
         {:noreply, socket}
+    end
+  end
+
+  defp create_stop_predictions_set_1_column(cached_predictions) do
+    create_stop_predictions_columnwise(cached_predictions, 5)
+  end
+
+  defp create_stop_predictions_set_2_column(cached_predictions) do
+    create_stop_predictions_columnwise(cached_predictions, 10)
+  end
+
+  defp create_stop_predictions_columnwise(cached_predictions, max_rows) do
+    cached_predictions
+    |> Enum.with_index()
+    |> Enum.reduce([], fn {prediction, index}, acc ->
+      remainder = rem(index, max_rows)
+      quotient = div(index, max_rows)
+
+      if remainder == 0,
+        do: List.insert_at(acc, quotient, [prediction]),
+        else: List.update_at(acc, quotient, &(&1 ++ [prediction]))
+    end)
+  end
+
+  defp update_estimated_arrival(service, next_bus) do
+    case Access.get(service, next_bus) do
+      nil -> service
+      _ -> update_in(service, [next_bus, "EstimatedArrival"], &format_to_mins(&1))
+    end
+  end
+
+  defp update_destination(service, bus_stop_map) do
+    case Access.get(service, "NextBus") do
+      nil ->
+        service
+
+      _ ->
+        update_in(
+          service,
+          ["NextBus", "DestinationCode"],
+          &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1 |> String.to_integer())
+        )
     end
   end
 
