@@ -1,4 +1,4 @@
-defmodule DisplayWeb.Display do
+defmodule DisplayWeb.DisplayLive do
   @moduledoc false
   use Phoenix.LiveView
   import Surface
