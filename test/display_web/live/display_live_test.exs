@@ -22,7 +22,7 @@ defmodule DisplayWeb.DisplayTest do
     assert render(view) =~ "CARIBBEAN AT KEPPEL BAY"
     assert render(view) =~ "14131"
     assert render(view) =~ "150"
-    assert render(view) =~ "60 min"
+    assert render(view) =~ "Arr*"
     assert render(view) =~ "Train services will be suspended from 6am to 7pm tomorrow"
   end
 end
