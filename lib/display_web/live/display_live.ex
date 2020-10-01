@@ -1,4 +1,4 @@
-defmodule DisplayWeb.Display do
+defmodule DisplayWeb.DisplayLive do
   @moduledoc false
   use Phoenix.LiveView
   import Surface
@@ -28,6 +28,8 @@ defmodule DisplayWeb.Display do
         stop_predictions_set_2_column: [],
         messages: []
       )
+
+    if connected?(socket), do: DisplayWeb.Endpoint.subscribe("poller")
 
     Process.send_after(self(), :update_stops, 0)
     Process.send_after(self(), :update_messages, 0)
@@ -86,12 +88,12 @@ defmodule DisplayWeb.Display do
             create_stop_predictions_set_2_column(cached_predictions)
           )
 
-        Process.send_after(self(), :update_stops, 20_000)
+        Process.send_after(self(), :update_stops, 30_000)
         {:noreply, socket}
 
       {:error, error} ->
         Logger.error("Error fetching cached_predictions #{inspect(error)}")
-        Process.send_after(self(), :update_stops, 20_000)
+        Process.send_after(self(), :update_stops, 30_000)
         {:noreply, socket}
     end
   end
@@ -149,6 +151,18 @@ defmodule DisplayWeb.Display do
 
         {:noreply, socket}
     end
+  end
+
+  def handle_info(
+        %Phoenix.Socket.Broadcast{
+          event: "arrival_predictions_updated",
+          payload: %{},
+          topic: "poller"
+        },
+        socket
+      ) do
+    Process.send_after(self(), :update_stops, 0)
+    {:noreply, socket}
   end
 
   defp create_stop_predictions_set_1_column(cached_predictions) do

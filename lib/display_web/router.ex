@@ -20,13 +20,14 @@ defmodule DisplayWeb.Router do
     pipe_through :browser
 
     live "/", PageLive, :index
-    live "/display", Display
+    live "/display", DisplayLive
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", DisplayWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", DisplayWeb do
+    pipe_through :api
+
+    post "/notifications", NotificationController, :create
+  end
 
   # Enables LiveDashboard only for development
   #

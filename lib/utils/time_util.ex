@@ -8,7 +8,7 @@ defmodule Display.Utils.TimeUtil do
   end
 
   def get_time_now do
-    Timezone.convert(Timex.now(), get_timezone)
+    Timezone.convert(Timex.now(), get_timezone())
   end
 
   def get_beginning_of_day do
@@ -21,7 +21,7 @@ defmodule Display.Utils.TimeUtil do
   end
 
   def get_current_time do
-    get_time_now
+    get_time_now()
     |> Timex.format!("%H:%M", :strftime)
   end
 
