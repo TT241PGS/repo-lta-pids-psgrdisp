@@ -25,6 +25,12 @@ defmodule Display.Utils.TimeUtil do
     |> Timex.format!("%H:%M", :strftime)
   end
 
+  def get_elapsed_time(nil), do: nil
+
+  def get_elapsed_time(start_time) do
+    Timex.now() |> Timex.diff(start_time) |> Timex.Duration.from_microseconds() |> Timex.format_duration(:humanized)
+  end
+
   def get_weekday_name(nil), do: nil
 
   def get_weekday_name(date) do

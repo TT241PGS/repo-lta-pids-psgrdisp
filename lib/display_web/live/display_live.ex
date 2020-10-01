@@ -4,9 +4,12 @@ defmodule DisplayWeb.DisplayLive do
   import Surface
   require Logger
   alias Display.{Buses, Messages, RealTime, Templates}
+  alias Display.Utils.TimeUtil
 
   def mount(%{"panel_id" => panel_id}, _session, socket) do
+    start_time = Timex.now
     Logger.info("Mount started")
+
     socket =
       assign(socket,
         bus_stop_no: nil,
@@ -26,12 +29,15 @@ defmodule DisplayWeb.DisplayLive do
     Process.send_after(self(), :update_stops, 0)
     Process.send_after(self(), :update_messages, 0)
     Process.send_after(self(), :update_layout, 0)
-    Logger.info("Mount ended")
+    elapsed_time = TimeUtil.get_elapsed_time(start_time)
+    Logger.info("Mount ended (#{elapsed_time})")
     {:ok, socket}
   end
 
   def handle_info(:update_stops, socket) do
+    start_time = Timex.now
     Logger.info(":update_stops started")
+
     bus_stop_no =
       Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
       |> get_in([:bus_stop_no])
@@ -83,27 +89,33 @@ defmodule DisplayWeb.DisplayLive do
           )
 
         Process.send_after(self(), :update_stops, 30_000)
-        Logger.info(":update_stops ended successfully")
+        elapsed_time = TimeUtil.get_elapsed_time(start_time)
+        Logger.info(":update_stops ended successfully (#{elapsed_time})")
         {:noreply, socket}
 
       {:error, error} ->
         Logger.error("Error fetching cached_predictions #{inspect(error)}")
         Process.send_after(self(), :update_stops, 30_000)
-        Logger.info(":update_stops failed")
+        elapsed_time = TimeUtil.get_elapsed_time(start_time)
+        Logger.info(":update_stops failed (#{elapsed_time})")
         {:noreply, socket}
     end
   end
 
   def handle_info(:update_messages, socket) do
+    start_time = Timex.now
     Logger.info(":update_messages started")
     messages = Messages.get_messages(socket.assigns.panel_id)
     socket = assign(socket, :messages, messages)
     Process.send_after(self(), :update_messages, 10_000)
-    Logger.info(":update_messages ended successfully")
+    elapsed_time = TimeUtil.get_elapsed_time(start_time)
+    Logger.info(":update_messages ended successfully (#{elapsed_time})")
     {:noreply, socket}
   end
 
   def handle_info(:update_layout, socket) do
+    start_time = Timex.now
+
     Logger.info(":update_layout started")
     templates = get_template_details_from_cms(socket.assigns.panel_id)
 
@@ -131,7 +143,8 @@ defmodule DisplayWeb.DisplayLive do
           Map.get(next_layout, "duration") * 1000
         )
 
-        Logger.info(":update_layout ended successfully")
+        elapsed_time = TimeUtil.get_elapsed_time(start_time)
+        Logger.info(":update_layout ended successfully (#{elapsed_time})")
 
         {:noreply, socket}
 
@@ -150,7 +163,8 @@ defmodule DisplayWeb.DisplayLive do
           Map.get(next_layout, "duration") * 1000
         )
 
-        Logger.info(":update_layout failed")
+        elapsed_time = TimeUtil.get_elapsed_time(start_time)
+        Logger.info(":update_layout ended successfully (#{elapsed_time})")
 
         {:noreply, socket}
     end
