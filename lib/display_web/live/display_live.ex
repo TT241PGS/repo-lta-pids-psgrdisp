@@ -5,16 +5,8 @@ defmodule DisplayWeb.DisplayLive do
   require Logger
   alias Display.{Buses, Messages, RealTime, Templates}
 
-  defp get_template_details_from_cms(panel_id) do
-    Templates.list_templates_by_panel_id(panel_id)
-    |> Enum.map(fn template ->
-      template
-      |> get_in([:template_detail])
-      |> Jason.decode!()
-    end)
-  end
-
   def mount(%{"panel_id" => panel_id}, _session, socket) do
+    Logger.info("Mount started")
     socket =
       assign(socket,
         bus_stop_no: nil,
@@ -34,10 +26,12 @@ defmodule DisplayWeb.DisplayLive do
     Process.send_after(self(), :update_stops, 0)
     Process.send_after(self(), :update_messages, 0)
     Process.send_after(self(), :update_layout, 0)
+    Logger.info("Mount ended")
     {:ok, socket}
   end
 
   def handle_info(:update_stops, socket) do
+    Logger.info(":update_stops started")
     bus_stop_no =
       Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
       |> get_in([:bus_stop_no])
@@ -89,23 +83,28 @@ defmodule DisplayWeb.DisplayLive do
           )
 
         Process.send_after(self(), :update_stops, 30_000)
+        Logger.info(":update_stops ended successfully")
         {:noreply, socket}
 
       {:error, error} ->
         Logger.error("Error fetching cached_predictions #{inspect(error)}")
         Process.send_after(self(), :update_stops, 30_000)
+        Logger.info(":update_stops failed")
         {:noreply, socket}
     end
   end
 
   def handle_info(:update_messages, socket) do
+    Logger.info(":update_messages started")
     messages = Messages.get_messages(socket.assigns.panel_id)
     socket = assign(socket, :messages, messages)
     Process.send_after(self(), :update_messages, 10_000)
+    Logger.info(":update_messages ended successfully")
     {:noreply, socket}
   end
 
   def handle_info(:update_layout, socket) do
+    Logger.info(":update_layout started")
     templates = get_template_details_from_cms(socket.assigns.panel_id)
 
     # If messages are present, show template A
@@ -132,6 +131,8 @@ defmodule DisplayWeb.DisplayLive do
           Map.get(next_layout, "duration") * 1000
         )
 
+        Logger.info(":update_layout ended successfully")
+
         {:noreply, socket}
 
       current_index ->
@@ -149,6 +150,8 @@ defmodule DisplayWeb.DisplayLive do
           Map.get(next_layout, "duration") * 1000
         )
 
+        Logger.info(":update_layout failed")
+
         {:noreply, socket}
     end
   end
@@ -163,6 +166,15 @@ defmodule DisplayWeb.DisplayLive do
       ) do
     Process.send_after(self(), :update_stops, 0)
     {:noreply, socket}
+  end
+
+  defp get_template_details_from_cms(panel_id) do
+    Templates.list_templates_by_panel_id(panel_id)
+    |> Enum.map(fn template ->
+      template
+      |> get_in([:template_detail])
+      |> Jason.decode!()
+    end)
   end
 
   defp create_stop_predictions_set_1_column(cached_predictions) do
