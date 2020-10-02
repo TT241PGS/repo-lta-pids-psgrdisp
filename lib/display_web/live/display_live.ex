@@ -7,7 +7,7 @@ defmodule DisplayWeb.DisplayLive do
   alias Display.Utils.TimeUtil
 
   def mount(%{"panel_id" => panel_id}, _session, socket) do
-    start_time = Timex.now
+    start_time = Timex.now()
     Logger.info("Mount started")
 
     socket =
@@ -20,6 +20,7 @@ defmodule DisplayWeb.DisplayLive do
         current_layout_panes: nil,
         is_multi_layout: false,
         stop_predictions_set_1_column: [],
+        incoming_buses: [],
         stop_predictions_set_2_column: [],
         messages: []
       )
@@ -35,7 +36,7 @@ defmodule DisplayWeb.DisplayLive do
   end
 
   def handle_info(:update_stops, socket) do
-    start_time = Timex.now
+    start_time = Timex.now()
     Logger.info(":update_stops started")
 
     bus_stop_no =
@@ -51,6 +52,16 @@ defmodule DisplayWeb.DisplayLive do
 
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
+        incoming_buses =
+          cached_predictions
+          |> Enum.reduce([], &incoming_bus_reducer(&1, &2))
+          |> Enum.filter(&(&1["time"] > -1))
+          |> Enum.sort_by(&{&1["time"], String.to_integer(&1["service_no"])})
+          |> Enum.take(5)
+          |> Enum.map(fn service ->
+            update_in(service, ["time"], &format_min_to_eta_mins(&1))
+          end)
+
         cached_predictions =
           cached_predictions
           |> Flow.from_enumerable()
@@ -87,6 +98,10 @@ defmodule DisplayWeb.DisplayLive do
             :stop_predictions_set_2_column,
             create_stop_predictions_set_2_column(cached_predictions)
           )
+          |> assign(
+            :incoming_buses,
+            incoming_buses
+          )
 
         Process.send_after(self(), :update_stops, 30_000)
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
@@ -103,7 +118,7 @@ defmodule DisplayWeb.DisplayLive do
   end
 
   def handle_info(:update_messages, socket) do
-    start_time = Timex.now
+    start_time = Timex.now()
     Logger.info(":update_messages started")
     messages = Messages.get_messages(socket.assigns.panel_id)
     socket = assign(socket, :messages, messages)
@@ -114,7 +129,7 @@ defmodule DisplayWeb.DisplayLive do
   end
 
   def handle_info(:update_layout, socket) do
-    start_time = Timex.now
+    start_time = Timex.now()
 
     Logger.info(":update_layout started")
     templates = get_template_details_from_cms(socket.assigns.panel_id)
@@ -182,6 +197,22 @@ defmodule DisplayWeb.DisplayLive do
     {:noreply, socket}
   end
 
+  defp incoming_bus_reducer(service, acc) do
+    next_bus_time =
+      if service["NextBus"]["EstimatedArrival"] == "",
+        do: nil,
+        else: service["NextBus"]["EstimatedArrival"]
+
+    case next_bus_time do
+      nil ->
+        acc
+
+      time ->
+        acc ++
+          [%{"service_no" => service["ServiceNo"], "time" => get_eta_in_minutes(time)}]
+    end
+  end
+
   defp get_template_details_from_cms(panel_id) do
     Templates.list_templates_by_panel_id(panel_id)
     |> Enum.map(fn template ->
@@ -215,7 +246,7 @@ defmodule DisplayWeb.DisplayLive do
   defp update_estimated_arrival(service, next_bus) do
     case Access.get(service, next_bus) do
       nil -> service
-      _ -> update_in(service, [next_bus, "EstimatedArrival"], &format_to_mins(&1))
+      _ -> update_in(service, [next_bus, "EstimatedArrival"], &format_time_to_eta_mins(&1))
     end
   end
 
@@ -243,14 +274,10 @@ defmodule DisplayWeb.DisplayLive do
     end
   end
 
-  def format_to_mins(nil), do: ""
+  def format_time_to_eta_mins(nil), do: ""
 
-  def format_to_mins(time) do
-    eta =
-      time
-      |> DateTime.from_iso8601()
-      |> elem(1)
-      |> Time.diff(DateTime.utc_now(), :second)
+  def format_time_to_eta_mins(time) do
+    eta = get_eta_in_seconds(time)
 
     cond do
       eta < 0 ->
@@ -270,6 +297,37 @@ defmodule DisplayWeb.DisplayLive do
     end
   end
 
+  defp format_min_to_eta_mins(eta) do
+    cond do
+      eta < 0 ->
+        "Arr*"
+
+      eta == 0 ->
+        "Arr"
+
+      eta >= 1 and eta <= 60 ->
+        "#{eta} min"
+
+      eta > 60 ->
+        "> 60 min"
+
+      true ->
+        "#{ceil(eta / 60)} min"
+    end
+  end
+
+  defp get_eta_in_seconds(time) do
+    time
+    |> DateTime.from_iso8601()
+    |> elem(1)
+    |> Time.diff(DateTime.utc_now(), :second)
+  end
+
+  defp get_eta_in_minutes(time) do
+    seconds = get_eta_in_seconds(time)
+    ceil(seconds / 60)
+  end
+
   def render(assigns) do
     theme = "dark"
 
@@ -287,6 +345,13 @@ defmodule DisplayWeb.DisplayLive do
         ~H"""
         <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
           <LandscapeTwoPaneBLayout prop={{assigns}}/>
+        </div>
+        """
+
+      "landscape_three_pane_a" ->
+        ~H"""
+        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
+          <LandscapeThreePaneALayout prop={{assigns}}/>
         </div>
         """
 
