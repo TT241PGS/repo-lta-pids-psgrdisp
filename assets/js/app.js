@@ -92,7 +92,7 @@ function slideInMessages() {
         speed: 500,
         autoplay: true,
         autoplayButtonOutput: false,
-        autoplayTimeout: 2000
+        autoplayTimeout: 5000
       });
       currentMessagesSlides = nextSlides;
     }
@@ -113,7 +113,7 @@ function slideInBusStopPredictions() {
         speed: 500,
         autoplay: true,
         autoplayButtonOutput: false,
-        autoplayTimeout: 5000
+        autoplayTimeout: 10000
       });
       currentPredictionsSlides = nextSlides;
     }
