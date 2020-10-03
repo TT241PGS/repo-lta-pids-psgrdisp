@@ -28,7 +28,10 @@ defmodule Display.Utils.TimeUtil do
   def get_elapsed_time(nil), do: nil
 
   def get_elapsed_time(start_time) do
-    Timex.now() |> Timex.diff(start_time) |> Timex.Duration.from_microseconds() |> Timex.format_duration(:humanized)
+    Timex.now()
+    |> Timex.diff(start_time)
+    |> Timex.Duration.from_microseconds()
+    |> Timex.format_duration(:humanized)
   end
 
   def get_weekday_name(nil), do: nil

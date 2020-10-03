@@ -6,7 +6,7 @@ defmodule AdvisoriesTwoColumn do
 
   def render(assigns) do
     ~H"""
-    <div class="advisories-container">
+    <div class="advisories-container mb-4rem">
       <div class="flex flex-row items-center">
         <div class="heading">
           <svg width="38.077" height="45" viewBox="0 0 38.077 45">
