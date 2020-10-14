@@ -4,7 +4,7 @@ defmodule DisplayWeb.DisplayLive do
   import Surface
   require Logger
   alias Display.{Buses, Messages, RealTime, Templates}
-  alias Display.Utils.TimeUtil
+  alias Display.Utils.{DisplayLiveUtil, TimeUtil}
 
   def mount(%{"panel_id" => panel_id}, _session, socket) do
     start_time = Timex.now()
@@ -54,12 +54,12 @@ defmodule DisplayWeb.DisplayLive do
       {:ok, cached_predictions} ->
         incoming_buses =
           cached_predictions
-          |> Enum.reduce([], &incoming_bus_reducer(&1, &2))
+          |> Enum.reduce([], &DisplayLiveUtil.incoming_bus_reducer(&1, &2))
           |> Enum.filter(&(&1["time"] > -1))
           |> Enum.sort_by(&{&1["time"], String.to_integer(&1["service_no"])})
           |> Enum.take(5)
           |> Enum.map(fn service ->
-            update_in(service, ["time"], &format_min_to_eta_mins(&1))
+            update_in(service, ["time"], &TimeUtil.format_min_to_eta_mins(&1))
           end)
 
         cached_predictions =
@@ -67,9 +67,9 @@ defmodule DisplayWeb.DisplayLive do
           |> Flow.from_enumerable()
           |> Flow.map(fn service ->
             service
-            |> update_estimated_arrival("NextBus")
-            |> update_estimated_arrival("NextBus2")
-            |> update_estimated_arrival("NextBus3")
+            |> DisplayLiveUtil.update_estimated_arrival("NextBus")
+            |> DisplayLiveUtil.update_estimated_arrival("NextBus2")
+            |> DisplayLiveUtil.update_estimated_arrival("NextBus3")
           end)
           |> Enum.sort_by(fn p -> p["ServiceNo"] |> String.to_integer() end)
 
@@ -85,18 +85,18 @@ defmodule DisplayWeb.DisplayLive do
           cached_predictions
           |> Enum.map(fn service ->
             service
-            |> update_destination(bus_stop_map)
+            |> DisplayLiveUtil.update_destination(bus_stop_map)
           end)
 
         socket =
           socket
           |> assign(
             :stop_predictions_set_1_column,
-            create_stop_predictions_set_1_column(cached_predictions)
+            DisplayLiveUtil.create_stop_predictions_set_1_column(cached_predictions)
           )
           |> assign(
             :stop_predictions_set_2_column,
-            create_stop_predictions_set_2_column(cached_predictions)
+            DisplayLiveUtil.create_stop_predictions_set_2_column(cached_predictions)
           )
           |> assign(
             :incoming_buses,
@@ -132,7 +132,7 @@ defmodule DisplayWeb.DisplayLive do
     start_time = Timex.now()
 
     Logger.info(":update_layout started")
-    templates = get_template_details_from_cms(socket.assigns.panel_id)
+    templates = DisplayLiveUtil.get_template_details_from_cms(socket.assigns.panel_id)
 
     # If messages are present, show template A
     elected_template_index = if length(socket.assigns.messages) > 0, do: 0, else: 1
@@ -164,7 +164,7 @@ defmodule DisplayWeb.DisplayLive do
         {:noreply, socket}
 
       current_index ->
-        next_index = get_next_index(layouts, current_index)
+        next_index = DisplayLiveUtil.get_next_index(layouts, current_index)
         next_layout = Enum.at(layouts, next_index)
 
         socket =
@@ -195,137 +195,6 @@ defmodule DisplayWeb.DisplayLive do
       ) do
     Process.send_after(self(), :update_stops, 0)
     {:noreply, socket}
-  end
-
-  defp incoming_bus_reducer(service, acc) do
-    next_bus_time =
-      if service["NextBus"]["EstimatedArrival"] == "",
-        do: nil,
-        else: service["NextBus"]["EstimatedArrival"]
-
-    case next_bus_time do
-      nil ->
-        acc
-
-      time ->
-        acc ++
-          [%{"service_no" => service["ServiceNo"], "time" => get_eta_in_minutes(time)}]
-    end
-  end
-
-  defp get_template_details_from_cms(panel_id) do
-    Templates.list_templates_by_panel_id(panel_id)
-    |> Enum.map(fn template ->
-      template
-      |> get_in([:template_detail])
-      |> Jason.decode!()
-    end)
-  end
-
-  defp create_stop_predictions_set_1_column(cached_predictions) do
-    create_stop_predictions_columnwise(cached_predictions, 5)
-  end
-
-  defp create_stop_predictions_set_2_column(cached_predictions) do
-    create_stop_predictions_columnwise(cached_predictions, 10)
-  end
-
-  defp create_stop_predictions_columnwise(cached_predictions, max_rows) do
-    cached_predictions
-    |> Enum.with_index()
-    |> Enum.reduce([], fn {prediction, index}, acc ->
-      remainder = rem(index, max_rows)
-      quotient = div(index, max_rows)
-
-      if remainder == 0,
-        do: List.insert_at(acc, quotient, [prediction]),
-        else: List.update_at(acc, quotient, &(&1 ++ [prediction]))
-    end)
-  end
-
-  defp update_estimated_arrival(service, next_bus) do
-    case Access.get(service, next_bus) do
-      nil -> service
-      _ -> update_in(service, [next_bus, "EstimatedArrival"], &format_time_to_eta_mins(&1))
-    end
-  end
-
-  defp update_destination(service, bus_stop_map) do
-    case Access.get(service, "NextBus") do
-      nil ->
-        service
-
-      _ ->
-        update_in(
-          service,
-          ["NextBus", "DestinationCode"],
-          &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1 |> String.to_integer())
-        )
-    end
-  end
-
-  defp get_next_index(layouts, current_index) do
-    max_index = length(layouts) - 1
-
-    cond do
-      current_index < max_index -> current_index + 1
-      current_index == max_index -> 0
-      true -> 0
-    end
-  end
-
-  def format_time_to_eta_mins(nil), do: ""
-
-  def format_time_to_eta_mins(time) do
-    eta = get_eta_in_seconds(time)
-
-    cond do
-      eta < 0 ->
-        "Arr*"
-
-      eta >= 0 and eta <= 20 ->
-        "Arr"
-
-      eta >= 20 and eta <= 60 ->
-        "1 min"
-
-      eta >= 3600 ->
-        "> 60 min"
-
-      true ->
-        "#{ceil(eta / 60)} min"
-    end
-  end
-
-  defp format_min_to_eta_mins(eta) do
-    cond do
-      eta < 0 ->
-        "Arr*"
-
-      eta == 0 ->
-        "Arr"
-
-      eta >= 1 and eta <= 60 ->
-        "#{eta} min"
-
-      eta > 60 ->
-        "> 60 min"
-
-      true ->
-        "#{ceil(eta / 60)} min"
-    end
-  end
-
-  defp get_eta_in_seconds(time) do
-    time
-    |> DateTime.from_iso8601()
-    |> elem(1)
-    |> Time.diff(DateTime.utc_now(), :second)
-  end
-
-  defp get_eta_in_minutes(time) do
-    seconds = get_eta_in_seconds(time)
-    ceil(seconds / 60)
   end
 
   def render(assigns) do

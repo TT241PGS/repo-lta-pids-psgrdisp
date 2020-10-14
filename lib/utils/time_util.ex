@@ -72,4 +72,64 @@ defmodule Display.Utils.TimeUtil do
       _ -> true
     end
   end
+
+  def format_time_to_eta_mins(nil), do: ""
+
+  def format_time_to_eta_mins(time) do
+    eta = get_eta_in_seconds(time)
+
+    cond do
+      eta < 0 ->
+        "Arr*"
+
+      eta >= 0 and eta <= 20 ->
+        "Arr"
+
+      eta >= 20 and eta <= 60 ->
+        "1 min"
+
+      eta >= 3600 ->
+        "> 60 min"
+
+      true ->
+        "#{ceil(eta / 60)} min"
+    end
+  end
+
+  def format_min_to_eta_mins(nil), do: nil
+
+  def format_min_to_eta_mins(eta) do
+    cond do
+      eta < 0 ->
+        "Arr*"
+
+      eta == 0 ->
+        "Arr"
+
+      eta >= 1 and eta <= 60 ->
+        "#{eta} min"
+
+      eta > 60 ->
+        "> 60 min"
+
+      true ->
+        "#{ceil(eta / 60)} min"
+    end
+  end
+
+  def get_eta_in_seconds(nil), do: nil
+
+  def get_eta_in_seconds(time) do
+    time
+    |> DateTime.from_iso8601()
+    |> elem(1)
+    |> Time.diff(DateTime.utc_now(), :second)
+  end
+
+  def get_eta_in_minutes(nil), do: nil
+
+  def get_eta_in_minutes(time) do
+    seconds = get_eta_in_seconds(time)
+    ceil(seconds / 60)
+  end
 end
