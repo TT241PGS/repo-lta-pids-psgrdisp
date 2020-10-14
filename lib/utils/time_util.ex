@@ -34,6 +34,10 @@ defmodule Display.Utils.TimeUtil do
     |> Timex.format_duration(:humanized)
   end
 
+  def get_seconds_past_today do
+    get_time_now() |> Timex.diff(get_beginning_of_day, :seconds)
+  end
+
   def get_weekday_name(nil), do: nil
 
   def get_weekday_name(date) do

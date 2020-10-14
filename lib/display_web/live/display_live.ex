@@ -52,41 +52,9 @@ defmodule DisplayWeb.DisplayLive do
 
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
-        incoming_buses =
-          cached_predictions
-          |> Enum.reduce([], &DisplayLiveUtil.incoming_bus_reducer(&1, &2))
-          |> Enum.filter(&(&1["time"] > -1))
-          |> Enum.sort_by(&{&1["time"], String.to_integer(&1["service_no"])})
-          |> Enum.take(5)
-          |> Enum.map(fn service ->
-            update_in(service, ["time"], &TimeUtil.format_min_to_eta_mins(&1))
-          end)
+        incoming_buses = DisplayLiveUtil.get_incoming_buses(cached_predictions)
 
-        cached_predictions =
-          cached_predictions
-          |> Flow.from_enumerable()
-          |> Flow.map(fn service ->
-            service
-            |> DisplayLiveUtil.update_estimated_arrival("NextBus")
-            |> DisplayLiveUtil.update_estimated_arrival("NextBus2")
-            |> DisplayLiveUtil.update_estimated_arrival("NextBus3")
-          end)
-          |> Enum.sort_by(fn p -> p["ServiceNo"] |> String.to_integer() end)
-
-        bus_stop_map =
-          cached_predictions
-          |> Enum.map(fn service ->
-            service
-            |> get_in(["NextBus", "DestinationCode"])
-          end)
-          |> Buses.get_bus_stop_map_by_nos()
-
-        cached_predictions =
-          cached_predictions
-          |> Enum.map(fn service ->
-            service
-            |> DisplayLiveUtil.update_destination(bus_stop_map)
-          end)
+        cached_predictions = DisplayLiveUtil.update_cached_predictions(cached_predictions)
 
         socket =
           socket
@@ -108,8 +76,23 @@ defmodule DisplayWeb.DisplayLive do
         Logger.info(":update_stops ended successfully (#{elapsed_time})")
         {:noreply, socket}
 
+      {:error, :not_found} ->
+        Logger.error(
+          "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
+        )
+
+        Process.send_after(self(), :update_stops, 30_000)
+        elapsed_time = TimeUtil.get_elapsed_time(start_time)
+        Logger.info(":update_stops failed (#{elapsed_time})")
+        {:noreply, socket}
+
       {:error, error} ->
-        Logger.error("Error fetching cached_predictions #{inspect(error)}")
+        Logger.error(
+          "Error fetching cached_predictions for bus stop: #{
+            inspect({bus_stop_no, bus_stop_name})
+          } -> #{inspect(error)}"
+        )
+
         Process.send_after(self(), :update_stops, 30_000)
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
         Logger.info(":update_stops failed (#{elapsed_time})")

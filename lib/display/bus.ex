@@ -3,6 +3,7 @@ defmodule Display.Buses do
 
   import Ecto.Query, warn: false
   alias Display.{Buses, Repo}
+  alias Display.Utils.TimeUtil
 
   def get_bus_stop_name_by_no(nil), do: nil
 
@@ -47,5 +48,21 @@ defmodule Display.Buses do
   def get_bus_stop_name_from_bus_stop_map(bus_stop_map, bus_stop_no) do
     Map.get(bus_stop_map, bus_stop_no)
     |> Map.get(:point_desc)
+  end
+
+  # TODO: Query with BaseVersion, OperatingDay
+  def get_bus_schedule_by_bus_stop(bus_stop_no) do
+    now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
+
+    from(bs in Buses.BusSchedule,
+      where: bs.point_no == ^bus_stop_no and bs.arriving_time > ^now_in_seconds_past_today,
+      select: %{
+        dpi_route_code: bs.dpi_route_code,
+        arriving_time: bs.arriving_time,
+        direction: bs.direction,
+        point_no: bs.point_no
+      }
+    )
+    |> Repo.all()
   end
 end
