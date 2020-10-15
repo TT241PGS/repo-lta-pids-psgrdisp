@@ -2,8 +2,10 @@ defmodule Display.Buses do
   @moduledoc false
 
   import Ecto.Query, warn: false
+  use Timex
   alias Display.{Buses, Repo}
   alias Display.Utils.TimeUtil
+  alias Ecto.Adapters.SQL
 
   def get_bus_stop_name_by_no(nil), do: nil
 
@@ -54,15 +56,18 @@ defmodule Display.Buses do
   def get_bus_schedule_by_bus_stop(bus_stop_no) do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
 
-    from(bs in Buses.BusSchedule,
-      where: bs.point_no == ^bus_stop_no and bs.arriving_time > ^now_in_seconds_past_today,
-      select: %{
-        dpi_route_code: bs.dpi_route_code,
-        arriving_time: bs.arriving_time,
-        direction: bs.direction,
-        point_no: bs.point_no
-      }
-    )
-    |> Repo.all()
+    query = "
+    select distinct bs_outer.dpi_route_code, bs_outer.direction, bs_top.arriving_time from bus_schedule bs_outer
+    join lateral (
+      select * from bus_schedule bs_inner
+      where bs_inner.dpi_route_code = bs_outer.dpi_route_code
+      and bs_inner.arriving_time > #{now_in_seconds_past_today}
+      order by bs_inner.arriving_time
+      limit 3
+    ) bs_top on true
+    where bs_outer.point_no = #{bus_stop_no}
+    order by bs_outer.dpi_route_code
+    "
+    SQL.query!(Repo, query, [])
   end
 end

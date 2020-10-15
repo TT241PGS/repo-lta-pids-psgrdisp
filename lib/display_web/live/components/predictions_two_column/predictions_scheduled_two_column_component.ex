@@ -1,4 +1,4 @@
-defmodule PredictionsTwoColumn do
+defmodule PredictionsScheduledTwoColumn do
   @moduledoc false
   use Surface.LiveComponent
 
@@ -25,23 +25,17 @@ defmodule PredictionsTwoColumn do
       <div class="bus-stop-predictions hidden">
         <div :for={{ stopPredictions <- @stopPredictionsSet }}>
           <div class="grid grid-rows-5 grid-flow-col gap-4rem mb-4rem">
-            <div class={{"flex", "w-1/2": length(stopPredictions) <= 5}} :for={{ service <- stopPredictions }}>
-              <div class="bus-info">{{service["ServiceNo"]}}</div>
+            <div class={{"flex", "w-1/2": length(stopPredictions) <= 5}} :for={{ prediction <- stopPredictions }}>
+              <div class="bus-info">{{prediction["ServiceNo"]}}</div>
               <div class="next-buses">
                 <div class="heading">
                   <span class="stops" style="display: none"> no of stops # <i class="ml-1rem fas fa-arrow-right"></i></span>
-                  <span class="stops">{{service["NextBus"]["DestinationCode"]}}</span>
+                  <span class="stops">dest #</span>
                 </div>
                 <div class="details">
-                  <div :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2", "NextBus3"] }}  class={{"next-bus", "mr-4rem": next_bus != "NextBus3", big: next_bus == "NextBus", small: next_bus == "NextBus2" or next_bus == "NextBus3"}}>
-                    <span class={{"indicator", "bg-red": service["NextBus"]["Load"] == "LSD", "bg-yellow-1": service["NextBus"]["Load"] == "SDA", "bg-green-1": service["NextBus"]["Load"] == "SEA"}}></span>
-                    <span class="label">{{service[next_bus]["EstimatedArrival"]}}</span>
-                    <span>
-                      <img src="/images/bus_no_wab.svg" :if={{ service[next_bus]["Feature"] == "" }}>
-                      <img src="/images/bus_sd.svg" :if={{ service[next_bus]["Type"] == "SD" }}>
-                      <img src="/images/bus_dd.svg" :if={{ service[next_bus]["Type"] == "DD" }}>
-                      <img src="/images/bus_bd.svg" :if={{ service[next_bus]["Type"] == "BD" }}>
-                    </span>
+                  <div :for={{ next_bus <- prediction["NextBuses"] }}  class={{"next-bus mr-4rem no-icon justify-center", big: next_bus["Order"] == 1, small: next_bus["Order"] > 1 }}>
+                    <span class="indicator bg-charcoal"></span>
+                    <span class="label mb-0 font-bold">{{next_bus["EstimatedArrival"]}}</span>
                   </div>
                 </div>
               </div>

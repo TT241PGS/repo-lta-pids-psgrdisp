@@ -19,9 +19,11 @@ defmodule DisplayWeb.DisplayLive do
         current_layout_index: nil,
         current_layout_panes: nil,
         is_multi_layout: false,
-        stop_predictions_set_1_column: [],
+        stop_predictions_realtime_set_1_column: [],
+        stop_predictions_scheduled_set_1_column: [],
         incoming_buses: [],
-        stop_predictions_set_2_column: [],
+        stop_predictions_realtime_set_2_column: [],
+        stop_predictions_scheduled_set_2_column: [],
         messages: []
       )
 
@@ -59,11 +61,11 @@ defmodule DisplayWeb.DisplayLive do
         socket =
           socket
           |> assign(
-            :stop_predictions_set_1_column,
+            :stop_predictions_realtime_set_1_column,
             DisplayLiveUtil.create_stop_predictions_set_1_column(cached_predictions)
           )
           |> assign(
-            :stop_predictions_set_2_column,
+            :stop_predictions_realtime_set_2_column,
             DisplayLiveUtil.create_stop_predictions_set_2_column(cached_predictions)
           )
           |> assign(
@@ -80,6 +82,27 @@ defmodule DisplayWeb.DisplayLive do
         Logger.error(
           "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
         )
+
+        # TODO remove hardcoded bus stop no
+        scheduled_predictions = Display.Scheduled.get_predictions(1019)
+
+        # TODO incoming buses
+
+        scheduled_predictions =
+          DisplayLiveUtil.update_scheduled_predictions(scheduled_predictions)
+
+        socket =
+          socket
+          |> assign(:stop_predictions_realtime_set_1_column, [])
+          |> assign(:stop_predictions_realtime_set_2_column, [])
+          |> assign(
+            :stop_predictions_scheduled_set_1_column,
+            DisplayLiveUtil.create_stop_predictions_set_1_column(scheduled_predictions)
+          )
+          |> assign(
+            :stop_predictions_scheduled_set_2_column,
+            DisplayLiveUtil.create_stop_predictions_set_2_column(scheduled_predictions)
+          )
 
         Process.send_after(self(), :update_stops, 30_000)
         elapsed_time = TimeUtil.get_elapsed_time(start_time)

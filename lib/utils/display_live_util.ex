@@ -71,6 +71,19 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
+  def update_scheduled_arrival(prediction) do
+    next_buses =
+      prediction["NextBuses"]
+      |> Enum.with_index()
+      |> Enum.map(fn {next_bus, index} ->
+        next_bus
+        |> update_in(["EstimatedArrival"], &TimeUtil.format_iso_date_to_hh_mm(&1))
+        |> Map.put("Order", index + 1)
+      end)
+
+    Map.replace!(prediction, "NextBuses", next_buses)
+  end
+
   def update_destination(service, bus_stop_map) do
     case Access.get(service, "NextBus") do
       nil ->
@@ -111,6 +124,32 @@ defmodule Display.Utils.DisplayLiveUtil do
         service
         |> update_destination(bus_stop_map)
       end)
+  end
+
+  def update_scheduled_predictions(scheduled_predictions) do
+    scheduled_predictions =
+      scheduled_predictions
+      |> Flow.from_enumerable()
+      |> Flow.map(fn prediction ->
+        update_scheduled_arrival(prediction)
+      end)
+
+    # |> Enum.sort_by(fn p -> p["ServiceNo"] |> String.to_integer() end)
+
+    # bus_stop_map =
+    #   scheduled_predictions
+    #   |> Enum.map(fn service ->
+    #     service
+    #     |> get_in(["NextBus", "DestinationCode"])
+    #   end)
+    #   |> Buses.get_bus_stop_map_by_nos()
+
+    # scheduled_predictions =
+    #   scheduled_predictions
+    #   |> Enum.map(fn service ->
+    #     service
+    #     |> update_destination(bus_stop_map)
+    #   end)
   end
 
   def get_next_index(layouts, current_index) do

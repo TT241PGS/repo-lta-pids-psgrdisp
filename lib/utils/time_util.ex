@@ -25,6 +25,18 @@ defmodule Display.Utils.TimeUtil do
     |> Timex.format!("%H:%M", :strftime)
   end
 
+  def get_iso_date_from_seconds(seconds) do
+    get_beginning_of_day()
+    |> Timex.add(Timex.Duration.from_seconds(seconds))
+    |> Timex.format!("%FT%T%:z", :strftime)
+  end
+
+  def format_iso_date_to_hh_mm(iso_date) do
+    iso_date
+    |> Timex.parse!("{ISO:Extended}")
+    |> Timex.format!("%H:%M", :strftime)
+  end
+
   def get_elapsed_time(nil), do: nil
 
   def get_elapsed_time(start_time) do
