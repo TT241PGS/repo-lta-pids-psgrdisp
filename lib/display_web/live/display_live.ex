@@ -86,7 +86,8 @@ defmodule DisplayWeb.DisplayLive do
         # TODO remove hardcoded bus stop no
         scheduled_predictions = Display.Scheduled.get_predictions(1019)
 
-        # TODO incoming buses
+        # TODO remove hardcoded bus stop no
+        incoming_buses = Display.Scheduled.get_incoming_buses(1019)
 
         scheduled_predictions =
           DisplayLiveUtil.update_scheduled_predictions(scheduled_predictions)
@@ -102,6 +103,10 @@ defmodule DisplayWeb.DisplayLive do
           |> assign(
             :stop_predictions_scheduled_set_2_column,
             DisplayLiveUtil.create_stop_predictions_set_2_column(scheduled_predictions)
+          )
+          |> assign(
+            :incoming_buses,
+            incoming_buses
           )
 
         Process.send_after(self(), :update_stops, 30_000)

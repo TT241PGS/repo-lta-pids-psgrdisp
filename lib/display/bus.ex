@@ -70,4 +70,24 @@ defmodule Display.Buses do
     "
     SQL.query!(Repo, query, [])
   end
+
+  # TODO: Query with BaseVersion, OperatingDay
+  def get_incoming_bus_schedule_by_bus_stop(bus_stop_no) do
+    now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
+
+    query = "
+    select distinct bs_outer.dpi_route_code, bs_top.arriving_time from bus_schedule bs_outer
+    join lateral (
+        select * from bus_schedule bs_inner
+        where bs_inner.dpi_route_code = bs_outer.dpi_route_code
+        and bs_inner.arriving_time > #{now_in_seconds_past_today}
+        order by bs_inner.arriving_time
+        limit 1
+    ) bs_top on true
+    where bs_outer.point_no = #{bus_stop_no}
+    order by bs_outer.dpi_route_code
+    limit 5;
+    "
+    SQL.query!(Repo, query, [])
+  end
 end

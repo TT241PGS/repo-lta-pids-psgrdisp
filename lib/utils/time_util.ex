@@ -37,6 +37,12 @@ defmodule Display.Utils.TimeUtil do
     |> Timex.format!("%H:%M", :strftime)
   end
 
+  def get_eta_from_seconds_past_today(seconds) do
+    seconds
+    |> get_iso_date_from_seconds()
+    |> format_time_to_eta_mins
+  end
+
   def get_elapsed_time(nil), do: nil
 
   def get_elapsed_time(start_time) do

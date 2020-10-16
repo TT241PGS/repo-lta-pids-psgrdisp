@@ -43,4 +43,17 @@ defmodule Display.Scheduled do
       }
     end)
   end
+
+  def get_incoming_buses(bus_stop_no) do
+    %Postgrex.Result{rows: rows} = Buses.get_incoming_bus_schedule_by_bus_stop(bus_stop_no)
+
+    rows
+    |> Enum.map(fn [dpi_route_code, arriving_time] ->
+      %{"service_no" => dpi_route_code, "time" => arriving_time}
+    end)
+    |> Enum.sort_by(&{&1["time"], String.to_integer(&1["service_no"])})
+    |> Enum.map(fn incoming_bus ->
+      update_in(incoming_bus, ["time"], &Utils.TimeUtil.get_eta_from_seconds_past_today(&1))
+    end)
+  end
 end
