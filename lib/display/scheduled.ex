@@ -17,11 +17,11 @@ defmodule Display.Scheduled do
     %{
       "Direction" => 2,
       "NextBuses" => [
-        %{"EstimatedArrival" => "2020-10-19T20:52:36+08:00"},
-        %{"EstimatedArrival" => "2020-10-19T21:01:36+08:00"},
-        %{"EstimatedArrival" => "2020-10-19T21:09:36+08:00"}
+        %{"EstimatedArrival" => "2020-10-19T22:12:00+08:00", "isLastBus" => false},
+        %{"EstimatedArrival" => "2020-10-19T22:27:34+08:00", "isLastBus" => false},
+        %{"EstimatedArrival" => "2020-10-19T22:43:34+08:00", "isLastBus" => true}
       ],
-      "ServiceNo" => "30",
+      "ServiceNo" => "42",
       "Status" => "operating_now"
     }
   ]
@@ -42,26 +42,28 @@ defmodule Display.Scheduled do
     |> merge_active_inactive_services()
   end
 
-  # Returns map of {service_no, direction} with next 3 buses and operational status
-  # Example:
-  # %{
-  #   {"30", 2} => %{
-  #     "NextBuses" => [
-  #       %{"EstimatedArrival" => "2020-10-19T14:50:36+08:00"},
-  #       %{"EstimatedArrival" => "2020-10-19T14:58:36+08:00"},
-  #       %{"EstimatedArrival" => "2020-10-19T15:07:36+08:00"}
-  #     ],
-  #     "Status" => "operating_now"
-  #   },
-  #   {"42", 2} => %{
-  #     "NextBuses" => [
-  #       %{"EstimatedArrival" => "2020-10-19T14:50:34+08:00"},
-  #       %{"EstimatedArrival" => "2020-10-19T15:02:34+08:00"},
-  #       %{"EstimatedArrival" => "2020-10-19T15:15:34+08:00"}
-  #     ],
-  #     "Status" => "operating_now"
-  #   }
-  # }
+  @doc """
+  Returns map of {service_no, direction} with next 3 buses and operational status
+  Example:
+  %{
+    {"30", 2} => %{
+      "NextBuses" => [
+        %{"EstimatedArrival" => "2020-10-19T14:50:36+08:00"},
+        %{"EstimatedArrival" => "2020-10-19T14:58:36+08:00"},
+        %{"EstimatedArrival" => "2020-10-19T15:07:36+08:00"}
+      ],
+      "Status" => "operating_now"
+    },
+    {"42", 2} => %{
+      "NextBuses" => [
+        %{"EstimatedArrival" => "2020-10-19T14:50:34+08:00"},
+        %{"EstimatedArrival" => "2020-10-19T15:02:34+08:00"},
+        %{"EstimatedArrival" => "2020-10-19T15:15:34+08:00"}
+      ],
+      "Status" => "operating_now"
+    }
+  }
+  """
   defp get_active_services_map(bus_stop_no) do
     %Postgrex.Result{rows: rows} = Buses.get_bus_schedule_by_bus_stop(bus_stop_no)
 
@@ -131,13 +133,15 @@ defmodule Display.Scheduled do
     end)
   end
 
-  # Get immediate next bus of each service
-  # Returns a list of services with formatted eta
-  # Example:
-  # [
-  #   %{"service_no" => "42", "time" => "3 min"},
-  #   %{"service_no" => "30", "time" => "7 min"}
-  # ]
+  @doc """
+  Get immediate next bus of each service
+  Returns a list of services with formatted eta
+  Example:
+  [
+    %{"service_no" => "42", "time" => "Arr"},
+    %{"service_no" => "30", "time" => "7 min"}
+  ]
+  """
   def get_incoming_buses(bus_stop_no) do
     %Postgrex.Result{rows: rows} = Buses.get_incoming_bus_schedule_by_bus_stop(bus_stop_no)
 
@@ -151,19 +155,21 @@ defmodule Display.Scheduled do
     end)
   end
 
-  # Get timing of last bus of each service in a bus_stop
-  # Returns a map with key {service_no, direction}
-  # Example:
-  # %{
-  #   {"17", 1} => %{
-  #     "time_iso" => "2020-10-19T06:12:13+08:00",
-  #     "time_seconds" => 22333
-  #   },
-  #   {"30", 2} => %{
-  #     "time_iso" => "2020-10-20T00:01:04+08:00",
-  #     "time_seconds" => 86464
-  #   }
-  # }
+  @doc """
+  Get timing of last bus of each service in a bus_stop
+  Returns a map with key {service_no, direction}
+  Example:
+  %{
+    {"17", 1} => %{
+      "time_iso" => "2020-10-19T06:12:13+08:00",
+      "time_seconds" => 22333
+    },
+    {"30", 2} => %{
+      "time_iso" => "2020-10-20T00:01:04+08:00",
+      "time_seconds" => 86464
+    }
+  }
+  """
   def get_last_buses_map(bus_stop_no) do
     %Postgrex.Result{rows: rows} = Buses.get_last_bus_by_service_by_bus_stop(bus_stop_no)
 
@@ -180,9 +186,11 @@ defmodule Display.Scheduled do
     end)
   end
 
-  # Get services in a bus_stop for a particular base_version
-  # Returns a list of {service_no, direction} tuple
-  # Example: [{"17", 1}, {"30", 2}, {"31", 2}, {"42", 2}]
+  @doc """
+  Get services in a bus_stop for a particular base_version
+  Returns a list of {service_no, direction} tuple
+  Example: [{"17", 1}, {"30", 2}, {"31", 2}, {"42", 2}]
+  """
   def get_all_services(bus_stop_no) do
     %Postgrex.Result{rows: rows} = Buses.get_all_services_by_bus_stop(bus_stop_no)
     Enum.map(rows, &List.to_tuple(&1))
