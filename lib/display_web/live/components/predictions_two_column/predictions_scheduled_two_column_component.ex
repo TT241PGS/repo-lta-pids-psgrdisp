@@ -27,7 +27,9 @@ defmodule PredictionsScheduledTwoColumn do
           <div class="grid grid-rows-5 grid-flow-col gap-4rem mb-4rem">
             <div class={{"flex", "w-1/2": length(stopPredictions) <= 5}} :for={{ prediction <- stopPredictions }}>
               <div class="bus-info">{{prediction["ServiceNo"]}}</div>
-              <div class="next-buses">
+              <div class="bus-info-message" :if={{prediction["Status"] == "not_operating_today"}}>Service does not operate today.</div>
+              <div class="bus-info-message" :if={{prediction["Status"] == "last_trip_departed"}}>Last trip for the day has departed.</div>
+              <div class="next-buses" :if={{prediction["Status"] == "operating_now"}}>
                 <div class="heading">
                   <span class="stops" style="display: none"> no of stops # <i class="ml-1rem fas fa-arrow-right"></i></span>
                   <span class="stops">dest #</span>

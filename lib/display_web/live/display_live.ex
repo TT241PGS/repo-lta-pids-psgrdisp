@@ -83,11 +83,9 @@ defmodule DisplayWeb.DisplayLive do
           "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
         )
 
-        # TODO remove hardcoded bus stop no
-        scheduled_predictions = Display.Scheduled.get_predictions(1019)
+        scheduled_predictions = Display.Scheduled.get_predictions(bus_stop_no)
 
-        # TODO remove hardcoded bus stop no
-        incoming_buses = Display.Scheduled.get_incoming_buses(1019)
+        incoming_buses = Display.Scheduled.get_incoming_buses(bus_stop_no)
 
         scheduled_predictions =
           DisplayLiveUtil.update_scheduled_predictions(scheduled_predictions)

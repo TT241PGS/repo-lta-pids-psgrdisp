@@ -61,6 +61,7 @@ defmodule Display.Buses do
     join lateral (
       select * from bus_schedule bs_inner
       where bs_inner.dpi_route_code = bs_outer.dpi_route_code
+      and bs_inner.point_no = #{bus_stop_no}
       and bs_inner.arriving_time > #{now_in_seconds_past_today}
       order by bs_inner.arriving_time
       limit 3
@@ -80,6 +81,7 @@ defmodule Display.Buses do
     join lateral (
         select * from bus_schedule bs_inner
         where bs_inner.dpi_route_code = bs_outer.dpi_route_code
+        and bs_inner.point_no = #{bus_stop_no}
         and bs_inner.arriving_time > #{now_in_seconds_past_today}
         order by bs_inner.arriving_time
         limit 1
@@ -87,6 +89,33 @@ defmodule Display.Buses do
     where bs_outer.point_no = #{bus_stop_no}
     order by bs_outer.dpi_route_code
     limit 5;
+    "
+    SQL.query!(Repo, query, [])
+  end
+
+  # TODO: Query with BaseVersion, OperatingDay
+  def get_last_bus_by_service_by_bus_stop(bus_stop_no) do
+    query = "
+    select distinct bs_outer.dpi_route_code, bs_outer.direction, bs_top.arriving_time from bus_schedule bs_outer
+    join lateral (
+        select * from bus_schedule bs_inner
+        where bs_inner.dpi_route_code = bs_outer.dpi_route_code
+        and bs_inner.point_no = #{bus_stop_no}
+        order by bs_inner.arriving_time desc
+        limit 1
+    ) bs_top on true
+    where bs_outer.point_no = #{bus_stop_no}
+    order by bs_outer.dpi_route_code
+    limit 5;
+    "
+    SQL.query!(Repo, query, [])
+  end
+
+  # TODO: Query with BaseVersion
+  def get_all_services_by_bus_stop(bus_stop_no) do
+    query = "
+    select distinct dpi_route_code, direction from bus_schedule
+    where point_no = #{bus_stop_no}
     "
     SQL.query!(Repo, query, [])
   end
