@@ -104,17 +104,14 @@ defmodule Display.Utils.TimeUtil do
       eta < 0 ->
         "Arr*"
 
-      eta >= 0 and eta <= 20 ->
+      eta >= 0 and eta <= 59 ->
         "Arr"
-
-      eta >= 20 and eta <= 60 ->
-        "1 min"
 
       eta >= 3600 ->
         "> 60 min"
 
       true ->
-        "#{ceil(eta / 60)} min"
+        "#{floor(eta / 60)} min"
     end
   end
 
@@ -128,14 +125,11 @@ defmodule Display.Utils.TimeUtil do
       eta == 0 ->
         "Arr"
 
-      eta >= 1 and eta <= 60 ->
-        "#{eta} min"
-
       eta > 60 ->
         "> 60 min"
 
       true ->
-        "#{ceil(eta / 60)} min"
+        "#{eta} min"
     end
   end
 
@@ -152,6 +146,6 @@ defmodule Display.Utils.TimeUtil do
 
   def get_eta_in_minutes(time) do
     seconds = get_eta_in_seconds(time)
-    ceil(seconds / 60)
+    floor(seconds / 60)
   end
 end
