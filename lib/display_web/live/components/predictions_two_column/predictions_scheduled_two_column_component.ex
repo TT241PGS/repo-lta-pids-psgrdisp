@@ -35,7 +35,7 @@ defmodule PredictionsScheduledTwoColumn do
                   <span class="stops">dest #</span>
                 </div>
                 <div class="details">
-                  <div :for={{ next_bus <- prediction["NextBuses"] }}  class={{"next-bus mr-4rem no-icon justify-center", big: next_bus["Order"] == 1, small: next_bus["Order"] > 1 }}>
+                  <div :for={{ next_bus <- prediction["NextBuses"] }}  class={{"next-bus mr-4rem no-icon justify-center", big: next_bus["Order"] == 1, small: next_bus["Order"] > 1, highlighted: next_bus["isLastBus"] == true }}>
                     <span class="indicator bg-charcoal"></span>
                     <span class="label mb-0 font-bold">{{next_bus["EstimatedArrival"]}}</span>
                   </div>

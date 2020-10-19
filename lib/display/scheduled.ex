@@ -27,7 +27,6 @@ defmodule Display.Scheduled do
   ]
   """
   def get_predictions(bus_stop_no) do
-    # "operating_now", "not_operating_today", "operation_completed"
     [
       Task.async(fn -> get_active_services_map(bus_stop_no) end),
       Task.async(fn -> get_last_buses_map(bus_stop_no) end),
@@ -120,11 +119,13 @@ defmodule Display.Scheduled do
 
         # operating_now
         true ->
+          next_buses = add_last_bus_flag(current_service, key, last_buses_map)
+
           %{
             "ServiceNo" => service_no,
             "Direction" => direction,
             "Status" => "operating_now",
-            "NextBuses" => current_service["NextBuses"]
+            "NextBuses" => next_buses
           }
       end
     end)
@@ -185,5 +186,25 @@ defmodule Display.Scheduled do
   def get_all_services(bus_stop_no) do
     %Postgrex.Result{rows: rows} = Buses.get_all_services_by_bus_stop(bus_stop_no)
     Enum.map(rows, &List.to_tuple(&1))
+  end
+
+  defp add_last_bus_flag(service, key, last_buses_map) do
+    last_index = length(service["NextBuses"]) - 1
+
+    next_buses =
+      service["NextBuses"]
+      |> Enum.with_index()
+      |> Enum.map(fn {next_bus, index} ->
+        timing_iso = next_bus["EstimatedArrival"]
+        last_bus_timing_iso = get_in(last_buses_map, [key, "time_iso"])
+
+        case timing_iso == last_bus_timing_iso and index == last_index do
+          true ->
+            Map.put(next_bus, "isLastBus", true)
+
+          _ ->
+            Map.put(next_bus, "isLastBus", false)
+        end
+      end)
   end
 end
