@@ -15,7 +15,7 @@ defmodule LandscapeOnePaneLayout do
           <DateTimeHorizontal />
         </div>
       </div>
-      <PredictionsTwoColumn stopPredictionsSet={{@prop.stop_predictions_set_2_column}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}}/>
+      <PredictionsTwoColumn stopPredictionsRealtimeSet={{@prop.stop_predictions_realtime_set_2_column}} stopPredictionsScheduledSet={{@prop.stop_predictions_scheduled_set_2_column}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}}/>
     </div>
     """
   end
