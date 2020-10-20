@@ -3,10 +3,14 @@ defmodule DisplayWeb.DisplayLive do
   use Phoenix.LiveView
   import Surface
   require Logger
-  alias Display.{Buses, Messages, RealTime, Templates}
+  alias Display.{Buses, Messages}
   alias Display.Utils.{DisplayLiveUtil, TimeUtil}
 
-  def mount(%{"panel_id" => panel_id}, _session, socket) do
+  def mount(
+        %{"panel_id" => panel_id} = assigns,
+        _session,
+        socket
+      ) do
     start_time = Timex.now()
     Logger.info("Mount started")
 
@@ -24,7 +28,8 @@ defmodule DisplayWeb.DisplayLive do
         incoming_buses: [],
         stop_predictions_realtime_set_2_column: [],
         stop_predictions_scheduled_set_2_column: [],
-        messages: []
+        messages: [],
+        skip_realtime: assigns["skip_realtime"] || false
       )
 
     if connected?(socket), do: DisplayWeb.Endpoint.subscribe("poller")
@@ -52,77 +57,17 @@ defmodule DisplayWeb.DisplayLive do
       |> assign(:bus_stop_no, bus_stop_no)
       |> assign(:bus_stop_name, bus_stop_name)
 
-    case RealTime.get_predictions_cached(bus_stop_no) do
-      {:ok, cached_predictions} ->
-        incoming_buses = DisplayLiveUtil.get_incoming_buses(cached_predictions)
+    case socket.assigns.skip_realtime do
+      "true" ->
+        DisplayLiveUtil.show_scheduled_predictions(socket, bus_stop_no, start_time)
 
-        cached_predictions = DisplayLiveUtil.update_cached_predictions(cached_predictions)
-
-        socket =
-          socket
-          |> assign(
-            :stop_predictions_realtime_set_1_column,
-            DisplayLiveUtil.create_stop_predictions_set_1_column(cached_predictions)
-          )
-          |> assign(
-            :stop_predictions_realtime_set_2_column,
-            DisplayLiveUtil.create_stop_predictions_set_2_column(cached_predictions)
-          )
-          |> assign(
-            :incoming_buses,
-            incoming_buses
-          )
-
-        Process.send_after(self(), :update_stops, 30_000)
-        elapsed_time = TimeUtil.get_elapsed_time(start_time)
-        Logger.info(":update_stops ended successfully (#{elapsed_time})")
-        {:noreply, socket}
-
-      {:error, :not_found} ->
-        Logger.error(
-          "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
+      _ ->
+        DisplayLiveUtil.get_realtime_or_scheduled_predictions(
+          socket,
+          bus_stop_no,
+          bus_stop_name,
+          start_time
         )
-
-        scheduled_predictions = Display.Scheduled.get_predictions(bus_stop_no)
-
-        incoming_buses = Display.Scheduled.get_incoming_buses(bus_stop_no)
-
-        scheduled_predictions =
-          DisplayLiveUtil.update_scheduled_predictions(scheduled_predictions)
-
-        socket =
-          socket
-          |> assign(:stop_predictions_realtime_set_1_column, [])
-          |> assign(:stop_predictions_realtime_set_2_column, [])
-          |> assign(
-            :stop_predictions_scheduled_set_1_column,
-            DisplayLiveUtil.create_stop_predictions_set_1_column(scheduled_predictions)
-          )
-          |> assign(
-            :stop_predictions_scheduled_set_2_column,
-            DisplayLiveUtil.create_stop_predictions_set_2_column(scheduled_predictions)
-          )
-          |> assign(
-            :incoming_buses,
-            incoming_buses
-          )
-
-        Process.send_after(self(), :update_stops, 30_000)
-        elapsed_time = TimeUtil.get_elapsed_time(start_time)
-        Logger.info(":update_stops failed (#{elapsed_time})")
-        {:noreply, socket}
-
-      {:error, error} ->
-        Logger.error(
-          "Error fetching cached_predictions for bus stop: #{
-            inspect({bus_stop_no, bus_stop_name})
-          } -> #{inspect(error)}"
-        )
-
-        Process.send_after(self(), :update_stops, 30_000)
-        elapsed_time = TimeUtil.get_elapsed_time(start_time)
-        Logger.info(":update_stops failed (#{elapsed_time})")
-        {:noreply, socket}
     end
   end
 

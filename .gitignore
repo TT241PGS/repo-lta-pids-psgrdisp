@@ -35,6 +35,8 @@ npm-debug.log
 
 priv/repo/.DS_Store
 
+.elixir_ls
+
 .env.dev.sh
 .env.nightly.sh
 .env.test.sh

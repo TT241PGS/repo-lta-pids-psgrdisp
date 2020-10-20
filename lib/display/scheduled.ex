@@ -149,7 +149,7 @@ defmodule Display.Scheduled do
     |> Enum.map(fn [dpi_route_code, arriving_time] ->
       %{"service_no" => dpi_route_code, "time" => arriving_time}
     end)
-    |> Enum.sort_by(&{&1["time"], String.to_integer(&1["service_no"])})
+    |> Enum.sort_by(&{&1["time"], &1["service_no"]})
     |> Enum.map(fn incoming_bus ->
       update_in(incoming_bus, ["time"], &TimeUtil.get_eta_from_seconds_past_today(&1))
     end)
