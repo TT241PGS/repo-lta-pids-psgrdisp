@@ -1,7 +1,9 @@
 defmodule Display.Utils.DisplayLiveUtil do
   @moduledoc false
 
-  alias Display.{Buses, Templates}
+  require Logger
+
+  alias Display.{Buses, RealTime, Templates}
   alias Display.Utils.TimeUtil
 
   def incoming_bus_reducer(service, acc) do
@@ -24,11 +26,89 @@ defmodule Display.Utils.DisplayLiveUtil do
     cached_predictions
     |> Enum.reduce([], &incoming_bus_reducer(&1, &2))
     |> Enum.filter(&(&1["time"] > -1))
-    |> Enum.sort_by(&{&1["time"], String.to_integer(&1["service_no"])})
+    |> Enum.sort_by(&{&1["time"], &1["service_no"]})
     |> Enum.take(5)
     |> Enum.map(fn service ->
       update_in(service, ["time"], &TimeUtil.format_min_to_eta_mins(&1))
     end)
+  end
+
+  def get_realtime_or_scheduled_predictions(socket, bus_stop_no, bus_stop_name, start_time) do
+    case RealTime.get_predictions_cached(bus_stop_no) do
+      {:ok, cached_predictions} ->
+        incoming_buses = get_incoming_buses(cached_predictions)
+
+        cached_predictions = update_cached_predictions(cached_predictions)
+
+        socket =
+          socket
+          |> Phoenix.LiveView.assign(
+            :stop_predictions_realtime_set_1_column,
+            create_stop_predictions_set_1_column(cached_predictions)
+          )
+          |> Phoenix.LiveView.assign(
+            :stop_predictions_realtime_set_2_column,
+            create_stop_predictions_set_2_column(cached_predictions)
+          )
+          |> Phoenix.LiveView.assign(
+            :incoming_buses,
+            incoming_buses
+          )
+
+        Process.send_after(self(), :update_stops, 30_000)
+        elapsed_time = TimeUtil.get_elapsed_time(start_time)
+        Logger.info(":update_stops ended successfully (#{elapsed_time})")
+        {:noreply, socket}
+
+      {:error, :not_found} ->
+        Logger.error(
+          "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
+        )
+
+        show_scheduled_predictions(socket, bus_stop_no, start_time)
+
+      {:error, error} ->
+        Logger.error(
+          "Error fetching cached_predictions for bus stop: #{
+            inspect({bus_stop_no, bus_stop_name})
+          } -> #{inspect(error)}"
+        )
+
+        Process.send_after(self(), :update_stops, 30_000)
+        elapsed_time = TimeUtil.get_elapsed_time(start_time)
+        Logger.info(":update_stops failed (#{elapsed_time})")
+        {:noreply, socket}
+    end
+  end
+
+  def show_scheduled_predictions(socket, bus_stop_no, start_time) do
+    scheduled_predictions = Display.Scheduled.get_predictions(bus_stop_no)
+
+    incoming_buses = Display.Scheduled.get_incoming_buses(bus_stop_no)
+
+    scheduled_predictions = update_scheduled_predictions(scheduled_predictions)
+
+    socket =
+      socket
+      |> Phoenix.LiveView.assign(:stop_predictions_realtime_set_1_column, [])
+      |> Phoenix.LiveView.assign(:stop_predictions_realtime_set_2_column, [])
+      |> Phoenix.LiveView.assign(
+        :stop_predictions_scheduled_set_1_column,
+        create_stop_predictions_set_1_column(scheduled_predictions)
+      )
+      |> Phoenix.LiveView.assign(
+        :stop_predictions_scheduled_set_2_column,
+        create_stop_predictions_set_2_column(scheduled_predictions)
+      )
+      |> Phoenix.LiveView.assign(
+        :incoming_buses,
+        incoming_buses
+      )
+
+    Process.send_after(self(), :update_stops, 30_000)
+    elapsed_time = TimeUtil.get_elapsed_time(start_time)
+    Logger.info(":update_stops failed (#{elapsed_time})")
+    {:noreply, socket}
   end
 
   def get_template_details_from_cms(panel_id) do
@@ -108,7 +188,7 @@ defmodule Display.Utils.DisplayLiveUtil do
         |> update_estimated_arrival("NextBus2")
         |> update_estimated_arrival("NextBus3")
       end)
-      |> Enum.sort_by(fn p -> p["ServiceNo"] |> String.to_integer() end)
+      |> Enum.sort_by(fn p -> p["ServiceNo"] end)
 
     bus_stop_map =
       cached_predictions
@@ -118,38 +198,19 @@ defmodule Display.Utils.DisplayLiveUtil do
       end)
       |> Buses.get_bus_stop_map_by_nos()
 
-    cached_predictions =
-      cached_predictions
-      |> Enum.map(fn service ->
-        service
-        |> update_destination(bus_stop_map)
-      end)
+    cached_predictions
+    |> Enum.map(fn service ->
+      service
+      |> update_destination(bus_stop_map)
+    end)
   end
 
   def update_scheduled_predictions(scheduled_predictions) do
-    scheduled_predictions =
-      scheduled_predictions
-      |> Flow.from_enumerable()
-      |> Flow.map(fn prediction ->
-        update_scheduled_arrival(prediction)
-      end)
-
-    # |> Enum.sort_by(fn p -> p["ServiceNo"] |> String.to_integer() end)
-
-    # bus_stop_map =
-    #   scheduled_predictions
-    #   |> Enum.map(fn service ->
-    #     service
-    #     |> get_in(["NextBus", "DestinationCode"])
-    #   end)
-    #   |> Buses.get_bus_stop_map_by_nos()
-
-    # scheduled_predictions =
-    #   scheduled_predictions
-    #   |> Enum.map(fn service ->
-    #     service
-    #     |> update_destination(bus_stop_map)
-    #   end)
+    scheduled_predictions
+    |> Flow.from_enumerable()
+    |> Flow.map(fn prediction ->
+      update_scheduled_arrival(prediction)
+    end)
   end
 
   def get_next_index(layouts, current_index) do
