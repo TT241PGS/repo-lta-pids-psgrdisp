@@ -2,13 +2,38 @@ defmodule Display.Utils.TimeUtil do
   @moduledoc false
 
   use Timex
+  require Logger
 
   def get_timezone do
     Timezone.get("Asia/Singapore")
   end
 
+  defp get_test_date_time do
+    callers = Process.get(:"$callers")
+    caller = if callers == nil, do: [], else: List.last(callers)
+
+    case Cachex.get(:display, caller) do
+      {:ok, nil} ->
+        {:error, :not_found}
+
+      {:ok, date_time} ->
+        date_time = date_time <> "+08:00"
+        DateTime.from_iso8601(date_time)
+
+      _ ->
+        {:error, :not_found}
+    end
+  end
+
   def get_time_now do
-    Timezone.convert(Timex.now(), get_timezone())
+    case get_test_date_time() do
+      {:ok, now, _} ->
+        now
+        |> Timezone.convert(get_timezone())
+
+      _ ->
+        Timezone.convert(Timex.now(), get_timezone())
+    end
   end
 
   def get_beginning_of_day do
@@ -46,7 +71,7 @@ defmodule Display.Utils.TimeUtil do
   def get_elapsed_time(nil), do: nil
 
   def get_elapsed_time(start_time) do
-    Timex.now()
+    get_time_now()
     |> Timex.diff(start_time)
     |> Timex.Duration.from_microseconds()
     |> Timex.format_duration(:humanized)

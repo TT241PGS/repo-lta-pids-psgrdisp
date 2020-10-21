@@ -32,6 +32,11 @@ defmodule DisplayWeb.DisplayLive do
         skip_realtime: assigns["skip_realtime"] || false
       )
 
+    case Process.get(:"$callers") do
+      nil -> ""
+      callers -> Cachex.put(:display, List.last(callers), assigns["scheduled_date_time"])
+    end
+
     if connected?(socket), do: DisplayWeb.Endpoint.subscribe("poller")
 
     Process.send_after(self(), :update_stops, 0)
