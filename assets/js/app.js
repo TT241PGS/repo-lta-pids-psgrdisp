@@ -107,6 +107,7 @@ function slideInBusStopPredictions() {
       (nextSlides && currentPredictionsSlides !== nextSlides)
     ) {
       nextSlides.classList.remove("hidden");
+      nextSlides.classList.add("fade-in");
       predictionsSlider = tns({
         container: ".bus-stop-predictions",
         controls: false,
@@ -137,7 +138,7 @@ function slideInLayouts() {
 onDocReady(refreshDateTime);
 
 // Register sliders
-onDocReady(slideInMessages);
+// onDocReady(slideInMessages);
 onDocReady(slideInBusStopPredictions);
 onDocReady(slideInLayouts);
 

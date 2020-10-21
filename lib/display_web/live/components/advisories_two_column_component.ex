@@ -22,6 +22,7 @@ defmodule AdvisoriesTwoColumn do
         </div>
       </div>
       <div class="advisory-content">
+        <marquee scrollamount="20">{{Enum.join(@messages, " * ")}}</marquee>
         <ul class="message-slides hidden">
           <li class="message-slide" :for={{ message <- @messages }}>{{message}}</li>
         </ul>
