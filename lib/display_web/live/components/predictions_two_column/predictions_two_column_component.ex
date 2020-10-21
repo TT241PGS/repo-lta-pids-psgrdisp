@@ -7,8 +7,10 @@ defmodule PredictionsTwoColumn do
 
   def render(assigns) do
     ~H"""
-    <PredictionsRealtimeTwoColumn :if={{ length(@stopPredictionsRealtimeSet) > 0 }} stopPredictionsSet={{@stopPredictionsRealtimeSet}}/>
-    <PredictionsScheduledTwoColumn :if={{ length(@stopPredictionsRealtimeSet) <= 0 }} stopPredictionsSet={{@stopPredictionsScheduledSet}}/>
+    <div class="predictions-wrapper">
+      <PredictionsRealtimeTwoColumn :if={{ length(@stopPredictionsRealtimeSet) > 0 }} stopPredictionsSet={{@stopPredictionsRealtimeSet}}/>
+      <PredictionsScheduledTwoColumn :if={{ length(@stopPredictionsRealtimeSet) <= 0 }} stopPredictionsSet={{@stopPredictionsScheduledSet}}/>
+    </div>
     """
   end
 end

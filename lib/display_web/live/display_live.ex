@@ -19,6 +19,7 @@ defmodule DisplayWeb.DisplayLive do
         bus_stop_no: nil,
         bus_stop_name: "Bus stop name #",
         panel_id: panel_id,
+        previous_layout_value: nil,
         current_layout_value: nil,
         current_layout_index: nil,
         current_layout_panes: nil,
@@ -107,7 +108,8 @@ defmodule DisplayWeb.DisplayLive do
         next_layout = Enum.at(layouts, 0)
 
         socket =
-          assign(socket, :current_layout_value, Map.get(next_layout, "value"))
+          assign(socket, :previous_layout_value, socket.assigns.current_layout_value)
+          |> assign(:current_layout_value, Map.get(next_layout, "value"))
           |> assign(:current_layout_index, 0)
           |> assign(:current_layout_panes, Map.get(next_layout, "panes"))
 
@@ -127,7 +129,8 @@ defmodule DisplayWeb.DisplayLive do
         next_layout = Enum.at(layouts, next_index)
 
         socket =
-          assign(socket, :current_layout_value, Map.get(next_layout, "value"))
+          assign(socket, :previous_layout_value, socket.assigns.current_layout_value)
+          |> assign(:current_layout_value, Map.get(next_layout, "value"))
           |> assign(:current_layout_index, next_index)
           |> assign(:current_layout_panes, Map.get(next_layout, "panes"))
 
@@ -161,38 +164,40 @@ defmodule DisplayWeb.DisplayLive do
 
     is_multi_layout = assigns.is_multi_layout
 
+    is_layout_changed = assigns.current_layout_value != assigns.previous_layout_value
+
     case assigns.current_layout_value do
       "landscape_one_pane" ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
+        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
           <LandscapeOnePaneLayout prop={{assigns}}/>
         </div>
         """
 
       "landscape_two_pane_b" ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
+        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
           <LandscapeTwoPaneBLayout prop={{assigns}}/>
         </div>
         """
 
       "landscape_three_pane_a" ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
+        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
           <LandscapeThreePaneALayout prop={{assigns}}/>
         </div>
         """
 
       nil ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
+        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
         <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
         </div>
         """
 
       unknown_layout ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme} hide", "multi-layout": is_multi_layout == true}}>
+        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
         <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
         </div>
         """
