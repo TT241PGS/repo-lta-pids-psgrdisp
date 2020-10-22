@@ -139,7 +139,9 @@ defmodule DisplayWeb.DisplayLive do
     templates = DisplayLiveUtil.get_template_details_from_cms(socket.assigns.panel_id)
 
     # If messages are present, show template A
-    elected_template_index = if length(socket.assigns.messages) > 0, do: 0, else: 1
+    # If template B is not available, fallback to template A
+    elected_template_index =
+      if length(socket.assigns.messages) > 0 or length(templates) < 2, do: 0, else: 1
 
     layouts = templates |> Enum.at(elected_template_index) |> Map.get("layouts")
 
