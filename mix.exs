@@ -56,6 +56,7 @@ defmodule Display.MixProject do
       {:surface, "~> 0.1.0-alpha.2"},
       {:health_checkup, "~> 0.1.0"},
       {:flow, "~> 1.0"},
+      {:cachex, "~> 3.3"},
       {:husky, "~> 1.0", only: :dev, runtime: false},
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
       {:cortex, "~> 0.1", only: [:dev]}

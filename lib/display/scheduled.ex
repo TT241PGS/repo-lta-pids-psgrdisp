@@ -33,7 +33,7 @@ defmodule Display.Scheduled do
       Task.async(fn -> get_all_services(bus_stop_no) end)
     ]
     |> Task.yield_many(5000)
-    |> Enum.map(fn {t, res} ->
+    |> Enum.map(fn {_, res} ->
       case res do
         {:ok, data} -> data
         _ -> nil
@@ -85,7 +85,7 @@ defmodule Display.Scheduled do
 
       case Map.get(acc, key) do
         nil -> Map.put(acc, key, value)
-        item -> update_in(acc, [key, "NextBuses"], &(&1 ++ value["NextBuses"]))
+        _ -> update_in(acc, [key, "NextBuses"], &(&1 ++ value["NextBuses"]))
       end
     end)
   end

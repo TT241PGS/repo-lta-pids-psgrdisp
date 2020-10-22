@@ -15,6 +15,8 @@ defmodule Display.Application do
       DisplayWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Display.PubSub},
+      # Start cachex
+      {Cachex, name: :display},
       # Start the Endpoint (http/https)
       DisplayWeb.Endpoint
       # Start a worker by calling: Display.Worker.start_link(arg)
