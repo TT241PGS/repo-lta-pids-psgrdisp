@@ -40,15 +40,19 @@ defmodule DisplayWeb.DisplayLive do
 
     if connected?(socket), do: DisplayWeb.Endpoint.subscribe("poller")
 
-    Process.send_after(self(), :update_stops, 0)
-    Process.send_after(self(), :update_messages, 0)
-    Process.send_after(self(), :update_layout, 0)
+    Process.send_after(self(), :update_stops_repeatedly, 0)
+    Process.send_after(self(), :update_messages_repeatedly, 0)
+    Process.send_after(self(), :update_layout_repeatedly, 0)
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info("Mount ended (#{elapsed_time})")
     {:ok, socket}
   end
 
-  def handle_info(:update_stops, socket) do
+  @doc """
+    This is called after "arrival_predictions_updated" broadcast event
+    This does not schedule update stops to be called after certain period again
+  """
+  def handle_info(:update_stops_once, socket) do
     start_time = Timex.now()
     Logger.info(":update_stops started")
 
@@ -65,33 +69,73 @@ defmodule DisplayWeb.DisplayLive do
 
     case socket.assigns.skip_realtime do
       "true" ->
-        DisplayLiveUtil.show_scheduled_predictions(socket, bus_stop_no, start_time)
+        DisplayLiveUtil.show_scheduled_predictions(socket, bus_stop_no, start_time, false)
 
       _ ->
         DisplayLiveUtil.get_realtime_or_scheduled_predictions(
           socket,
           bus_stop_no,
           bus_stop_name,
-          start_time
+          start_time,
+          false
         )
     end
   end
 
-  def handle_info(:update_messages, socket) do
+  @doc """
+    This calls itself after certain period of time to update stops every n seconds
+  """
+  def handle_info(:update_stops_repeatedly, socket) do
+    start_time = Timex.now()
+    Logger.info(":update_stops started")
+
+    bus_stop_no =
+      Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
+      |> get_in([:bus_stop_no])
+
+    bus_stop_name = Buses.get_bus_stop_name_by_no(bus_stop_no)
+
+    socket =
+      socket
+      |> assign(:bus_stop_no, bus_stop_no)
+      |> assign(:bus_stop_name, bus_stop_name)
+
+    case socket.assigns.skip_realtime do
+      "true" ->
+        DisplayLiveUtil.show_scheduled_predictions(socket, bus_stop_no, start_time, true)
+
+      _ ->
+        DisplayLiveUtil.get_realtime_or_scheduled_predictions(
+          socket,
+          bus_stop_no,
+          bus_stop_name,
+          start_time,
+          true
+        )
+    end
+  end
+
+  @doc """
+    This calls itself after certain period of time to update messages/advisories every n seconds
+  """
+  def handle_info(:update_messages_repeatedly, socket) do
     start_time = Timex.now()
     Logger.info(":update_messages started")
     messages = Messages.get_messages(socket.assigns.panel_id)
     socket = assign(socket, :messages, messages)
-    Process.send_after(self(), :update_messages, 10_000)
+    Process.send_after(self(), :update_messages_repeatedly, 10_000)
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
-    Logger.info(":update_messages ended successfully (#{elapsed_time})")
+    Logger.info(":update_messages_repeatedly ended successfully (#{elapsed_time})")
     {:noreply, socket}
   end
 
-  def handle_info(:update_layout, socket) do
+  @doc """
+    This calls itself after certain period of time to update layout every n seconds
+  """
+  def handle_info(:update_layout_repeatedly, socket) do
     start_time = Timex.now()
 
-    Logger.info(":update_layout started")
+    Logger.info(":update_layout_repeatedly started")
     templates = DisplayLiveUtil.get_template_details_from_cms(socket.assigns.panel_id)
 
     # If messages are present, show template A
@@ -115,12 +159,12 @@ defmodule DisplayWeb.DisplayLive do
 
         Process.send_after(
           self(),
-          :update_layout,
+          :update_layout_repeatedly,
           Map.get(next_layout, "duration") * 1000
         )
 
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
-        Logger.info(":update_layout ended successfully (#{elapsed_time})")
+        Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
 
         {:noreply, socket}
 
@@ -136,12 +180,12 @@ defmodule DisplayWeb.DisplayLive do
 
         Process.send_after(
           self(),
-          :update_layout,
+          :update_layout_repeatedly,
           Map.get(next_layout, "duration") * 1000
         )
 
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
-        Logger.info(":update_layout ended successfully (#{elapsed_time})")
+        Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
 
         {:noreply, socket}
     end
@@ -155,7 +199,7 @@ defmodule DisplayWeb.DisplayLive do
         },
         socket
       ) do
-    Process.send_after(self(), :update_stops, 0)
+    Process.send_after(self(), :update_stops_once, 0)
     {:noreply, socket}
   end
 

@@ -33,7 +33,13 @@ defmodule Display.Utils.DisplayLiveUtil do
     end)
   end
 
-  def get_realtime_or_scheduled_predictions(socket, bus_stop_no, bus_stop_name, start_time) do
+  def get_realtime_or_scheduled_predictions(
+        socket,
+        bus_stop_no,
+        bus_stop_name,
+        start_time,
+        is_trigger_next
+      ) do
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
         incoming_buses = get_incoming_buses(cached_predictions)
@@ -55,7 +61,7 @@ defmodule Display.Utils.DisplayLiveUtil do
             incoming_buses
           )
 
-        Process.send_after(self(), :update_stops, 30_000)
+        trigger_next_update_stops(is_trigger_next)
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
         Logger.info(":update_stops ended successfully (#{elapsed_time})")
         {:noreply, socket}
@@ -65,7 +71,7 @@ defmodule Display.Utils.DisplayLiveUtil do
           "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
         )
 
-        show_scheduled_predictions(socket, bus_stop_no, start_time)
+        show_scheduled_predictions(socket, bus_stop_no, start_time, is_trigger_next)
 
       {:error, error} ->
         Logger.error(
@@ -74,14 +80,14 @@ defmodule Display.Utils.DisplayLiveUtil do
           } -> #{inspect(error)}"
         )
 
-        Process.send_after(self(), :update_stops, 30_000)
+        trigger_next_update_stops(is_trigger_next)
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
         Logger.info(":update_stops failed (#{elapsed_time})")
         {:noreply, socket}
     end
   end
 
-  def show_scheduled_predictions(socket, bus_stop_no, start_time) do
+  def show_scheduled_predictions(socket, bus_stop_no, start_time, is_trigger_next) do
     scheduled_predictions = Display.Scheduled.get_predictions(bus_stop_no)
 
     incoming_buses = Display.Scheduled.get_incoming_buses(bus_stop_no)
@@ -105,10 +111,16 @@ defmodule Display.Utils.DisplayLiveUtil do
         incoming_buses
       )
 
-    Process.send_after(self(), :update_stops, 30_000)
+    trigger_next_update_stops(is_trigger_next)
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info(":update_stops failed (#{elapsed_time})")
     {:noreply, socket}
+  end
+
+  def trigger_next_update_stops(is_trigger) do
+    if is_trigger == true do
+      Process.send_after(self(), :update_stops_repeatedly, 30_000)
+    end
   end
 
   def get_template_details_from_cms(panel_id) do
