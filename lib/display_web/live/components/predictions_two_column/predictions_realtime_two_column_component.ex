@@ -36,11 +36,11 @@ defmodule PredictionsRealtimeTwoColumn do
                   <div :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2", "NextBus3"] }}  class={{"next-bus", "mr-4rem": next_bus != "NextBus3", big: next_bus == "NextBus", small: next_bus == "NextBus2" or next_bus == "NextBus3"}}>
                     <span class={{"indicator", "bg-red": service["NextBus"]["Load"] == "LSD", "bg-yellow-1": service["NextBus"]["Load"] == "SDA", "bg-green-1": service["NextBus"]["Load"] == "SEA"}}></span>
                     <span class="label">{{service[next_bus]["EstimatedArrival"]}}</span>
-                    <span>
-                      <img src="/images/bus_no_wab.svg" :if={{ service[next_bus]["Feature"] == "" }}>
-                      <img src="/images/bus_sd.svg" :if={{ service[next_bus]["Type"] == "SD" }}>
-                      <img src="/images/bus_dd.svg" :if={{ service[next_bus]["Type"] == "DD" }}>
-                      <img src="/images/bus_bd.svg" :if={{ service[next_bus]["Type"] == "BD" }}>
+                    <span class="flex">
+                      <img class="bus-feature-icon" src="/images/bus_no_wab.svg" :if={{ service[next_bus]["Feature"] == "" }}>
+                      <img class="bus-feature-icon" src="/images/bus_sd.svg" :if={{ service[next_bus]["Type"] == "SD" }}>
+                      <img class="bus-feature-icon" src="/images/bus_dd.svg" :if={{ service[next_bus]["Type"] == "DD" }}>
+                      <img class="bus-feature-icon" src="/images/bus_bd.svg" :if={{ service[next_bus]["Type"] == "BD" }}>
                     </span>
                   </div>
                 </div>
