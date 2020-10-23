@@ -152,6 +152,7 @@ defmodule DisplayWeb.DisplayLive do
     case socket.assigns.current_layout_index do
       nil ->
         next_layout = Enum.at(layouts, 0)
+        next_duration = Map.get(next_layout, "duration") |> String.to_integer()
 
         socket =
           assign(socket, :previous_layout_value, socket.assigns.current_layout_value)
@@ -162,7 +163,7 @@ defmodule DisplayWeb.DisplayLive do
         Process.send_after(
           self(),
           :update_layout_repeatedly,
-          Map.get(next_layout, "duration") * 1000
+          next_duration * 1000
         )
 
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
@@ -173,6 +174,7 @@ defmodule DisplayWeb.DisplayLive do
       current_index ->
         next_index = DisplayLiveUtil.get_next_index(layouts, current_index)
         next_layout = Enum.at(layouts, next_index)
+        next_duration = Map.get(next_layout, "duration") |> String.to_integer()
 
         socket =
           assign(socket, :previous_layout_value, socket.assigns.current_layout_value)
@@ -183,7 +185,7 @@ defmodule DisplayWeb.DisplayLive do
         Process.send_after(
           self(),
           :update_layout_repeatedly,
-          Map.get(next_layout, "duration") * 1000
+          next_duration * 1000
         )
 
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
