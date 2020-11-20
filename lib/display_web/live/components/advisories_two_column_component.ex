@@ -2,7 +2,7 @@ defmodule AdvisoriesTwoColumn do
   @moduledoc false
   use Surface.LiveComponent
 
-  property messages, :list, default: %{}
+  property message, :string, default: ""
 
   def render(assigns) do
     ~H"""
@@ -22,9 +22,8 @@ defmodule AdvisoriesTwoColumn do
         </div>
       </div>
       <div class="advisory-content">
-        <marquee scrollamount="20">{{Enum.join(@messages, " * ")}}</marquee>
-        <ul class="message-slides hidden">
-          <li class="message-slide" :for={{ message <- @messages }}>{{message}}</li>
+        <ul class="message-slides">
+          <li class="message-slide" >{{@message}}</li>
         </ul>
       </div>
     </div>
