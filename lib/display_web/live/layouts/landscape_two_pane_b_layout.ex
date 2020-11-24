@@ -15,7 +15,7 @@ defmodule LandscapeTwoPaneBLayout do
           <DateTimeHorizontal />
         </div>
       </div>
-      <PredictionsTwoColumn stopPredictionsRealtimeSet={{@prop.stop_predictions_realtime_set_2_column}} stopPredictionsScheduledSet={{@prop.stop_predictions_scheduled_set_2_column}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}}/>
+      <PredictionsTwoColumn realtimeActiveIndex={{@prop.predictions_realtime_set_2_column_index}} scheduledActiveIndex={{@prop.predictions_scheduled_set_2_column_index}} stopPredictionsRealtimeSet={{@prop.predictions_realtime_set_2_column}} stopPredictionsScheduledSet={{@prop.predictions_scheduled_set_2_column}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}}/>
       <AdvisoriesTwoColumn message={{@prop.message}} :if={{get_in(@prop.current_layout_panes, ["pane2", "type", "value"]) == "scheduled_and_ad_hoc_messages"}} />
     </div>
     """

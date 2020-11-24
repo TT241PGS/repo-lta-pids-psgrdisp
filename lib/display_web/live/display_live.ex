@@ -6,6 +6,8 @@ defmodule DisplayWeb.DisplayLive do
   alias Display.{Buses, Messages}
   alias Display.Utils.{DisplayLiveUtil, TimeUtil}
 
+  @slider_speed 5
+
   def mount(
         %{"panel_id" => panel_id} = assigns,
         _session,
@@ -17,18 +19,24 @@ defmodule DisplayWeb.DisplayLive do
     socket =
       assign(socket,
         bus_stop_no: nil,
-        bus_stop_name: "Bus stop name #",
+        bus_stop_name: "",
         panel_id: panel_id,
         previous_layout_value: nil,
         current_layout_value: nil,
         current_layout_index: nil,
         current_layout_panes: nil,
         is_multi_layout: false,
-        stop_predictions_realtime_set_1_column: [],
-        stop_predictions_scheduled_set_1_column: [],
         incoming_buses: [],
-        stop_predictions_realtime_set_2_column: [],
-        stop_predictions_scheduled_set_2_column: [],
+        predictions_previous: [],
+        predictions_current: [],
+        predictions_realtime_set_1_column: [],
+        predictions_realtime_set_2_column: [],
+        predictions_realtime_set_1_column_index: nil,
+        predictions_realtime_set_2_column_index: nil,
+        predictions_scheduled_set_1_column: [],
+        predictions_scheduled_set_2_column: [],
+        predictions_scheduled_set_1_column_index: nil,
+        predictions_scheduled_set_2_column_index: nil,
         messages: %{message_map: nil, timeline: nil},
         previous_messages: %{message_map: nil, timeline: nil},
         message_list_index: nil,
@@ -119,6 +127,88 @@ defmodule DisplayWeb.DisplayLive do
     end
   end
 
+  def handle_info(:update_predictions_slider, socket) do
+    start_time = Timex.now()
+    Logger.info(":update_predictions_slider started")
+
+    %{
+      predictions_realtime_set_1_column: predictions_realtime_set_1_column,
+      predictions_realtime_set_2_column: predictions_realtime_set_2_column,
+      predictions_realtime_set_1_column_index: predictions_realtime_set_1_column_index,
+      predictions_realtime_set_2_column_index: predictions_realtime_set_2_column_index,
+      predictions_scheduled_set_1_column: predictions_scheduled_set_1_column,
+      predictions_scheduled_set_2_column: predictions_scheduled_set_2_column,
+      predictions_scheduled_set_1_column_index: predictions_scheduled_set_1_column_index,
+      predictions_scheduled_set_2_column_index: predictions_scheduled_set_2_column_index
+    } = socket.assigns
+
+    cond do
+      length(predictions_realtime_set_1_column) > 0 ->
+        Process.send_after(self(), :update_predictions_slider, @slider_speed * 1000)
+
+      length(predictions_realtime_set_2_column) > 0 ->
+        Process.send_after(self(), :update_predictions_slider, @slider_speed * 1000)
+
+      length(predictions_scheduled_set_1_column) > 0 ->
+        Process.send_after(self(), :update_predictions_slider, @slider_speed * 1000)
+
+      length(predictions_scheduled_set_2_column) > 0 ->
+        Process.send_after(self(), :update_predictions_slider, @slider_speed * 1000)
+    end
+
+    elapsed_time = TimeUtil.get_elapsed_time(start_time)
+    Logger.info(":update_predictions_slider ended successfully (#{elapsed_time})")
+
+    socket =
+      socket
+      |> assign(
+        :predictions_realtime_set_1_column_index,
+        determine_prediction_next_index(
+          predictions_realtime_set_1_column,
+          predictions_realtime_set_1_column_index
+        )
+      )
+      |> assign(
+        :predictions_realtime_set_2_column_index,
+        determine_prediction_next_index(
+          predictions_realtime_set_2_column,
+          predictions_realtime_set_2_column_index
+        )
+      )
+      |> assign(
+        :predictions_scheduled_set_1_column_index,
+        determine_prediction_next_index(
+          predictions_scheduled_set_1_column,
+          predictions_scheduled_set_1_column_index
+        )
+      )
+      |> assign(
+        :predictions_scheduled_set_2_column_index,
+        determine_prediction_next_index(
+          predictions_scheduled_set_2_column,
+          predictions_scheduled_set_2_column_index
+        )
+      )
+
+    {:noreply, socket}
+  end
+
+  defp determine_prediction_next_index(list, index) do
+    cond do
+      length(list) == 0 ->
+        nil
+
+      index == nil ->
+        0
+
+      index == length(list) - 1 ->
+        0
+
+      true ->
+        index + 1
+    end
+  end
+
   @doc """
     This calls itself after certain period of time to update messages/advisories every n seconds
   """
@@ -130,9 +220,9 @@ defmodule DisplayWeb.DisplayLive do
 
     IO.inspect(new_messages)
 
-    cycle_time = 30
+    cycle_time = 10
 
-    sample_pm = [10, 10]
+    sample_pm = [50, 50]
 
     new_messages =
       new_messages

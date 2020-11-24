@@ -44,24 +44,39 @@ defmodule Display.Utils.DisplayLiveUtil do
       {:ok, cached_predictions} ->
         incoming_buses = get_incoming_buses(cached_predictions)
 
+        predictions_previous = socket.assigns.predictions_current
         cached_predictions = update_cached_predictions(cached_predictions)
 
         socket =
           socket
+          |> Phoenix.LiveView.assign(:predictions_scheduled_set_1_column, [])
+          |> Phoenix.LiveView.assign(:predictions_scheduled_set_2_column, [])
+          |> Phoenix.LiveView.assign(:predictions_scheduled_set_1_column_index, nil)
+          |> Phoenix.LiveView.assign(:predictions_scheduled_set_2_column_index, nil)
           |> Phoenix.LiveView.assign(
-            :stop_predictions_realtime_set_1_column,
-            create_stop_predictions_set_1_column(cached_predictions)
+            :predictions_realtime_set_1_column,
+            create_predictions_set_1_column(cached_predictions)
           )
           |> Phoenix.LiveView.assign(
-            :stop_predictions_realtime_set_2_column,
-            create_stop_predictions_set_2_column(cached_predictions)
+            :predictions_realtime_set_2_column,
+            create_predictions_set_2_column(cached_predictions)
           )
           |> Phoenix.LiveView.assign(
             :incoming_buses,
             incoming_buses
           )
+          |> Phoenix.LiveView.assign(
+            :predictions_previous,
+            predictions_previous
+          )
+          |> Phoenix.LiveView.assign(
+            :predictions_current,
+            cached_predictions
+          )
 
         trigger_next_update_stops(is_trigger_next)
+        trigger_prediction_slider(predictions_previous, cached_predictions)
+
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
         Logger.info(":update_stops ended successfully (#{elapsed_time})")
         {:noreply, socket}
@@ -88,6 +103,8 @@ defmodule Display.Utils.DisplayLiveUtil do
   end
 
   def show_scheduled_predictions(socket, bus_stop_no, start_time, is_trigger_next) do
+    predictions_previous = socket.assigns.predictions_current
+
     scheduled_predictions = Display.Scheduled.get_predictions(bus_stop_no)
 
     incoming_buses = Display.Scheduled.get_incoming_buses(bus_stop_no)
@@ -96,22 +113,34 @@ defmodule Display.Utils.DisplayLiveUtil do
 
     socket =
       socket
-      |> Phoenix.LiveView.assign(:stop_predictions_realtime_set_1_column, [])
-      |> Phoenix.LiveView.assign(:stop_predictions_realtime_set_2_column, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_set_1_column, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_set_2_column, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_set_1_column_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_realtime_set_2_column_index, nil)
       |> Phoenix.LiveView.assign(
-        :stop_predictions_scheduled_set_1_column,
-        create_stop_predictions_set_1_column(scheduled_predictions)
+        :predictions_scheduled_set_1_column,
+        create_predictions_set_1_column(scheduled_predictions)
       )
       |> Phoenix.LiveView.assign(
-        :stop_predictions_scheduled_set_2_column,
-        create_stop_predictions_set_2_column(scheduled_predictions)
+        :predictions_scheduled_set_2_column,
+        create_predictions_set_2_column(scheduled_predictions)
       )
       |> Phoenix.LiveView.assign(
         :incoming_buses,
         incoming_buses
       )
+      |> Phoenix.LiveView.assign(
+        :predictions_previous,
+        predictions_previous
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_current,
+        scheduled_predictions
+      )
 
     trigger_next_update_stops(is_trigger_next)
+    trigger_prediction_slider(predictions_previous, scheduled_predictions)
+
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info(":update_stops failed (#{elapsed_time})")
     {:noreply, socket}
@@ -120,6 +149,19 @@ defmodule Display.Utils.DisplayLiveUtil do
   def trigger_next_update_stops(is_trigger) do
     if is_trigger == true do
       Process.send_after(self(), :update_stops_repeatedly, 30_000)
+    end
+  end
+
+  defp trigger_prediction_slider(predictions_previous, predictions_current) do
+    cond do
+      predictions_previous != predictions_current ->
+        Process.send_after(self(), :update_predictions_slider, 100)
+
+      predictions_previous == [] and predictions_current == [] ->
+        Process.send_after(self(), :update_predictions_slider, 100)
+
+      true ->
+        nil
     end
   end
 
@@ -132,15 +174,15 @@ defmodule Display.Utils.DisplayLiveUtil do
     end)
   end
 
-  def create_stop_predictions_set_1_column(cached_predictions) do
-    create_stop_predictions_columnwise(cached_predictions, 5)
+  def create_predictions_set_1_column(cached_predictions) do
+    create_predictions_columnwise(cached_predictions, 5)
   end
 
-  def create_stop_predictions_set_2_column(cached_predictions) do
-    create_stop_predictions_columnwise(cached_predictions, 10)
+  def create_predictions_set_2_column(cached_predictions) do
+    create_predictions_columnwise(cached_predictions, 10)
   end
 
-  defp create_stop_predictions_columnwise(cached_predictions, max_rows) do
+  defp create_predictions_columnwise(cached_predictions, max_rows) do
     cached_predictions
     |> Enum.with_index()
     |> Enum.reduce([], fn {prediction, index}, acc ->
