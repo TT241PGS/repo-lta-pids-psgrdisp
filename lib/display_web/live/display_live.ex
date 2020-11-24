@@ -18,6 +18,7 @@ defmodule DisplayWeb.DisplayLive do
 
     socket =
       assign(socket,
+        date_time: TimeUtil.get_display_date_time(),
         bus_stop_no: nil,
         bus_stop_name: "",
         panel_id: panel_id,
@@ -55,6 +56,7 @@ defmodule DisplayWeb.DisplayLive do
     Process.send_after(self(), :update_stops_repeatedly, 0)
     Process.send_after(self(), :update_messages_repeatedly, 0)
     Process.send_after(self(), :update_layout_repeatedly, 0)
+    Process.send_after(self(), :update_time_repeatedly, 0)
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info("Mount ended (#{elapsed_time})")
     {:ok, socket}
@@ -125,6 +127,19 @@ defmodule DisplayWeb.DisplayLive do
           true
         )
     end
+  end
+
+  @doc """
+    This calls itself after certain period of time to update time
+  """
+  def handle_info(:update_time_repeatedly, socket) do
+    socket =
+      socket
+      |> assign(:date_time, TimeUtil.get_display_date_time())
+
+    Process.send_after(self(), :update_time_repeatedly, 30_000)
+
+    {:noreply, socket}
   end
 
   def handle_info(:update_predictions_slider, socket) do

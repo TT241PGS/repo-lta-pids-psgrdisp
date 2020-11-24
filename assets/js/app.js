@@ -44,39 +44,6 @@ liveSocket.connect();
 // >> liveSocket.enableLatencySim(1000)
 window.liveSocket = liveSocket;
 
-function setDateTime() {
-  const now = new Date();
-
-  const day = now.toLocaleString("en-SG", { weekday: "long" });
-
-  const date = now.toLocaleString("en-SG", {
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
-
-  const time = now.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-    hour12: false
-  });
-
-  const dayNode = document.querySelector("#day");
-  const dateNode = document.querySelector("#date");
-  const timeNode = document.querySelector("#time");
-  if (dayNode && dateNode && timeNode) {
-    dayNode.innerHTML = day;
-    dateNode.innerHTML = date;
-    timeNode.innerHTML = time;
-  }
-}
-
-function refreshDateTime() {
-  setInterval(() => {
-    setDateTime();
-  }, 100);
-}
-
 function slideInLayouts() {
   setInterval(() => {
     const wrapperHidden = document.querySelector(".full-page-wrapper.hide");
@@ -90,8 +57,6 @@ function slideInLayouts() {
     }
   }, 100);
 }
-
-onDocReady(refreshDateTime);
 
 // Register sliders
 onDocReady(slideInLayouts);
