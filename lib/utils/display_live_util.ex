@@ -317,4 +317,62 @@ defmodule Display.Utils.DisplayLiveUtil do
       true -> 0
     end
   end
+
+  def update_layout(socket, layouts, current_layout_index) do
+    case current_layout_index do
+      nil ->
+        next_layout = Enum.at(layouts, 0)
+        next_duration = Map.get(next_layout, "duration") |> String.to_integer()
+
+        update_layout_prev_timer = socket.assigns.update_layout_timer
+
+        case update_layout_prev_timer do
+          nil -> nil
+          timer_ref -> Process.cancel_timer(timer_ref)
+        end
+
+        update_layout_timer =
+          Process.send_after(
+            self(),
+            :update_layout_repeatedly,
+            next_duration * 1000
+          )
+
+        socket =
+          socket
+          |> Phoenix.LiveView.assign(:current_layout_value, Map.get(next_layout, "value"))
+          |> Phoenix.LiveView.assign(:current_layout_index, 0)
+          |> Phoenix.LiveView.assign(:update_layout_timer, update_layout_timer)
+
+        {:noreply, socket}
+
+      current_index ->
+        next_index = get_next_index(layouts, current_index)
+        next_layout = Enum.at(layouts, next_index)
+        next_duration = Map.get(next_layout, "duration") |> String.to_integer()
+
+        update_layout_prev_timer = socket.assigns.update_layout_timer
+
+        case update_layout_prev_timer do
+          nil -> nil
+          timer_ref -> Process.cancel_timer(timer_ref)
+        end
+
+        update_layout_timer =
+          Process.send_after(
+            self(),
+            :update_layout_repeatedly,
+            next_duration * 1000
+          )
+
+        socket =
+          socket
+          |> Phoenix.LiveView.assign(:current_layout_value, Map.get(next_layout, "value"))
+          |> Phoenix.LiveView.assign(:current_layout_index, next_index)
+          |> Phoenix.LiveView.assign(:current_layout_panes, Map.get(next_layout, "panes"))
+          |> Phoenix.LiveView.assign(:update_layout_timer, update_layout_timer)
+
+        {:noreply, socket}
+    end
+  end
 end
