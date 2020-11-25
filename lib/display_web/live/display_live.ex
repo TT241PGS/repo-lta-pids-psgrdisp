@@ -5,7 +5,7 @@ defmodule DisplayWeb.DisplayLive do
   require Logger
   alias Display.{Buses, Messages}
   alias Display.Utils.{DisplayLiveUtil, TimeUtil}
-
+  # prediction page switching frequency in seconds
   @slider_speed 5
 
   def mount(
@@ -38,6 +38,7 @@ defmodule DisplayWeb.DisplayLive do
         predictions_scheduled_set_2_column: [],
         predictions_scheduled_set_1_column_index: nil,
         predictions_scheduled_set_2_column_index: nil,
+        is_prediction_next_slide_scheduled: false,
         messages: %{message_map: nil, timeline: nil},
         previous_messages: %{message_map: nil, timeline: nil},
         message_list_index: nil,
@@ -81,9 +82,20 @@ defmodule DisplayWeb.DisplayLive do
       |> assign(:bus_stop_no, bus_stop_no)
       |> assign(:bus_stop_name, bus_stop_name)
 
-    case socket.assigns.skip_realtime do
+    %{
+      skip_realtime: skip_realtime,
+      is_prediction_next_slide_scheduled: is_prediction_next_slide_scheduled
+    } = socket.assigns
+
+    case skip_realtime do
       "true" ->
-        DisplayLiveUtil.show_scheduled_predictions(socket, bus_stop_no, start_time, false)
+        DisplayLiveUtil.show_scheduled_predictions(
+          socket,
+          bus_stop_no,
+          start_time,
+          false,
+          is_prediction_next_slide_scheduled
+        )
 
       _ ->
         DisplayLiveUtil.get_realtime_or_scheduled_predictions(
@@ -91,7 +103,8 @@ defmodule DisplayWeb.DisplayLive do
           bus_stop_no,
           bus_stop_name,
           start_time,
-          false
+          false,
+          is_prediction_next_slide_scheduled
         )
     end
   end
@@ -114,9 +127,20 @@ defmodule DisplayWeb.DisplayLive do
       |> assign(:bus_stop_no, bus_stop_no)
       |> assign(:bus_stop_name, bus_stop_name)
 
-    case socket.assigns.skip_realtime do
+    %{
+      skip_realtime: skip_realtime,
+      is_prediction_next_slide_scheduled: is_prediction_next_slide_scheduled
+    } = socket.assigns
+
+    case skip_realtime do
       "true" ->
-        DisplayLiveUtil.show_scheduled_predictions(socket, bus_stop_no, start_time, true)
+        DisplayLiveUtil.show_scheduled_predictions(
+          socket,
+          bus_stop_no,
+          start_time,
+          true,
+          is_prediction_next_slide_scheduled
+        )
 
       _ ->
         DisplayLiveUtil.get_realtime_or_scheduled_predictions(
@@ -124,7 +148,8 @@ defmodule DisplayWeb.DisplayLive do
           bus_stop_no,
           bus_stop_name,
           start_time,
-          true
+          true,
+          is_prediction_next_slide_scheduled
         )
     end
   end
@@ -157,19 +182,31 @@ defmodule DisplayWeb.DisplayLive do
       predictions_scheduled_set_2_column_index: predictions_scheduled_set_2_column_index
     } = socket.assigns
 
-    cond do
-      length(predictions_realtime_set_1_column) > 0 ->
-        Process.send_after(self(), :update_predictions_slider, @slider_speed * 1000)
+    next_trigger_after =
+      cond do
+        length(predictions_realtime_set_1_column) > 0 ->
+          @slider_speed
 
-      length(predictions_realtime_set_2_column) > 0 ->
-        Process.send_after(self(), :update_predictions_slider, @slider_speed * 1000)
+        length(predictions_realtime_set_2_column) > 0 ->
+          @slider_speed
 
-      length(predictions_scheduled_set_1_column) > 0 ->
-        Process.send_after(self(), :update_predictions_slider, @slider_speed * 1000)
+        length(predictions_scheduled_set_1_column) > 0 ->
+          @slider_speed
 
-      length(predictions_scheduled_set_2_column) > 0 ->
-        Process.send_after(self(), :update_predictions_slider, @slider_speed * 1000)
-    end
+        length(predictions_scheduled_set_2_column) > 0 ->
+          @slider_speed
+
+        true ->
+          nil
+      end
+
+    socket =
+      unless is_nil(next_trigger_after) do
+        Process.send_after(self(), :update_predictions_slider, next_trigger_after * 1000)
+        assign(socket, :is_prediction_next_slide_scheduled, true)
+      else
+        assign(socket, :is_prediction_next_slide_scheduled, false)
+      end
 
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info(":update_predictions_slider ended successfully (#{elapsed_time})")
@@ -233,11 +270,11 @@ defmodule DisplayWeb.DisplayLive do
     previous_messages = socket.assigns.messages
     new_messages = Messages.get_messages(socket.assigns.panel_id)
 
-    IO.inspect(new_messages)
+    # IO.inspect(new_messages)
 
-    cycle_time = 10
+    cycle_time = 30
 
-    sample_pm = [50, 50]
+    sample_pm = [30, 30]
 
     new_messages =
       new_messages
@@ -247,7 +284,7 @@ defmodule DisplayWeb.DisplayLive do
         %{text: text, pm: Enum.at(sample_pm, index)}
       end)
 
-    IO.inspect(new_messages)
+    # IO.inspect(new_messages)
 
     # TODO get it from database
 
@@ -256,8 +293,8 @@ defmodule DisplayWeb.DisplayLive do
     elapsed_time1 = TimeUtil.get_elapsed_time(start_time1)
     Logger.info(":get_message_timings ended successfully (#{elapsed_time1})")
 
-    IO.inspect({:cycle_time, cycle_time})
-    IO.inspect(new_messages)
+    # IO.inspect({:cycle_time, cycle_time})
+    # IO.inspect(new_messages)
 
     socket =
       socket
@@ -366,12 +403,6 @@ defmodule DisplayWeb.DisplayLive do
         do: message_map[message_list_index],
         else: ""
 
-    IO.inspect({:message_list_index, message_list_index})
-    IO.inspect({:message_timeline_index, new_message_timeline_index})
-    IO.inspect({:message, message})
-    IO.inspect({:next_trigger_at, next_trigger_at})
-    IO.inspect({:next_trigger_after, next_trigger_after})
-
     unless is_nil(next_trigger_at) do
       Process.send_after(self(), :update_messages_timeline, next_trigger_after * 1000)
     end
@@ -399,8 +430,8 @@ defmodule DisplayWeb.DisplayLive do
 
     messages = socket.assigns.messages
 
-    # If messages are present, show template B
     # If messages are not present, show template A
+    # If messages are present, show template B
     elected_template_index = if is_nil(messages.timeline), do: 0, else: 1
 
     # FOR DEVELOPMENT ONLY, not supposed to be commited
@@ -447,6 +478,44 @@ defmodule DisplayWeb.DisplayLive do
         },
         "selected" => false,
         "value" => "landscape_two_pane_b"
+      },
+      %{
+        "chosen" => false,
+        "duration" => "10",
+        "id" => "landscape_one_pane",
+        "label" => "One-Pane Layout",
+        "panes" => %{
+          "pane1" => %{
+            "config" => %{
+              "font" => %{
+                "color" => %{"label" => "blue", "value" => "blue"},
+                "style" => %{"label" => "sans-serif", "value" => "sans-serif"}
+              }
+            },
+            "type" => %{
+              "description" =>
+                "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium hic optio tempora harum placeat itaque a architecto exercitationem atque soluta ducimus, esse, laboriosam adipisci, quam ut! Necessitatibus aperiam architecto quis. ",
+              "label" => "Predictions and Points of Interest by Service",
+              "value" => "predictions_by_service"
+            }
+          },
+          "pane2" => %{
+            "config" => %{
+              "font" => %{
+                "color" => %{"label" => "blue", "value" => "blue"},
+                "style" => %{"label" => "sans-serif", "value" => "sans-serif"}
+              }
+            },
+            "type" => %{
+              "description" =>
+                "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium hic optio tempora harum placeat itaque a architecto exercitationem atque soluta ducimus, esse, laboriosam adipisci, quam ut! Necessitatibus aperiam architecto quis. ",
+              "label" => "Scheduled and ad-hoc messages",
+              "value" => "scheduled_and_ad_hoc_messages"
+            }
+          }
+        },
+        "selected" => false,
+        "value" => "landscape_one_pane"
       }
     ]
 
@@ -515,44 +584,40 @@ defmodule DisplayWeb.DisplayLive do
   def render(assigns) do
     theme = "dark"
 
-    is_multi_layout = assigns.is_multi_layout
-
-    is_layout_changed = assigns.current_layout_value != assigns.previous_layout_value
-
     case assigns.current_layout_value do
       "landscape_one_pane" ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
+        <landscape_one_pane class={{"full-page-wrapper #{theme}"}}>
           <LandscapeOnePaneLayout prop={{assigns}}/>
-        </div>
+        </landscape_one_pane>
         """
 
       "landscape_two_pane_b" ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
+        <landscape_two_pane_b class={{"full-page-wrapper #{theme}"}}>
           <LandscapeTwoPaneBLayout prop={{assigns}}/>
-        </div>
+        </landscape_two_pane_b>
         """
 
       "landscape_three_pane_a" ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
+        <landscape_three_pane_a class={{"full-page-wrapper #{theme}"}}>
           <LandscapeThreePaneALayout prop={{assigns}}/>
-        </div>
+        </landscape_three_pane_a>
         """
 
       nil ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
-        <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
+        <div class={{"full-page-wrapper #{theme}"}}>
+          <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
         </div>
         """
 
       unknown_layout ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
-        <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
-        </div>
+        <unknown_layout class={{"full-page-wrapper #{theme}"}}>
+          <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
+        </unknown_layout>
         """
     end
   end

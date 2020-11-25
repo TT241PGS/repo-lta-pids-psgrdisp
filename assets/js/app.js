@@ -44,23 +44,6 @@ liveSocket.connect();
 // >> liveSocket.enableLatencySim(1000)
 window.liveSocket = liveSocket;
 
-function slideInLayouts() {
-  setInterval(() => {
-    const wrapperHidden = document.querySelector(".full-page-wrapper.hide");
-    wrapperHidden && wrapperHidden.classList.remove("hide");
-    if (wrapperHidden && wrapperHidden.classList.contains("multi-layout")) {
-      // Slide in for multi layout
-      wrapperHidden.classList.add("slide-in");
-    } else {
-      // Fade in for single layout
-      wrapperHidden && wrapperHidden.classList.add("fade-in");
-    }
-  }, 100);
-}
-
-// Register sliders
-onDocReady(slideInLayouts);
-
 function onDocReady(fn) {
   // see if DOM is already available
   if (

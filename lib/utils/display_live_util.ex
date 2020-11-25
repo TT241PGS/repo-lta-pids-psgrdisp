@@ -38,7 +38,8 @@ defmodule Display.Utils.DisplayLiveUtil do
         bus_stop_no,
         bus_stop_name,
         start_time,
-        is_trigger_next
+        is_trigger_next,
+        is_prediction_next_slide_scheduled
       ) do
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
@@ -75,7 +76,12 @@ defmodule Display.Utils.DisplayLiveUtil do
           )
 
         trigger_next_update_stops(is_trigger_next)
-        trigger_prediction_slider(predictions_previous, cached_predictions)
+
+        trigger_prediction_slider(
+          predictions_previous,
+          cached_predictions,
+          is_prediction_next_slide_scheduled
+        )
 
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
         Logger.info(":update_stops ended successfully (#{elapsed_time})")
@@ -86,7 +92,13 @@ defmodule Display.Utils.DisplayLiveUtil do
           "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
         )
 
-        show_scheduled_predictions(socket, bus_stop_no, start_time, is_trigger_next)
+        show_scheduled_predictions(
+          socket,
+          bus_stop_no,
+          start_time,
+          is_trigger_next,
+          is_prediction_next_slide_scheduled
+        )
 
       {:error, error} ->
         Logger.error(
@@ -102,7 +114,13 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
-  def show_scheduled_predictions(socket, bus_stop_no, start_time, is_trigger_next) do
+  def show_scheduled_predictions(
+        socket,
+        bus_stop_no,
+        start_time,
+        is_trigger_next,
+        is_prediction_next_slide_scheduled
+      ) do
     predictions_previous = socket.assigns.predictions_current
 
     scheduled_predictions = Display.Scheduled.get_predictions(bus_stop_no)
@@ -139,7 +157,12 @@ defmodule Display.Utils.DisplayLiveUtil do
       )
 
     trigger_next_update_stops(is_trigger_next)
-    trigger_prediction_slider(predictions_previous, scheduled_predictions)
+
+    trigger_prediction_slider(
+      predictions_previous,
+      scheduled_predictions,
+      is_prediction_next_slide_scheduled
+    )
 
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info(":update_stops failed (#{elapsed_time})")
@@ -152,8 +175,15 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
-  defp trigger_prediction_slider(predictions_previous, predictions_current) do
+  defp trigger_prediction_slider(
+         predictions_previous,
+         predictions_current,
+         is_prediction_next_slide_scheduled
+       ) do
     cond do
+      is_prediction_next_slide_scheduled == true ->
+        nil
+
       predictions_previous != predictions_current ->
         Process.send_after(self(), :update_predictions_slider, 100)
 
