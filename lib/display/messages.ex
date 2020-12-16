@@ -36,7 +36,7 @@ defmodule Display.Messages do
           acc
 
         {:ok, result} ->
-          acc ++ [result |> Enum.at(0) |> get_in([:message_content])]
+          acc ++ [result |> Enum.at(0)]
       end
     end)
   end
@@ -117,6 +117,13 @@ defmodule Display.Messages do
   end
 
   def get_message_timings([], _cycle_time) do
+    %{
+      message_map: nil,
+      timeline: nil
+    }
+  end
+
+  def get_message_timings(_messages, nil) do
     %{
       message_map: nil,
       timeline: nil

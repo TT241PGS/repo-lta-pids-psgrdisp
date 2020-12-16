@@ -45,6 +45,7 @@ defmodule DisplayWeb.DisplayLive do
         message_list_index: nil,
         message_timeline_index: nil,
         message: "",
+        cycle_time: nil,
         is_show_non_message_template: false,
         skip_realtime: assigns["skip_realtime"] || false
       )
@@ -272,31 +273,32 @@ defmodule DisplayWeb.DisplayLive do
     previous_messages = socket.assigns.messages
     new_messages = Messages.get_messages(socket.assigns.panel_id)
 
-    # IO.inspect(new_messages)
-
-    cycle_time = 10
-
-    sample_pm = [10, 10]
-
     new_messages =
       new_messages
-      |> Enum.with_index()
-      |> Enum.map(fn {text, index} ->
-        # TODO get it from database
-        %{text: text, pm: Enum.at(sample_pm, index)}
+      |> Enum.map(fn %{message_content: text, priority: pm} ->
+        %{text: text, pm: pm}
       end)
 
-    IO.inspect(new_messages)
+    cycle_time =
+      case socket.assigns.current_layout_panes do
+        nil ->
+          # Default to 300 when page loads as cycle_time is needed to show messages
+          300
 
-    # TODO get it from database
+        panes ->
+          panes
+          |> Enum.reduce(nil, fn {_pane_id, pane}, acc ->
+            case get_in(pane, ["config", "cycle_time"]) do
+              nil -> acc
+              cycle_time -> cycle_time |> String.to_integer()
+            end
+          end)
+      end
 
     start_time1 = Timex.now()
     new_messages = Messages.get_message_timings(new_messages, cycle_time)
     elapsed_time1 = TimeUtil.get_elapsed_time(start_time1)
     Logger.info(":get_message_timings ended successfully (#{elapsed_time1})")
-
-    IO.inspect({:cycle_time_in_seconds, cycle_time})
-    IO.inspect(new_messages)
 
     socket =
       socket
@@ -432,8 +434,6 @@ defmodule DisplayWeb.DisplayLive do
       |> assign(:message_timeline_index, new_message_timeline_index)
       |> assign(:message, message)
 
-    IO.inspect({new_message_timeline_index, next_trigger_after})
-
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info(":update_messages_timeline ended successfully (#{elapsed_time})")
 
@@ -448,86 +448,6 @@ defmodule DisplayWeb.DisplayLive do
 
     Logger.info(":update_layout_repeatedly started")
     templates = DisplayLiveUtil.get_template_details_from_cms(socket.assigns.panel_id)
-
-    templates = [
-      %{
-        "layouts" => [
-          %{
-            "chosen" => false,
-            "duration" => "20",
-            "id" => "landscape_three_pane_a",
-            "label" => "One-Pane Layout",
-            "panes" => %{
-              "pane1" => %{
-                "config" => %{
-                  "font" => %{
-                    "color" => %{"label" => "blue", "value" => "blue"},
-                    "style" => %{"label" => "sans-serif", "value" => "sans-serif"}
-                  }
-                },
-                "type" => %{
-                  "description" =>
-                    "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium hic optio tempora harum placeat itaque a architecto exercitationem atque soluta ducimus, esse, laboriosam adipisci, quam ut! Necessitatibus aperiam architecto quis. ",
-                  "label" => "Predictions and Points of Interest by Service",
-                  "value" => "predictions_by_service"
-                }
-              },
-              "pane2" => %{
-                "type" => %{
-                  "value" => "next_buses_arriving_at_stop",
-                  "label" => "Next Buses Arriving at Stop"
-                },
-                "config" => %{"font" => %{"style" => "serif", "color" => "blue"}}
-              }
-            },
-            "selected" => false,
-            "value" => "landscape_three_pane_a"
-          }
-        ]
-      },
-      %{
-        "layouts" => [
-          %{
-            "chosen" => false,
-            "duration" => "20",
-            "id" => "landscape_two_pane_b_0",
-            "label" => "One-Pane Layout",
-            "panes" => %{
-              "pane1" => %{
-                "config" => %{
-                  "font" => %{
-                    "color" => %{"label" => "blue", "value" => "blue"},
-                    "style" => %{"label" => "sans-serif", "value" => "sans-serif"}
-                  }
-                },
-                "type" => %{
-                  "description" =>
-                    "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium hic optio tempora harum placeat itaque a architecto exercitationem atque soluta ducimus, esse, laboriosam adipisci, quam ut! Necessitatibus aperiam architecto quis. ",
-                  "label" => "Predictions and Points of Interest by Service",
-                  "value" => "predictions_by_service"
-                }
-              },
-              "pane2" => %{
-                "config" => %{
-                  "font" => %{
-                    "color" => %{"label" => "blue", "value" => "blue"},
-                    "style" => %{"label" => "sans-serif", "value" => "sans-serif"}
-                  }
-                },
-                "type" => %{
-                  "description" =>
-                    "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium hic optio tempora harum placeat itaque a architecto exercitationem atque soluta ducimus, esse, laboriosam adipisci, quam ut! Necessitatibus aperiam architecto quis. ",
-                  "label" => "Scheduled and ad-hoc messages",
-                  "value" => "scheduled_and_ad_hoc_messages"
-                }
-              }
-            },
-            "selected" => false,
-            "value" => "landscape_two_pane_b"
-          }
-        ]
-      }
-    ]
 
     socket = socket |> assign(:templates, templates)
 

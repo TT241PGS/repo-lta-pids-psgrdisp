@@ -7,7 +7,7 @@ defmodule Display.Messages.MessageData do
   schema "cms_message_data" do
     field :name, :string
     field :type, :string
-    field :priority, :string
+    field :priority, :integer
     field :start_date_time, :naive_datetime
     field :end_date_time, :naive_datetime
     field :start_time_1, :string
