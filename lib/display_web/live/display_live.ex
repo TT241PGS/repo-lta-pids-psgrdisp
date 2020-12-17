@@ -502,35 +502,35 @@ defmodule DisplayWeb.DisplayLive do
     case assigns.current_layout_value do
       "landscape_one_pane" ->
         ~H"""
-        <landscape_one_pane class={{"full-page-wrapper #{theme}"}}>
+        <div class={{"content-wrapper landscape #{theme}"}}>
           <LandscapeOnePaneLayout prop={{assigns}}/>
-        </landscape_one_pane>
+        </div>
         """
 
       "landscape_two_pane_b" ->
         ~H"""
-        <landscape_two_pane_b class={{"full-page-wrapper #{theme}"}}>
+        <div class={{"content-wrapper landscape #{theme}"}}>
           <LandscapeTwoPaneBLayout prop={{assigns}}/>
-        </landscape_two_pane_b>
+        </div>
         """
 
       "landscape_three_pane_a" ->
         ~H"""
-        <landscape_three_pane_a class={{"full-page-wrapper #{theme}"}}>
+        <div class={{"content-wrapper landscape #{theme}"}}>
           <LandscapeThreePaneALayout prop={{assigns}}/>
-        </landscape_three_pane_a>
+        </div>
         """
 
       nil ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}"}}>
+        <div class={{"content-wrapper landscape #{theme}"}}>
           <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
         </div>
         """
 
       unknown_layout ->
         ~H"""
-        <unknown_layout class={{"full-page-wrapper #{theme}"}}>
+        <unknown_layout class={{"content-wrapper landscape #{theme}"}}>
           <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
         </unknown_layout>
         """

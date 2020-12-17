@@ -9,9 +9,9 @@ defmodule DateTimeHorizontal do
   def render(assigns) do
     ~H"""
     <div class="sc-dlnjPT hrYkFG clock-with-date-horizontal">
-      <div class="date" id="day">{{@day}}</div>
-      <div class="date with-border" id="date">{{@date}}</div>
-      <div class="time with-border" id="time">{{@time}}</div>
+      <div class="day">{{@day}}</div>
+      <div class="date with-border">{{@date}}</div>
+      <div class="time with-border">{{@time}}</div>
     </div>
     """
   end

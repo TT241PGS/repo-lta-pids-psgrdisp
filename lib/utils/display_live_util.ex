@@ -205,24 +205,29 @@ defmodule Display.Utils.DisplayLiveUtil do
   end
 
   def create_predictions_set_1_column(cached_predictions) do
-    create_predictions_columnwise(cached_predictions, 5)
+    create_predictions_columnwise(cached_predictions, 1)
   end
 
   def create_predictions_set_2_column(cached_predictions) do
-    create_predictions_columnwise(cached_predictions, 10)
+    create_predictions_columnwise(cached_predictions, 2)
   end
 
-  defp create_predictions_columnwise(cached_predictions, max_rows) do
-    cached_predictions
-    |> Enum.with_index()
-    |> Enum.reduce([], fn {prediction, index}, acc ->
-      remainder = rem(index, max_rows)
-      quotient = div(index, max_rows)
+  defp create_predictions_columnwise(cached_predictions, columns) do
+    max_rows = 5
 
-      if remainder == 0,
-        do: List.insert_at(acc, quotient, [prediction]),
-        else: List.update_at(acc, quotient, &(&1 ++ [prediction]))
-    end)
+    cached_predictions =
+      cached_predictions
+      |> Enum.with_index()
+      |> Enum.reduce([], fn {prediction, index}, acc ->
+        remainder = rem(index, max_rows)
+        quotient = div(index, max_rows)
+
+        if remainder == 0,
+          do: List.insert_at(acc, quotient, [prediction]),
+          else: List.update_at(acc, quotient, &(&1 ++ [prediction]))
+      end)
+
+    if columns == 2, do: Enum.chunk_every(cached_predictions, 2), else: cached_predictions
   end
 
   def update_estimated_arrival(service, next_bus) do

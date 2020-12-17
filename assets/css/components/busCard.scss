@@ -1,0 +1,72 @@
+.bus-card {
+  width: 354px;
+  height: 187px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 35px;
+  flex-direction: column;
+  padding: 15px 0 0;
+
+  .number {
+    font-size: 60px;
+    line-height: 73px;
+    @include letter-spacing(50);
+  }
+
+  .status {
+    background-color: $dark;
+    font-size: 52px;
+    line-height: 83px;
+    width: 254px;
+    height: 83px;
+    border-radius: 15px 15px 0 0;
+    text-align: center;
+  }
+
+  + .bus-card {
+    margin-left: 15px;
+  }
+
+  &.no-bottom-border {
+    height: 205px;
+    border-radius: 35px 35px 0 0;
+  }
+}
+
+.dark {
+  .bus-card {
+    background-color: $charcoal;
+    color: #fff;
+
+    &.inverted {
+      background-color: #fff;
+      color: $charcoal;
+
+      .status {
+        color: #fff;
+      }
+    }
+  }
+}
+
+.incoming-bus-card {
+  font-size: 44px;
+  line-height: 53px;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 35px 35px 0 0;
+  border: 3px solid #fff;
+  border-bottom: none;
+  padding: 49px 31px;
+
+  + .bus-card {
+    margin-left: 15px;
+  }
+}
+
+.dark {
+  .incoming-bus-card {
+    color: #fff;
+  }
+}

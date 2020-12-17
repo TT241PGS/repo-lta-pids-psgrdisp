@@ -1,0 +1,16 @@
+.bus-info-message {
+  width: 1322px;
+  height: 238px;
+  font-size: 60px;
+  border-radius: 0 50px 50px 0;
+  display: flex;
+  align-items: center;
+  padding: 0 58px;
+}
+
+.dark {
+  .bus-info-message {
+    background-color: $charcoal;
+    color: #fff;
+  }
+}

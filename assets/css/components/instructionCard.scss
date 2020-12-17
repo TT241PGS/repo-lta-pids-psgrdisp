@@ -1,0 +1,41 @@
+.instruction-card {
+  width: 871px;
+  height: 187px;
+  font-size: 32px;
+  line-height: 39px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 35px;
+  margin: 0 30px;
+  position: relative;
+
+  .floating-arrow {
+    width: 95px;
+    height: 95px;
+    border-radius: 50%;
+    background-color: $dark;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 10px solid $charcoal;
+
+    &.left {
+      left: -60px;
+    }
+
+    &.right {
+      right: -60px;
+    }
+  }
+}
+
+.dark {
+  .instruction-card {
+    background-color: $charcoal;
+    color: #fff;
+  }
+}

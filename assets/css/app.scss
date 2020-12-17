@@ -1,26 +1,26 @@
-/* This file is for your main application css. */
-/* @import "./phoenix.css" */
-/* purgecss start ignore */
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-/* purgecss end ignore */
+@import 'variables.scss';
+@import 'mixins.scss';
 
-@import "tailwindcss/utilities";
+@import 'layout/main.scss';
+@import 'layout/header.scss';
+@import 'layout/footer.scss';
+@import 'layout/utils.scss';
 
-/*
-
-@import "./fonts";
-@import "./layout/wrapper";
-
-@import "./components/busStop";
-@import "./components/busInfo";
-@import "./components/nextBuses";
-@import "./components/clock";
-@import "./components/tag";
-@import "./components/cards";
-
-*/
-@import "./default.css";
+@import 'components/busStopInfo.scss';
+@import 'components/clockWithDateHorizontal.scss';
+@import 'components/headingInfo.scss';
+@import 'components/busInfo.scss';
+@import 'components/nextBuses.scss';
+@import 'components/nextBus.scss';
+@import 'components/busInfoMessage.scss';
+@import 'components/destinationCard.scss';
+@import 'components/tag.scss';
+@import 'components/instructionCard.scss';
+@import 'components/busCard.scss';
+@import 'components/destinationWithMultiTags.scss';
+@import 'components/stationWithTags.scss';
+@import 'components/carousel.scss';
+@import 'components/advisories.scss';
 
 @import "../node_modules/nprogress/nprogress.css";
 
@@ -81,6 +81,10 @@
   opacity: 0;
 }
 
+.hidden {
+  display: none !important;
+}
+
 body {
   background-color: #3d3d3d;
 }
@@ -90,6 +94,6 @@ body {
 }
 
 .bus-feature-icon {
-  height: 30px;
+  height: 50px;
   padding: 2px 5px;
 }
