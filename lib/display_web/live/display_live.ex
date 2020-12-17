@@ -5,6 +5,8 @@ defmodule DisplayWeb.DisplayLive do
   require Logger
   alias Display.{Buses, Messages}
   alias Display.Utils.{DisplayLiveUtil, TimeUtil}
+  # prediction page switching frequency in seconds
+  @slider_speed 5
 
   def mount(
         %{"panel_id" => panel_id} = assigns,
@@ -16,20 +18,35 @@ defmodule DisplayWeb.DisplayLive do
 
     socket =
       assign(socket,
+        date_time: TimeUtil.get_display_date_time(),
         bus_stop_no: nil,
-        bus_stop_name: "Bus stop name #",
+        bus_stop_name: "",
         panel_id: panel_id,
-        previous_layout_value: nil,
+        templates: [],
         current_layout_value: nil,
         current_layout_index: nil,
         current_layout_panes: nil,
+        update_layout_timer: nil,
         is_multi_layout: false,
-        stop_predictions_realtime_set_1_column: [],
-        stop_predictions_scheduled_set_1_column: [],
         incoming_buses: [],
-        stop_predictions_realtime_set_2_column: [],
-        stop_predictions_scheduled_set_2_column: [],
-        messages: [],
+        predictions_previous: [],
+        predictions_current: [],
+        predictions_realtime_set_1_column: [],
+        predictions_realtime_set_2_column: [],
+        predictions_realtime_set_1_column_index: nil,
+        predictions_realtime_set_2_column_index: nil,
+        predictions_scheduled_set_1_column: [],
+        predictions_scheduled_set_2_column: [],
+        predictions_scheduled_set_1_column_index: nil,
+        predictions_scheduled_set_2_column_index: nil,
+        is_prediction_next_slide_scheduled: false,
+        messages: %{message_map: nil, timeline: nil},
+        previous_messages: %{message_map: nil, timeline: nil},
+        message_list_index: nil,
+        message_timeline_index: nil,
+        message: "",
+        cycle_time: nil,
+        is_show_non_message_template: false,
         skip_realtime: assigns["skip_realtime"] || false
       )
 
@@ -43,6 +60,7 @@ defmodule DisplayWeb.DisplayLive do
     Process.send_after(self(), :update_stops_repeatedly, 0)
     Process.send_after(self(), :update_messages_repeatedly, 0)
     Process.send_after(self(), :update_layout_repeatedly, 0)
+    Process.send_after(self(), :update_time_repeatedly, 0)
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info("Mount ended (#{elapsed_time})")
     {:ok, socket}
@@ -67,9 +85,20 @@ defmodule DisplayWeb.DisplayLive do
       |> assign(:bus_stop_no, bus_stop_no)
       |> assign(:bus_stop_name, bus_stop_name)
 
-    case socket.assigns.skip_realtime do
+    %{
+      skip_realtime: skip_realtime,
+      is_prediction_next_slide_scheduled: is_prediction_next_slide_scheduled
+    } = socket.assigns
+
+    case skip_realtime do
       "true" ->
-        DisplayLiveUtil.show_scheduled_predictions(socket, bus_stop_no, start_time, false)
+        DisplayLiveUtil.show_scheduled_predictions(
+          socket,
+          bus_stop_no,
+          start_time,
+          false,
+          is_prediction_next_slide_scheduled
+        )
 
       _ ->
         DisplayLiveUtil.get_realtime_or_scheduled_predictions(
@@ -77,7 +106,8 @@ defmodule DisplayWeb.DisplayLive do
           bus_stop_no,
           bus_stop_name,
           start_time,
-          false
+          false,
+          is_prediction_next_slide_scheduled
         )
     end
   end
@@ -100,9 +130,20 @@ defmodule DisplayWeb.DisplayLive do
       |> assign(:bus_stop_no, bus_stop_no)
       |> assign(:bus_stop_name, bus_stop_name)
 
-    case socket.assigns.skip_realtime do
+    %{
+      skip_realtime: skip_realtime,
+      is_prediction_next_slide_scheduled: is_prediction_next_slide_scheduled
+    } = socket.assigns
+
+    case skip_realtime do
       "true" ->
-        DisplayLiveUtil.show_scheduled_predictions(socket, bus_stop_no, start_time, true)
+        DisplayLiveUtil.show_scheduled_predictions(
+          socket,
+          bus_stop_no,
+          start_time,
+          true,
+          is_prediction_next_slide_scheduled
+        )
 
       _ ->
         DisplayLiveUtil.get_realtime_or_scheduled_predictions(
@@ -110,8 +151,116 @@ defmodule DisplayWeb.DisplayLive do
           bus_stop_no,
           bus_stop_name,
           start_time,
-          true
+          true,
+          is_prediction_next_slide_scheduled
         )
+    end
+  end
+
+  @doc """
+    This calls itself after certain period of time to update time
+  """
+  def handle_info(:update_time_repeatedly, socket) do
+    socket =
+      socket
+      |> assign(:date_time, TimeUtil.get_display_date_time())
+
+    Process.send_after(self(), :update_time_repeatedly, 30_000)
+
+    {:noreply, socket}
+  end
+
+  def handle_info(:update_predictions_slider, socket) do
+    start_time = Timex.now()
+    Logger.info(":update_predictions_slider started")
+
+    %{
+      predictions_realtime_set_1_column: predictions_realtime_set_1_column,
+      predictions_realtime_set_2_column: predictions_realtime_set_2_column,
+      predictions_realtime_set_1_column_index: predictions_realtime_set_1_column_index,
+      predictions_realtime_set_2_column_index: predictions_realtime_set_2_column_index,
+      predictions_scheduled_set_1_column: predictions_scheduled_set_1_column,
+      predictions_scheduled_set_2_column: predictions_scheduled_set_2_column,
+      predictions_scheduled_set_1_column_index: predictions_scheduled_set_1_column_index,
+      predictions_scheduled_set_2_column_index: predictions_scheduled_set_2_column_index
+    } = socket.assigns
+
+    next_trigger_after =
+      cond do
+        length(predictions_realtime_set_1_column) > 0 ->
+          @slider_speed
+
+        length(predictions_realtime_set_2_column) > 0 ->
+          @slider_speed
+
+        length(predictions_scheduled_set_1_column) > 0 ->
+          @slider_speed
+
+        length(predictions_scheduled_set_2_column) > 0 ->
+          @slider_speed
+
+        true ->
+          nil
+      end
+
+    socket =
+      unless is_nil(next_trigger_after) do
+        Process.send_after(self(), :update_predictions_slider, next_trigger_after * 1000)
+        assign(socket, :is_prediction_next_slide_scheduled, true)
+      else
+        assign(socket, :is_prediction_next_slide_scheduled, false)
+      end
+
+    elapsed_time = TimeUtil.get_elapsed_time(start_time)
+    Logger.info(":update_predictions_slider ended successfully (#{elapsed_time})")
+
+    socket =
+      socket
+      |> assign(
+        :predictions_realtime_set_1_column_index,
+        determine_prediction_next_index(
+          predictions_realtime_set_1_column,
+          predictions_realtime_set_1_column_index
+        )
+      )
+      |> assign(
+        :predictions_realtime_set_2_column_index,
+        determine_prediction_next_index(
+          predictions_realtime_set_2_column,
+          predictions_realtime_set_2_column_index
+        )
+      )
+      |> assign(
+        :predictions_scheduled_set_1_column_index,
+        determine_prediction_next_index(
+          predictions_scheduled_set_1_column,
+          predictions_scheduled_set_1_column_index
+        )
+      )
+      |> assign(
+        :predictions_scheduled_set_2_column_index,
+        determine_prediction_next_index(
+          predictions_scheduled_set_2_column,
+          predictions_scheduled_set_2_column_index
+        )
+      )
+
+    {:noreply, socket}
+  end
+
+  defp determine_prediction_next_index(list, index) do
+    cond do
+      length(list) == 0 ->
+        nil
+
+      index == nil ->
+        0
+
+      index == length(list) - 1 ->
+        0
+
+      true ->
+        index + 1
     end
   end
 
@@ -120,12 +269,174 @@ defmodule DisplayWeb.DisplayLive do
   """
   def handle_info(:update_messages_repeatedly, socket) do
     start_time = Timex.now()
-    Logger.info(":update_messages started")
-    messages = Messages.get_messages(socket.assigns.panel_id)
-    socket = assign(socket, :messages, messages)
+    Logger.info(":update_messages_repeatedly started")
+    previous_messages = socket.assigns.messages
+    new_messages = Messages.get_messages(socket.assigns.panel_id)
+
+    new_messages =
+      new_messages
+      |> Enum.map(fn %{message_content: text, priority: pm} ->
+        %{text: text, pm: pm}
+      end)
+
+    cycle_time =
+      case socket.assigns.current_layout_panes do
+        nil ->
+          # Default to 300 when page loads as cycle_time is needed to show messages
+          300
+
+        panes ->
+          panes
+          |> Enum.reduce(nil, fn {_pane_id, pane}, acc ->
+            case get_in(pane, ["config", "cycle_time"]) do
+              nil -> acc
+              cycle_time -> cycle_time |> String.to_integer()
+            end
+          end)
+      end
+
+    start_time1 = Timex.now()
+    new_messages = Messages.get_message_timings(new_messages, cycle_time)
+    elapsed_time1 = TimeUtil.get_elapsed_time(start_time1)
+    Logger.info(":get_message_timings ended successfully (#{elapsed_time1})")
+
+    socket =
+      socket
+      |> assign(:previous_messages, previous_messages)
+      |> assign(:messages, new_messages)
+      |> assign(:cycle_time, cycle_time)
+
+    unless new_messages.timeline == nil or previous_messages == new_messages do
+      Process.send_after(self(), :update_messages_timeline, 100)
+    end
+
     Process.send_after(self(), :update_messages_repeatedly, 10_000)
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info(":update_messages_repeatedly ended successfully (#{elapsed_time})")
+    {:noreply, socket}
+  end
+
+  @doc """
+    This is called only when there are messages for a panel in order to cycle through messages
+  """
+  # messages: [],
+  # previous_messages: [],
+  # message_list_index: nil,
+  # message_timeline_index: nil,
+  def handle_info(:update_messages_timeline, socket) do
+    start_time = Timex.now()
+    Logger.info(":update_messages_timeline started")
+
+    %{
+      messages: %{timeline: timeline, message_map: message_map},
+      message_timeline_index: message_timeline_index
+    } = socket.assigns
+
+    timeline_length = length(timeline)
+    timeline_last_index = timeline_length - 1
+
+    new_message_timeline_index =
+      cond do
+        timeline_length == 0 ->
+          nil
+
+        message_timeline_index == nil ->
+          0
+
+        message_timeline_index == timeline_last_index ->
+          0
+
+        true ->
+          message_timeline_index + 1
+      end
+
+    next_message_timeline_index =
+      cond do
+        timeline_length == 0 ->
+          nil
+
+        new_message_timeline_index == nil ->
+          nil
+
+        new_message_timeline_index == timeline_last_index ->
+          0
+
+        true ->
+          new_message_timeline_index + 1
+      end
+
+    next_trigger_at =
+      cond do
+        is_nil(next_message_timeline_index) ->
+          nil
+
+        message_timeline_index == timeline_last_index and next_message_timeline_index == 1 ->
+          socket.assigns.cycle_time
+
+        true ->
+          Enum.at(timeline, next_message_timeline_index) |> elem(0)
+      end
+
+    next_trigger_after =
+      cond do
+        length(timeline) > 0 and is_nil(message_timeline_index) ->
+          next_trigger_at
+
+        next_trigger_at == 0 ->
+          previous_timeline = Enum.at(timeline, new_message_timeline_index) |> elem(0)
+          socket.assigns.cycle_time - previous_timeline
+
+        next_trigger_at == socket.assigns.cycle_time ->
+          1
+
+        message_timeline_index >= 0 ->
+          previous_timeline = Enum.at(timeline, new_message_timeline_index) |> elem(0)
+          next_trigger_at - previous_timeline
+
+        true ->
+          next_trigger_at
+      end
+
+    message_list_index =
+      if new_message_timeline_index >= 0,
+        do: Enum.at(timeline, new_message_timeline_index) |> elem(1),
+        else: nil
+
+    message =
+      if message_list_index >= 0,
+        do: message_map[message_list_index],
+        else: ""
+
+    unless is_nil(next_trigger_at) do
+      Process.send_after(self(), :update_messages_timeline, next_trigger_after * 1000)
+    end
+
+    socket =
+      if new_message_timeline_index == timeline_last_index and message_list_index == nil do
+        socket = socket |> assign(:is_show_non_message_template, true)
+
+        %{templates: templates, current_layout_index: current_layout_index} = socket.assigns
+        layouts = templates |> Enum.at(0) |> Map.get("layouts")
+
+        DisplayLiveUtil.update_layout(socket, layouts, current_layout_index) |> elem(1)
+      else
+        socket |> assign(:is_show_non_message_template, false)
+
+        %{templates: templates, current_layout_index: current_layout_index} = socket.assigns
+        layouts = templates |> Enum.at(1) |> Map.get("layouts")
+
+        DisplayLiveUtil.update_layout(socket, layouts, current_layout_index) |> elem(1)
+      end
+
+    socket =
+      socket
+      |> assign(:message_list_index, message_list_index)
+      |> assign(:message_timeline_index, new_message_timeline_index)
+      |> assign(:message, message)
+
+    elapsed_time = TimeUtil.get_elapsed_time(start_time)
+    Logger.info(":update_messages_timeline ended successfully (#{elapsed_time})")
+
     {:noreply, socket}
   end
 
@@ -138,61 +449,39 @@ defmodule DisplayWeb.DisplayLive do
     Logger.info(":update_layout_repeatedly started")
     templates = DisplayLiveUtil.get_template_details_from_cms(socket.assigns.panel_id)
 
-    # If messages are present, show template A
-    # If template B is not available, fallback to template A
-    elected_template_index =
-      if length(socket.assigns.messages) > 0 or length(templates) < 2, do: 0, else: 1
+    socket = socket |> assign(:templates, templates)
 
-    layouts = templates |> Enum.at(elected_template_index) |> Map.get("layouts")
+    %{
+      messages: messages,
+      current_layout_index: current_layout_index,
+      is_show_non_message_template: is_show_non_message_template
+    } = socket.assigns
 
-    is_multi_layout = if length(layouts) > 1, do: true, else: false
+    template_index =
+      cond do
+        is_show_non_message_template == true ->
+          0
 
-    socket = assign(socket, :is_multi_layout, is_multi_layout)
+        # If messages are not present, show template A
+        is_nil(messages.timeline) ->
+          0
 
-    case socket.assigns.current_layout_index do
-      nil ->
-        next_layout = Enum.at(layouts, 0)
-        next_duration = Map.get(next_layout, "duration") |> String.to_integer()
+        # If messages are present, show template B
+        true ->
+          1
+      end
 
-        socket =
-          assign(socket, :previous_layout_value, socket.assigns.current_layout_value)
-          |> assign(:current_layout_value, Map.get(next_layout, "value"))
-          |> assign(:current_layout_index, 0)
-          |> assign(:current_layout_panes, Map.get(next_layout, "panes"))
+    # FOR DEVELOPMENT ONLY, not supposed to be commited
+    # template_index = 0
 
-        Process.send_after(
-          self(),
-          :update_layout_repeatedly,
-          next_duration * 1000
-        )
+    layouts = templates |> Enum.at(template_index) |> Map.get("layouts")
 
-        elapsed_time = TimeUtil.get_elapsed_time(start_time)
-        Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
+    result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
 
-        {:noreply, socket}
+    elapsed_time = TimeUtil.get_elapsed_time(start_time)
+    Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
 
-      current_index ->
-        next_index = DisplayLiveUtil.get_next_index(layouts, current_index)
-        next_layout = Enum.at(layouts, next_index)
-        next_duration = Map.get(next_layout, "duration") |> String.to_integer()
-
-        socket =
-          assign(socket, :previous_layout_value, socket.assigns.current_layout_value)
-          |> assign(:current_layout_value, Map.get(next_layout, "value"))
-          |> assign(:current_layout_index, next_index)
-          |> assign(:current_layout_panes, Map.get(next_layout, "panes"))
-
-        Process.send_after(
-          self(),
-          :update_layout_repeatedly,
-          next_duration * 1000
-        )
-
-        elapsed_time = TimeUtil.get_elapsed_time(start_time)
-        Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
-
-        {:noreply, socket}
-    end
+    result
   end
 
   def handle_info(
@@ -210,44 +499,40 @@ defmodule DisplayWeb.DisplayLive do
   def render(assigns) do
     theme = "dark"
 
-    is_multi_layout = assigns.is_multi_layout
-
-    is_layout_changed = assigns.current_layout_value != assigns.previous_layout_value
-
     case assigns.current_layout_value do
       "landscape_one_pane" ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
+        <landscape_one_pane class={{"full-page-wrapper #{theme}"}}>
           <LandscapeOnePaneLayout prop={{assigns}}/>
-        </div>
+        </landscape_one_pane>
         """
 
       "landscape_two_pane_b" ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
+        <landscape_two_pane_b class={{"full-page-wrapper #{theme}"}}>
           <LandscapeTwoPaneBLayout prop={{assigns}}/>
-        </div>
+        </landscape_two_pane_b>
         """
 
       "landscape_three_pane_a" ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
+        <landscape_three_pane_a class={{"full-page-wrapper #{theme}"}}>
           <LandscapeThreePaneALayout prop={{assigns}}/>
-        </div>
+        </landscape_three_pane_a>
         """
 
       nil ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
-        <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
+        <div class={{"full-page-wrapper #{theme}"}}>
+          <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
         </div>
         """
 
       unknown_layout ->
         ~H"""
-        <div class={{"full-page-wrapper #{theme}", hide: is_layout_changed == true, "multi-layout": is_multi_layout == true}}>
-        <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
-        </div>
+        <unknown_layout class={{"full-page-wrapper #{theme}"}}>
+          <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
+        </unknown_layout>
         """
     end
   end

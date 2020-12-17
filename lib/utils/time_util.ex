@@ -50,6 +50,14 @@ defmodule Display.Utils.TimeUtil do
     |> Timex.format!("%H:%M", :strftime)
   end
 
+  def get_display_date_time do
+    %{
+      day: Timex.format!(get_time_now(), "%A", :strftime),
+      date: Timex.format!(get_time_now(), "%d %B %Y", :strftime),
+      time: Timex.format!(get_time_now(), "%H:%M", :strftime)
+    }
+  end
+
   def get_iso_date_from_seconds(seconds) do
     get_beginning_of_day()
     |> Timex.add(Timex.Duration.from_seconds(seconds))

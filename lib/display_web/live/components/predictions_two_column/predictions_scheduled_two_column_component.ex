@@ -3,6 +3,7 @@ defmodule PredictionsScheduledTwoColumn do
   use Surface.LiveComponent
 
   property stopPredictionsSet, :list, default: %{}
+  property activeIndex, :integer, default: 0
 
   def render(assigns) do
     ~H"""
@@ -22,8 +23,8 @@ defmodule PredictionsScheduledTwoColumn do
           </div>
         </div>
       </div>
-      <div class="bus-stop-predictions hidden">
-        <div :for={{ stopPredictions <- @stopPredictionsSet }}>
+      <div class="bus-stop-predictions">
+        <div :for={{ {stopPredictions, index} <- Enum.with_index(@stopPredictionsSet) }} class={{hidden: @activeIndex != index, "slide-in": @activeIndex == index}}>
           <div class="grid grid-rows-5 grid-flow-col gap-4rem mb-4rem">
             <div class={{"flex", "w-1/2": length(stopPredictions) <= 5}} :for={{ prediction <- stopPredictions }}>
               <div class="bus-info">{{prediction["ServiceNo"]}}</div>
