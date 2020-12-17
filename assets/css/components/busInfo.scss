@@ -1,0 +1,17 @@
+.bus-info {
+  width: 498px;
+  height: 238px;
+  font-size: 125px;
+  line-height: 238px;
+  text-align: center;
+  @include letter-spacing(50);
+  border-radius: 50px 0 0 50px;
+  margin-right: 25px;
+}
+
+.dark {
+  .bus-info {
+    background-color: $charcoal;
+    color: #fff;
+  }
+}

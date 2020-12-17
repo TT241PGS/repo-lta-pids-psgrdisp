@@ -1,0 +1,19 @@
+.tag {
+  min-width: 150px;
+  height: 64px;
+  padding: 0 31.25px;
+  line-height: 64px;
+  font-size: 48px;
+  border-radius: 10px;
+  text-transform: uppercase;
+
+  + .tag {
+    margin-left: 10px;
+  }
+}
+
+.dark {
+  .tag {
+    color: #fff;
+  }
+}

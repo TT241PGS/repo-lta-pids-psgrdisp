@@ -1,0 +1,16 @@
+.next-bus-station-with-tags {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+
+  .text {
+    font-size: 52px;
+    line-height: 63px;
+  }
+}
+
+.dark {
+  .next-bus-station-with-tags {
+    color: #fff;
+  }
+}

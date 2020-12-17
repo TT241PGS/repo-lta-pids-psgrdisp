@@ -1,0 +1,53 @@
+.advisories-container {
+  border: 3px solid #3d3d3d;
+  border-radius: 25px;
+
+  .heading-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 24px 0 0 0;
+
+    h1 {
+      font-size: 55px;
+      line-height: 67px;
+      margin: 0;
+    }
+
+    .heading {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      left: 0;
+      top: 0;
+      margin: 0;
+      text-transform: uppercase;
+      background-color: $charcoal;
+      border-radius: 25px 0 70px 25px;
+      width: 540px;
+      height: 113px;
+      padding: 19px 40px 30px;
+
+      svg {
+        margin-right: 16px;
+      }
+    }
+
+    .tags {
+      padding-left: 580px;
+    }
+  }
+
+  .advisory-content {
+    font-size: 60px;
+    line-height: 80px;
+    padding: 50px 47px;
+    margin-top: 70px;
+  }
+}
+
+.dark {
+  .advisories-container {
+    color: #fff;
+  }
+}

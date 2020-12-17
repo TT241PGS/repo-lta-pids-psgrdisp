@@ -1,0 +1,52 @@
+.heading-info {
+  font-size: 32px;
+  text-transform: uppercase;
+  border-radius: 25px 25px 0 25px;
+  padding: 11.5px 34px;
+}
+
+.dark {
+  .heading-info {
+    background-color: $charcoal;
+    color: #fff;
+  }
+}
+
+.heading {
+  position: relative;
+  margin: 50px 0 10px;
+  height: 60px;
+
+  .two-columns-no-sidebar {
+    .heading-info {
+      position: absolute;
+      top: 0;
+    }
+
+    .heading-info.bus {
+      left: 0;
+    }
+
+    .heading-info.arriving {
+      left: 523px;
+    }
+
+    .heading-info.next {
+      left: 1140px;
+    }
+
+    .page-count {
+      font-size: 32px;
+      position: absolute;
+      right: 0;
+    }
+  }
+}
+
+.dark {
+  .heading {
+    .page-count {
+      color: #fff;
+    }
+  }
+}

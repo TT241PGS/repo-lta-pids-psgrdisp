@@ -1,0 +1,32 @@
+.bus-stop-info {
+  height: 113px;
+  border-radius: 25px;
+  background-color: $green;
+  position: relative;
+  overflow: hidden;
+
+  .bus-stop-name,
+  .bus-stop-number {
+    line-height: 113px;
+    font-size: 60px;
+  }
+
+  .bus-stop-number {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 325px;
+    color: #fff;
+    padding: 0 50px;
+    background-color: $teal;
+    border-radius: 0 0 60px 0;
+    @include letter-spacing(50);
+    font-weight: bold;
+  }
+
+  .bus-stop-name {
+    font-weight: normal;
+    color: $text-dark-1;
+  }
+}

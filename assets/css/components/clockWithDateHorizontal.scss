@@ -1,0 +1,49 @@
+.clock-with-date-horizontal {
+  width: 1510px;
+  height: 113px;
+  margin-left: 51px;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+
+  border: 3px solid #707070;
+  border-radius: 25px 0 25px 25px;
+
+  .day,
+  .date,
+  .time {
+    font-size: 60px;
+    color: #fff;
+    line-height: 113px;
+    text-transform: uppercase;
+    position: absolute;
+    top: 0;
+  }
+
+  .day {
+    padding-left: 49px;
+    width: 566px;
+    left: 0;
+  }
+
+  .date {
+    border-radius: 0 0 0 60px;
+    border-left: 3px solid #707070;
+    width: 822px;
+    padding-left: 43px;
+    left: 497px;
+  }
+
+  .time {
+    border-radius: 0 0 0 60px;
+    font-weight: bold;
+    background-color: #3d3d3d;
+    width: 292px;
+    position: absolute;
+    right: 0;
+    height: 100%;
+    text-align: center;
+    border-left: 3px solid #707070;
+    @include letter-spacing(50);
+  }
+}
