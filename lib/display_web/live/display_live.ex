@@ -41,6 +41,7 @@ defmodule DisplayWeb.DisplayLive do
         predictions_scheduled_set_2_column_index: nil,
         is_prediction_next_slide_scheduled: false,
         messages: %{message_map: nil, timeline: nil},
+        suppressed_messages: %{all_services: nil, few_services: nil},
         previous_messages: %{message_map: nil, timeline: nil},
         message_list_index: nil,
         message_timeline_index: nil,
@@ -60,6 +61,7 @@ defmodule DisplayWeb.DisplayLive do
 
     Process.send_after(self(), :update_stops_repeatedly, 0)
     Process.send_after(self(), :update_messages_repeatedly, 0)
+    Process.send_after(self(), :update_suppressed_messages_repeatedly, 0)
     Process.send_after(self(), :update_layout_repeatedly, 0)
     Process.send_after(self(), :update_time_repeatedly, 0)
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
@@ -483,6 +485,24 @@ defmodule DisplayWeb.DisplayLive do
     Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
 
     result
+  end
+
+  @doc """
+    This calls itself after certain period of time to update messages/advisories every n seconds
+  """
+  def handle_info(:update_suppressed_messages_repeatedly, socket) do
+    start_time = Timex.now()
+    Logger.info(":update_suppressed_messages_repeatedly started")
+    suppressed_messages = Messages.get_suppressed_messages(socket.assigns.bus_stop_no)
+
+    socket =
+      socket
+      |> assign(:suppressed_messages, suppressed_messages)
+
+    Process.send_after(self(), :update_suppressed_messages_repeatedly, 10_000)
+    elapsed_time = TimeUtil.get_elapsed_time(start_time)
+    Logger.info(":update_suppressed_messages_repeatedly ended successfully (#{elapsed_time})")
+    {:noreply, socket}
   end
 
   def handle_info(

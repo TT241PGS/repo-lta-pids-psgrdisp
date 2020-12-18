@@ -357,4 +357,25 @@ defmodule Display.Messages do
   defp sum(a, b) do
     a + b
   end
+
+  def get_suppressed_messages(nil) do
+    %{all_services: nil, few_services: nil}
+  end
+
+  def get_suppressed_messages(_bus_stop_no) do
+    %{
+      all_services: nil,
+      few_services: %{
+        "51" => "Not operating today",
+        "40" => "Last bus departed"
+      }
+    }
+  end
+
+  # def get_suppressed_messages(_bus_stop_no) do
+  #   %{
+  #     all_services: %{message: "No buses will stop here today due to F1 road closure"},
+  #     few_services: nil
+  #   }
+  # end
 end
