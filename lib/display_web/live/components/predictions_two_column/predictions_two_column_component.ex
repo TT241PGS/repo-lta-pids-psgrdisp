@@ -6,7 +6,9 @@ defmodule PredictionsTwoColumn do
   property stopPredictionsScheduledSet, :list, default: %{}
   property realtimeActiveIndex, :integer, default: 0
   property scheduledActiveIndex, :integer, default: 0
-  property suppressed_messages, :map, default: %{all_services: nil, few_services: nil}
+
+  property suppressed_messages, :map,
+    default: %{all_services: nil, few_services: nil, hide_services: []}
 
   def render(assigns) do
     ~H"""

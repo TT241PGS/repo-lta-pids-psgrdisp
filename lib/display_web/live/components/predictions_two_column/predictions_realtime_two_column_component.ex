@@ -17,7 +17,7 @@ defmodule PredictionsRealtimeTwoColumn do
             <span class="heading-info next">Next</span>
           </div>
         </div>
-        <div class={{"flex", "mb-30": service_index < 5}} :for={{ {service, service_index} <- Enum.with_index(stopPredictionsColumn) }}>
+        <div class={{"flex", "mb-30": service_index < 5, hidden: Enum.member?(@suppressed_messages.hide_services, service["ServiceNo"])}} :for={{ {service, service_index} <- Enum.with_index(stopPredictionsColumn) }}>
           <div class="sc-bdnylx dciVXD bus-info">{{service["ServiceNo"]}}</div>
           <div class="bus-info-message" :if={{get_in(@suppressed_messages, [:few_services, service["ServiceNo"]]) != nil}}>{{get_in(@suppressed_messages, [:few_services, service["ServiceNo"]])}}</div>
           <div class="next-buses" :if={{get_in(@suppressed_messages, [:few_services, service["ServiceNo"]]) == nil}}>

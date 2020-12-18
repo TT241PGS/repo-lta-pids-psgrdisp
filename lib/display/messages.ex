@@ -359,23 +359,34 @@ defmodule Display.Messages do
   end
 
   def get_suppressed_messages(nil) do
-    %{all_services: nil, few_services: nil}
+    %{all_services: nil, few_services: nil, hide_services: []}
   end
 
   def get_suppressed_messages(_bus_stop_no) do
+    %{all_services: nil, few_services: nil, hide_services: []}
+  end
+
+  def get_suppressed_messages(_bus_stop_no) do
+    # TODO call database
+    # For all_services,
+    #   query all messages with stop_code == ^bus_stop_code and service_no == nil,
+    # For few_services,
+    #   query all messages with service_no != nil and show_service == "yes" and (stop_code == nil or stop_code == ^bus_stop_code)
+
     %{
       all_services: nil,
       few_services: %{
-        "51" => "Not operating today",
-        "40" => "Last bus departed"
-      }
+        "40" => "Not operating today"
+      },
+      hide_services: ["51"]
     }
   end
 
   # def get_suppressed_messages(_bus_stop_no) do
   #   %{
   #     all_services: %{message: "No buses will stop here today due to F1 road closure"},
-  #     few_services: nil
+  #     few_services: nil,
+  #     hide_services: []
   #   }
   # end
 end

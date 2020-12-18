@@ -41,7 +41,7 @@ defmodule DisplayWeb.DisplayLive do
         predictions_scheduled_set_2_column_index: nil,
         is_prediction_next_slide_scheduled: false,
         messages: %{message_map: nil, timeline: nil},
-        suppressed_messages: %{all_services: nil, few_services: nil},
+        suppressed_messages: %{all_services: nil, few_services: nil, hide_services: []},
         previous_messages: %{message_map: nil, timeline: nil},
         message_list_index: nil,
         message_timeline_index: nil,
