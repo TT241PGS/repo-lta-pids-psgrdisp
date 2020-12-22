@@ -43,6 +43,8 @@ defmodule Display.Utils.DisplayLiveUtil do
       ) do
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
+        cached_predictions = filter_panel_groups(cached_predictions, socket.assigns.panel_id)
+
         incoming_buses = get_incoming_buses(cached_predictions)
 
         predictions_previous = socket.assigns.predictions_current
@@ -123,9 +125,14 @@ defmodule Display.Utils.DisplayLiveUtil do
       ) do
     predictions_previous = socket.assigns.predictions_current
 
-    scheduled_predictions = Display.Scheduled.get_predictions(bus_stop_no)
+    scheduled_predictions =
+      Display.Scheduled.get_predictions(bus_stop_no)
+      |> filter_panel_groups(socket.assigns.panel_id)
 
-    incoming_buses = Display.Scheduled.get_incoming_buses(bus_stop_no)
+    incoming_buses =
+      scheduled_predictions
+      |> Enum.map(fn prediction -> prediction["ServiceNo"] end)
+      |> Display.Scheduled.get_incoming_buses(bus_stop_no)
 
     scheduled_predictions = update_scheduled_predictions(scheduled_predictions)
 
@@ -379,5 +386,49 @@ defmodule Display.Utils.DisplayLiveUtil do
 
         {:noreply, socket}
     end
+  end
+
+  defp filter_panel_groups(predictions, panel_id) do
+    with config <- Buses.get_panel_configuration_by_panel_id(panel_id),
+         false <- is_nil(config) do
+      %{
+        service_group_type: group_type,
+        day_group: day_group,
+        night_group: night_group,
+        service_group: service_group
+      } = config
+
+      cond do
+        group_type == "SERVICE_GROUP" ->
+          filter_groups(service_group, predictions)
+
+        group_type == "DAY_NIGHT_GROUP" and TimeUtil.is_day_now() ->
+          filter_groups(day_group, predictions)
+
+        group_type == "DAY_NIGHT_GROUP" and not TimeUtil.is_day_now() ->
+          filter_groups(night_group, predictions)
+
+        true ->
+          predictions
+      end
+    else
+      _ -> predictions
+    end
+  end
+
+  defp filter_groups(groups, predictions) when is_bitstring(groups) and is_list(predictions) do
+    groups
+    |> String.split(",")
+    |> Enum.map(&String.trim/1)
+    |> Enum.reduce([], fn service_no, acc ->
+      case Enum.find(predictions, nil, fn service -> service["ServiceNo"] == service_no end) do
+        nil -> acc
+        service -> acc ++ [service]
+      end
+    end)
+  end
+
+  defp filter_groups(_groups, predictions) do
+    predictions
   end
 end

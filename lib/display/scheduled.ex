@@ -142,10 +142,11 @@ defmodule Display.Scheduled do
     %{"service_no" => "30", "time" => "7 min"}
   ]
   """
-  def get_incoming_buses(bus_stop_no) do
+  def get_incoming_buses(filter_service_groups, bus_stop_no) do
     %Postgrex.Result{rows: rows} = Buses.get_incoming_bus_schedule_by_bus_stop(bus_stop_no)
 
     rows
+    |> Enum.filter(fn [dpi_route_code, _] -> dpi_route_code in filter_service_groups end)
     |> Enum.map(fn [dpi_route_code, arriving_time] ->
       %{"service_no" => dpi_route_code, "time" => arriving_time}
     end)

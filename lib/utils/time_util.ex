@@ -175,4 +175,9 @@ defmodule Display.Utils.TimeUtil do
     seconds = get_eta_in_seconds(time)
     floor(seconds / 60)
   end
+
+  def is_day_now() do
+    elapsed_seconds = get_seconds_past_today()
+    elapsed_seconds >= 21600 and elapsed_seconds < 64800
+  end
 end
