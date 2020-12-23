@@ -41,6 +41,14 @@ defmodule Display.Utils.NaturalSort do
       ["foo", "foo03.z", "foo06.A", "foo06.a", "foo45.D"]
       iex> NaturalSort.sort(["foo03.z", "foo45.D", "foo06.a", "foo06.A", "foo"], [case_sensitive: :true, direction: :desc])
       ["foo45.D", "foo06.a", "foo06.A", "foo03.z", "foo"]
+
+      services
+      |> Enum.sort_by(
+        fn p ->
+          NaturalSort.format_item(p["ServiceNo"], false)
+        end,
+        NaturalSort.sort_direction(:asc)
+      )
   """
 
   def sort([]), do: []
