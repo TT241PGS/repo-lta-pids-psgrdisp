@@ -119,4 +119,11 @@ defmodule Display.Buses do
     "
     SQL.query!(Repo, query, [])
   end
+
+  def get_panel_configuration_by_panel_id(panel_id) do
+    from(p in Buses.PanelConfiguration,
+      where: p.panel_id == ^panel_id
+    )
+    |> Repo.one()
+  end
 end
