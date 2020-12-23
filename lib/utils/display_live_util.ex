@@ -284,12 +284,6 @@ defmodule Display.Utils.DisplayLiveUtil do
         |> update_estimated_arrival("NextBus2")
         |> update_estimated_arrival("NextBus3")
       end)
-      |> Enum.sort_by(
-        fn p ->
-          NaturalSort.format_item(p["ServiceNo"], false)
-        end,
-        NaturalSort.sort_direction(:asc)
-      )
 
     bus_stop_map =
       cached_predictions
@@ -312,12 +306,6 @@ defmodule Display.Utils.DisplayLiveUtil do
     |> Flow.map(fn prediction ->
       update_scheduled_arrival(prediction)
     end)
-    |> Enum.sort_by(
-      fn p ->
-        NaturalSort.format_item(p["ServiceNo"], false)
-      end,
-      NaturalSort.sort_direction(:asc)
-    )
   end
 
   def get_next_index(layouts, current_index) do
