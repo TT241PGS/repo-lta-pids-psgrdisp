@@ -48,7 +48,7 @@ defmodule Display.Utils.DisplayLiveUtil do
         incoming_buses = get_incoming_buses(cached_predictions)
 
         predictions_previous = socket.assigns.predictions_current
-        cached_predictions = update_cached_predictions(cached_predictions)
+        cached_predictions = update_cached_predictions(cached_predictions, bus_stop_no)
 
         socket =
           socket
@@ -274,6 +274,16 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
+  def update_realtime_no_of_stops(service, no_of_stops_map) do
+    no_of_stops =
+      Buses.get_no_of_stops_from_map_by_dpi_route_code_and_dest_code(
+        no_of_stops_map,
+        {service["ServiceNo"], service["NextBus"]["DestinationCode"] |> String.to_integer()}
+      )
+
+    Map.put(service, "NoOfStops", no_of_stops)
+  end
+
   def update_scheduled_destination(service, bus_stop_map) do
     case Access.get(service, "DestinationCode") do
       nil ->
@@ -288,7 +298,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
-  def update_cached_predictions(cached_predictions) do
+  def update_cached_predictions(cached_predictions, bus_stop_no) do
     cached_predictions =
       cached_predictions
       |> Flow.from_enumerable()
@@ -307,9 +317,12 @@ defmodule Display.Utils.DisplayLiveUtil do
       end)
       |> Buses.get_bus_stop_map_by_nos()
 
+    no_of_stops_map = Buses.get_no_of_stops_map_by_bus_stop(bus_stop_no)
+
     cached_predictions
     |> Enum.map(fn service ->
       service
+      |> update_realtime_no_of_stops(no_of_stops_map)
       |> update_realtime_destination(bus_stop_map)
     end)
   end

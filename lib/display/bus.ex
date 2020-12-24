@@ -52,6 +52,24 @@ defmodule Display.Buses do
     |> Map.get(:point_desc)
   end
 
+  def get_no_of_stops_map_by_bus_stop(bus_stop) do
+    from(s in Buses.Schedule,
+      where: s.point_no == ^bus_stop,
+      distinct: [s.dpi_route_code, s.dest_code, s.no_of_stops]
+    )
+    |> Repo.all()
+    |> Enum.reduce(%{}, fn service, acc ->
+      Map.put(acc, {service.dpi_route_code, service.dest_code}, service.no_of_stops)
+    end)
+  end
+
+  def get_no_of_stops_from_map_by_dpi_route_code_and_dest_code(
+        no_of_stops_map,
+        {dpi_route_code, dest_code}
+      ) do
+    Map.get(no_of_stops_map, {dpi_route_code, dest_code})
+  end
+
   # TODO: Query with BaseVersion, OperatingDay
   def get_bus_schedule_by_bus_stop(bus_stop_no) do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()

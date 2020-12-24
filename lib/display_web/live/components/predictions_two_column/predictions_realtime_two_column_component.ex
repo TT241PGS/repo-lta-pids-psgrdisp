@@ -20,7 +20,7 @@ defmodule PredictionsRealtimeTwoColumn do
           <div class="sc-bdnylx dciVXD bus-info">{{service["ServiceNo"]}}</div>
           <div class="next-buses">
             <div class="next-buses-heading-info">
-              <span class="stops"># stops<i class="ml-1rem fas fa-arrow-right"></i></span>
+              <span class="stops">{{service["NoOfStops"]}}<i class="ml-1rem fas fa-arrow-right"></i></span>
               <p>{{service["NextBus"]["DestinationCode"]}}</p>
             </div>
             <div class="details">
