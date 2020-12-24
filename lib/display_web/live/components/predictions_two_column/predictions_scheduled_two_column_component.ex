@@ -22,8 +22,8 @@ defmodule PredictionsScheduledTwoColumn do
           <div class="bus-info-message" :if={{service["Status"] == "last_trip_departed"}}>Last trip for the day has departed.</div>
           <div class="next-buses" :if={{service["Status"] == "operating_now"}}>
             <div class="next-buses-heading-info">
-              <span class="stops"># stops<i class="ml-1rem fas fa-arrow-right"></i></span>
-              <p>dest #</p>
+              <span class="stops">{{service["NoOfStops"]}}<i class="ml-1rem fas fa-arrow-right"></i></span>
+              <p>{{service["DestinationCode"]}}</p>
             </div>
             <div class="details">
               <div class="next-bus" :for={{ next_bus <- service["NextBuses"] }}>

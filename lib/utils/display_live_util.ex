@@ -3,7 +3,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   require Logger
 
-  alias Display.{Buses, RealTime, Templates}
+  alias Display.{Buses, RealTime, Scheduled, Templates}
   alias Display.Utils.{NaturalSort, TimeUtil}
 
   def incoming_bus_reducer(service, acc) do
@@ -126,13 +126,13 @@ defmodule Display.Utils.DisplayLiveUtil do
     predictions_previous = socket.assigns.predictions_current
 
     scheduled_predictions =
-      Display.Scheduled.get_predictions(bus_stop_no)
+      Scheduled.get_predictions(bus_stop_no)
       |> filter_panel_groups(socket.assigns.panel_id)
 
     incoming_buses =
       scheduled_predictions
       |> Enum.map(fn prediction -> prediction["ServiceNo"] end)
-      |> Display.Scheduled.get_incoming_buses(bus_stop_no)
+      |> Scheduled.get_incoming_buses(bus_stop_no)
 
     scheduled_predictions = update_scheduled_predictions(scheduled_predictions)
 
@@ -260,7 +260,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     Map.replace!(prediction, "NextBuses", next_buses)
   end
 
-  def update_destination(service, bus_stop_map) do
+  def update_realtime_destination(service, bus_stop_map) do
     case Access.get(service, "NextBus") do
       nil ->
         service
@@ -270,6 +270,20 @@ defmodule Display.Utils.DisplayLiveUtil do
           service,
           ["NextBus", "DestinationCode"],
           &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1 |> String.to_integer())
+        )
+    end
+  end
+
+  def update_scheduled_destination(service, bus_stop_map) do
+    case Access.get(service, "DestinationCode") do
+      nil ->
+        service
+
+      _ ->
+        update_in(
+          service,
+          ["DestinationCode"],
+          &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1)
         )
     end
   end
@@ -296,15 +310,30 @@ defmodule Display.Utils.DisplayLiveUtil do
     cached_predictions
     |> Enum.map(fn service ->
       service
-      |> update_destination(bus_stop_map)
+      |> update_realtime_destination(bus_stop_map)
     end)
   end
 
   def update_scheduled_predictions(scheduled_predictions) do
+    scheduled_predictions =
+      scheduled_predictions
+      |> Flow.from_enumerable()
+      |> Flow.map(fn prediction ->
+        update_scheduled_arrival(prediction)
+      end)
+
+    bus_stop_map =
+      scheduled_predictions
+      |> Enum.map(fn service ->
+        service
+        |> get_in(["DestinationCode"])
+      end)
+      |> Buses.get_bus_stop_map_by_nos()
+
     scheduled_predictions
-    |> Flow.from_enumerable()
-    |> Flow.map(fn prediction ->
-      update_scheduled_arrival(prediction)
+    |> Enum.map(fn service ->
+      service
+      |> update_scheduled_destination(bus_stop_map)
     end)
   end
 
@@ -409,10 +438,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     |> String.split(",")
     |> Enum.map(&String.trim/1)
     |> Enum.reduce([], fn service_no, acc ->
-      case Enum.find(predictions, nil, fn service -> service["ServiceNo"] == service_no end) do
-        nil -> acc
-        service -> acc ++ [service]
-      end
+      acc ++ Enum.filter(predictions, fn service -> service["ServiceNo"] == service_no end)
     end)
   end
 

@@ -69,13 +69,14 @@ defmodule Display.Scheduled do
 
     rows
     |> Enum.reduce(%{}, fn row, acc ->
-      [dpi_route_code, direction, arriving_time] = row
-      key = {dpi_route_code, direction}
+      [dpi_route_code, dest_code, no_of_stops, arriving_time] = row
+      key = {dpi_route_code, dest_code}
 
       arriving_time_formatted = TimeUtil.get_iso_date_from_seconds(arriving_time)
 
       value = %{
         "Status" => "operating_now",
+        "NoOfStops" => no_of_stops,
         "NextBuses" => [
           %{
             "EstimatedArrival" => arriving_time_formatted
@@ -93,7 +94,7 @@ defmodule Display.Scheduled do
   defp merge_active_inactive_services([active_services_map, last_buses_map, all_services]) do
     all_services
     |> Enum.map(fn key ->
-      {service_no, direction} = key
+      {service_no, dest_code} = key
       current_service = Map.get(active_services_map, key)
       # If current_service is not nil, then bus has upcoming trips
       is_operating_now = if current_service == nil, do: false, else: true
@@ -105,7 +106,7 @@ defmodule Display.Scheduled do
         is_operating_today and not is_operating_now ->
           %{
             "ServiceNo" => service_no,
-            "Direction" => direction,
+            "DestinationCode" => dest_code,
             "Status" => "last_trip_departed",
             "NextBuses" => []
           }
@@ -114,7 +115,7 @@ defmodule Display.Scheduled do
         not is_operating_today ->
           %{
             "ServiceNo" => service_no,
-            "Direction" => direction,
+            "DestinationCode" => dest_code,
             "Status" => "not_operating_today",
             "NextBuses" => []
           }
@@ -125,7 +126,8 @@ defmodule Display.Scheduled do
 
           %{
             "ServiceNo" => service_no,
-            "Direction" => direction,
+            "DestinationCode" => dest_code,
+            "NoOfStops" => current_service["NoOfStops"],
             "Status" => "operating_now",
             "NextBuses" => next_buses
           }
@@ -175,8 +177,8 @@ defmodule Display.Scheduled do
     %Postgrex.Result{rows: rows} = Buses.get_last_bus_by_service_by_bus_stop(bus_stop_no)
 
     rows
-    |> Enum.reduce(%{}, fn [dpi_route_code, direction, arriving_time], acc ->
-      key = {dpi_route_code, direction}
+    |> Enum.reduce(%{}, fn [dpi_route_code, dest_code, arriving_time], acc ->
+      key = {dpi_route_code, dest_code}
 
       value = %{
         "time_seconds" => arriving_time,
@@ -200,20 +202,19 @@ defmodule Display.Scheduled do
   defp add_last_bus_flag(service, key, last_buses_map) do
     last_index = length(service["NextBuses"]) - 1
 
-    next_buses =
-      service["NextBuses"]
-      |> Enum.with_index()
-      |> Enum.map(fn {next_bus, index} ->
-        timing_iso = next_bus["EstimatedArrival"]
-        last_bus_timing_iso = get_in(last_buses_map, [key, "time_iso"])
+    service["NextBuses"]
+    |> Enum.with_index()
+    |> Enum.map(fn {next_bus, index} ->
+      timing_iso = next_bus["EstimatedArrival"]
+      last_bus_timing_iso = get_in(last_buses_map, [key, "time_iso"])
 
-        case timing_iso == last_bus_timing_iso and index == last_index do
-          true ->
-            Map.put(next_bus, "isLastBus", true)
+      case timing_iso == last_bus_timing_iso and index == last_index do
+        true ->
+          Map.put(next_bus, "isLastBus", true)
 
-          _ ->
-            Map.put(next_bus, "isLastBus", false)
-        end
-      end)
+        _ ->
+          Map.put(next_bus, "isLastBus", false)
+      end
+    end)
   end
 end

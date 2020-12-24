@@ -57,7 +57,7 @@ defmodule Display.Buses do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
 
     query = "
-    select distinct bs_outer.dpi_route_code, bs_outer.direction, bs_top.arriving_time from schedule bs_outer
+    select distinct bs_outer.dpi_route_code, bs_outer.dest_code, bs_outer.no_of_stops, bs_top.arriving_time from schedule bs_outer
     join lateral (
       select * from schedule bs_inner
       where bs_inner.dpi_route_code = bs_outer.dpi_route_code
@@ -96,7 +96,7 @@ defmodule Display.Buses do
   # TODO: Query with BaseVersion, OperatingDay
   def get_last_bus_by_service_by_bus_stop(bus_stop_no) do
     query = "
-    select distinct bs_outer.dpi_route_code, bs_outer.direction, bs_top.arriving_time from schedule bs_outer
+    select distinct bs_outer.dpi_route_code, bs_outer.dest_code, bs_top.arriving_time from schedule bs_outer
     join lateral (
         select * from schedule bs_inner
         where bs_inner.dpi_route_code = bs_outer.dpi_route_code
@@ -114,7 +114,7 @@ defmodule Display.Buses do
   # TODO: Query with BaseVersion
   def get_all_services_by_bus_stop(bus_stop_no) do
     query = "
-    select distinct dpi_route_code, direction from schedule
+    select distinct dpi_route_code, dest_code from schedule
     where point_no = #{bus_stop_no}
     "
     SQL.query!(Repo, query, [])
