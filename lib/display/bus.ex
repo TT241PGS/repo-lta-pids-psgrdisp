@@ -57,9 +57,9 @@ defmodule Display.Buses do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
 
     query = "
-    select distinct bs_outer.dpi_route_code, bs_outer.direction, bs_top.arriving_time from bus_schedule bs_outer
+    select distinct bs_outer.dpi_route_code, bs_outer.direction, bs_top.arriving_time from schedule bs_outer
     join lateral (
-      select * from bus_schedule bs_inner
+      select * from schedule bs_inner
       where bs_inner.dpi_route_code = bs_outer.dpi_route_code
       and bs_inner.point_no = #{bus_stop_no}
       and bs_inner.arriving_time > #{now_in_seconds_past_today}
@@ -77,9 +77,9 @@ defmodule Display.Buses do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
 
     query = "
-    select distinct bs_outer.dpi_route_code, bs_top.arriving_time from bus_schedule bs_outer
+    select distinct bs_outer.dpi_route_code, bs_top.arriving_time from schedule bs_outer
     join lateral (
-        select * from bus_schedule bs_inner
+        select * from schedule bs_inner
         where bs_inner.dpi_route_code = bs_outer.dpi_route_code
         and bs_inner.point_no = #{bus_stop_no}
         and bs_inner.arriving_time > #{now_in_seconds_past_today}
@@ -96,9 +96,9 @@ defmodule Display.Buses do
   # TODO: Query with BaseVersion, OperatingDay
   def get_last_bus_by_service_by_bus_stop(bus_stop_no) do
     query = "
-    select distinct bs_outer.dpi_route_code, bs_outer.direction, bs_top.arriving_time from bus_schedule bs_outer
+    select distinct bs_outer.dpi_route_code, bs_outer.direction, bs_top.arriving_time from schedule bs_outer
     join lateral (
-        select * from bus_schedule bs_inner
+        select * from schedule bs_inner
         where bs_inner.dpi_route_code = bs_outer.dpi_route_code
         and bs_inner.point_no = #{bus_stop_no}
         order by bs_inner.arriving_time desc
@@ -114,7 +114,7 @@ defmodule Display.Buses do
   # TODO: Query with BaseVersion
   def get_all_services_by_bus_stop(bus_stop_no) do
     query = "
-    select distinct dpi_route_code, direction from bus_schedule
+    select distinct dpi_route_code, direction from schedule
     where point_no = #{bus_stop_no}
     "
     SQL.query!(Repo, query, [])
