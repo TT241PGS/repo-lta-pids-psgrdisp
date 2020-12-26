@@ -1,16 +1,17 @@
-defmodule Display.Buses.BusSchedule do
+defmodule Display.Buses.Schedule do
   @moduledoc false
 
   use Ecto.Schema
   import Ecto.Changeset
 
   @primary_key false
-  schema "bus_schedule" do
+  schema "schedule" do
     field :base_version, :integer
-    field :operating_day_desc, :string
     field :line_no, :integer
     field :route_abbr, :string
     field :direction, :integer
+    field :dest_code, :integer
+    field :no_of_stops, :integer
     field :sequence_no, :integer
     field :point_no, :integer
     field :point_type, :integer
@@ -28,6 +29,8 @@ defmodule Display.Buses.BusSchedule do
     :line_no,
     :route_abbr,
     :direction,
+    :dest_code,
+    :no_of_stops,
     :sequence_no,
     :point_no,
     :point_type,
