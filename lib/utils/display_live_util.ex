@@ -45,6 +45,14 @@ defmodule Display.Utils.DisplayLiveUtil do
       {:ok, cached_predictions} ->
         cached_predictions = filter_panel_groups(cached_predictions, socket.assigns.panel_id)
 
+        service_arrival_map =
+          cached_predictions
+          |> Enum.reduce(%{}, fn service, acc ->
+            Map.put(acc, service["ServiceNo"], service["NextBus"]["EstimatedArrival"])
+          end)
+
+        quickest_way_to = RealTime.get_quickest_way_to(bus_stop_no, service_arrival_map)
+
         incoming_buses = get_incoming_buses(cached_predictions)
 
         predictions_previous = socket.assigns.predictions_current
@@ -75,6 +83,10 @@ defmodule Display.Utils.DisplayLiveUtil do
           |> Phoenix.LiveView.assign(
             :predictions_current,
             cached_predictions
+          )
+          |> Phoenix.LiveView.assign(
+            :quickest_way_to,
+            quickest_way_to
           )
 
         trigger_next_update_stops(is_trigger_next)
@@ -136,6 +148,8 @@ defmodule Display.Utils.DisplayLiveUtil do
 
     scheduled_predictions = update_scheduled_predictions(scheduled_predictions)
 
+    quickest_way_to = Scheduled.get_quickest_way_to(bus_stop_no)
+
     socket =
       socket
       |> Phoenix.LiveView.assign(:predictions_realtime_set_1_column, [])
@@ -161,6 +175,10 @@ defmodule Display.Utils.DisplayLiveUtil do
       |> Phoenix.LiveView.assign(
         :predictions_current,
         scheduled_predictions
+      )
+      |> Phoenix.LiveView.assign(
+        :quickest_way_to,
+        quickest_way_to
       )
 
     trigger_next_update_stops(is_trigger_next)

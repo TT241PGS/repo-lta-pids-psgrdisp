@@ -144,4 +144,56 @@ defmodule Display.Buses do
     )
     |> Repo.one()
   end
+
+  # TODO: Query with BaseVersion, OperatingDay
+  def get_scheduled_quickest_way_to_by_bus_stop(bus_stop_no) do
+    now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
+    query = "
+    select distinct t_top.service, t_outer.poi_stop, t_top.time_period, t_top.time_taken from quickest_way_to_poi t_outer
+    join lateral (
+        select * from quickest_way_to_poi t_inner
+        where t_inner.departure_stop = t_outer.departure_stop
+        and t_inner.poi_stop = t_outer.poi_stop
+        and t_inner.time_period > #{now_in_seconds_past_today}
+        order by t_inner.time_period asc
+        limit 2
+    ) t_top on true
+    where t_outer.departure_stop=#{bus_stop_no}
+    order by t_top.time_period,t_outer.poi_stop
+    limit 4;
+    "
+    SQL.query!(Repo, query, [])
+  end
+
+  # TODO: Query with BaseVersion, OperatingDay
+  # Get next 5 services each going to every POI stop from a bus stop
+  def get_realtime_quickest_way_to_by_bus_stop(bus_stop_no) do
+    now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
+    next_hour_in_seconds_past_today = now_in_seconds_past_today * 60
+    query = "
+    select distinct t_outer.poi_stop, t_top.service, t_top.time_taken from quickest_way_to_poi t_outer
+    join lateral (
+        select * from quickest_way_to_poi t_inner
+        where t_inner.departure_stop = t_outer.departure_stop
+        and t_inner.poi_stop = t_outer.poi_stop
+        and t_inner.time_period > #{now_in_seconds_past_today}
+        and t_inner.time_period <= #{next_hour_in_seconds_past_today}
+        order by t_inner.time_period
+        limit 5
+    ) t_top on true
+    where t_outer.departure_stop=#{bus_stop_no}
+    group by t_outer.poi_stop,t_top.service,t_top.time_taken
+    "
+    SQL.query!(Repo, query, [])
+  end
+
+  def get_poi_metadata_map(poi_list) do
+    from(p in Buses.PoiStop,
+      where: p.stop_code in ^poi_list
+    )
+    |> Repo.all()
+    |> Enum.reduce(%{}, fn poi, acc ->
+      Map.put(acc, poi.stop_code, poi.poi_name)
+    end)
+  end
 end
