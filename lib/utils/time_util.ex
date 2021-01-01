@@ -45,9 +45,14 @@ defmodule Display.Utils.TimeUtil do
     Timex.format!(DateTime.utc_now(), "%Y-%m-%d", :strftime)
   end
 
-  def get_current_time do
+  def get_current_time_hh_mm do
     get_time_now()
     |> Timex.format!("%H:%M", :strftime)
+  end
+
+  def get_current_time_hh_mm_ss do
+    get_time_now()
+    |> Timex.format!("%H:%M:%S", :strftime)
   end
 
   def get_display_date_time do
