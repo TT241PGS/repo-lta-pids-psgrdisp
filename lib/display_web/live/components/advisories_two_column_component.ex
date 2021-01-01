@@ -6,7 +6,7 @@ defmodule AdvisoriesTwoColumn do
 
   def render(assigns) do
     ~H"""
-    <div class="advisories-container">
+    <div class="advisories-container m-top-component">
       <div class="heading-wrapper">
         <div class="heading">
           <h1>Advisories</h1>

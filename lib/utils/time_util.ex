@@ -86,7 +86,11 @@ defmodule Display.Utils.TimeUtil do
   end
 
   def get_seconds_past_today do
-    get_time_now() |> Timex.diff(get_beginning_of_day, :seconds)
+    get_time_now() |> Timex.diff(get_beginning_of_day(), :seconds)
+  end
+
+  def get_seconds_past_today_from_iso_date(time) do
+    time |> DateTime.from_iso8601() |> elem(1) |> Timex.diff(get_beginning_of_day(), :seconds)
   end
 
   def get_weekday_name(nil), do: nil

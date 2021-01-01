@@ -217,4 +217,80 @@ defmodule Display.Scheduled do
       end
     end)
   end
+
+  @doc """
+  Get quickest way to of last bus of each service in a bus_stop
+  Example:
+  [
+    %{
+      "arriving_time_at_origin" => "> 60 min",
+      "poi_name" => "W'Lands Train Checkpt",
+      "service_no" => "912",
+      "travel_time" => 2400
+    },
+    %{
+      "arriving_time_at_origin" => "> 60 min",
+      "poi_name" => "Changi Airport",
+      "service_no" => "914",
+      "travel_time" => 2600
+    }
+  ]
+  """
+  def get_quickest_way_to(bus_stop_no) do
+    %Postgrex.Result{rows: rows} = Buses.get_scheduled_quickest_way_to_by_bus_stop(bus_stop_no)
+
+    rows
+    |> Enum.reduce(%{}, fn [dpi_route_code, poi_stop_code, arriving_time_at_origin, travel_time],
+                           acc ->
+      key = poi_stop_code
+
+      value = %{
+        "arriving_time_at_origin" => arriving_time_at_origin,
+        "travel_time" => travel_time,
+        "service_no" => dpi_route_code
+      }
+
+      case Map.get(acc, key) do
+        nil ->
+          Map.put(acc, key, value)
+
+        first_service ->
+          service = determine_quickest_way_to(first_service, value)
+          Map.replace(acc, key, service)
+      end
+    end)
+    |> add_poi_metadata()
+  end
+
+  defp determine_quickest_way_to(first_service, second_service) do
+    first_service_arrival_at_destination =
+      first_service["arriving_time_at_origin"] + first_service["travel_time"]
+
+    second_service_arrival_at_destination =
+      second_service["arriving_time_at_origin"] + second_service["travel_time"]
+
+    arrival_diff_in_seconds =
+      first_service_arrival_at_destination - second_service_arrival_at_destination
+
+    # Arrival Difference < 4 minutes
+    case arrival_diff_in_seconds < 240 do
+      true ->
+        first_service
+
+      _ ->
+        second_service
+    end
+  end
+
+  defp add_poi_metadata(quickets_way_to_map) do
+    poi_metadata_map =
+      Map.keys(quickets_way_to_map)
+      |> Buses.get_poi_metadata_map()
+
+    Enum.map(quickets_way_to_map, fn {k, v} ->
+      v
+      |> Map.put("poi_name", Map.get(poi_metadata_map, k))
+      |> update_in(["arriving_time_at_origin"], &TimeUtil.get_eta_from_seconds_past_today/1)
+    end)
+  end
 end
