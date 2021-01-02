@@ -144,11 +144,23 @@ defmodule Display.Scheduled do
     %{"service_no" => "30", "time" => "7 min"}
   ]
   """
-  def get_incoming_buses(filter_service_groups, bus_stop_no) do
+  def get_incoming_buses(_filter_service_groups, _bus_stop_no, %{
+        global_message: global_message
+      })
+      when is_bitstring(global_message) do
+    []
+  end
+
+  def get_incoming_buses(filter_service_groups, bus_stop_no, %{
+        service_message_map: service_message_map,
+        hide_services: hide_services
+      }) do
     %Postgrex.Result{rows: rows} = Buses.get_incoming_bus_schedule_by_bus_stop(bus_stop_no)
+    suppress_services = Map.keys(service_message_map) ++ hide_services
 
     rows
     |> Enum.filter(fn [dpi_route_code, _] -> dpi_route_code in filter_service_groups end)
+    |> Enum.filter(fn [dpi_route_code, _] -> dpi_route_code not in suppress_services end)
     |> Enum.map(fn [dpi_route_code, arriving_time] ->
       %{"service_no" => dpi_route_code, "time" => arriving_time}
     end)
@@ -236,10 +248,21 @@ defmodule Display.Scheduled do
     }
   ]
   """
-  def get_quickest_way_to(bus_stop_no) do
+  def get_quickest_way_to(_bus_stop_no, %{global_message: global_message})
+      when is_bitstring(global_message) do
+    []
+  end
+
+  def get_quickest_way_to(bus_stop_no, %{
+        service_message_map: service_message_map,
+        hide_services: hide_services
+      }) do
     %Postgrex.Result{rows: rows} = Buses.get_scheduled_quickest_way_to_by_bus_stop(bus_stop_no)
 
+    suppress_services = Map.keys(service_message_map) ++ hide_services
+
     rows
+    |> Enum.filter(fn [dpi_route_code, _, _, _] -> dpi_route_code not in suppress_services end)
     |> Enum.reduce(%{}, fn [dpi_route_code, poi_stop_code, arriving_time_at_origin, travel_time],
                            acc ->
       key = poi_stop_code

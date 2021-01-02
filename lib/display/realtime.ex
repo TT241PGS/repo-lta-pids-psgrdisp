@@ -49,10 +49,22 @@ defmodule Display.RealTime do
     }
   ]
   """
-  def get_quickest_way_to(bus_stop_no, service_arrival_map) do
+
+  def get_quickest_way_to(_bus_stop_no, _service_arrival_map, %{global_message: global_message})
+      when is_bitstring(global_message) do
+    []
+  end
+
+  def get_quickest_way_to(bus_stop_no, service_arrival_map, %{
+        service_message_map: service_message_map,
+        hide_services: hide_services
+      }) do
     %Postgrex.Result{rows: rows} = Buses.get_realtime_quickest_way_to_by_bus_stop(bus_stop_no)
 
+    suppress_services = Map.keys(service_message_map) ++ hide_services
+
     rows
+    |> Enum.filter(fn [_, dpi_route_code, _] -> dpi_route_code not in suppress_services end)
     |> Enum.reduce(%{}, fn [poi_stop_code, dpi_route_code, travel_time], acc ->
       key = poi_stop_code
 

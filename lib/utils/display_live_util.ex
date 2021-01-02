@@ -3,8 +3,8 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   require Logger
 
-  alias Display.{Buses, RealTime, Scheduled, Templates}
-  alias Display.Utils.{NaturalSort, TimeUtil}
+  alias Display.{Buses, Messages, RealTime, Scheduled, Templates}
+  alias Display.Utils.{TimeUtil}
 
   def incoming_bus_reducer(service, acc) do
     next_bus_time =
@@ -22,10 +22,23 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
-  def get_incoming_buses(cached_predictions) do
+  def get_incoming_buses(_cached_predictions, %{
+        global_message: global_message
+      })
+      when is_bitstring(global_message) do
+    []
+  end
+
+  def get_incoming_buses(cached_predictions, %{
+        service_message_map: service_message_map,
+        hide_services: hide_services
+      }) do
+    suppress_services = Map.keys(service_message_map) ++ hide_services
+
     cached_predictions
     |> Enum.reduce([], &incoming_bus_reducer(&1, &2))
     |> Enum.filter(&(&1["time"] > -1))
+    |> Enum.filter(&(&1["service_no"] not in suppress_services))
     |> Enum.sort_by(&{&1["time"], &1["service_no"]})
     |> Enum.take(5)
     |> Enum.map(fn service ->
@@ -51,11 +64,15 @@ defmodule Display.Utils.DisplayLiveUtil do
             Map.put(acc, service["ServiceNo"], service["NextBus"]["EstimatedArrival"])
           end)
 
-        quickest_way_to = RealTime.get_quickest_way_to(bus_stop_no, service_arrival_map)
+        %{predictions_current: predictions_previous} = socket.assigns
 
-        incoming_buses = get_incoming_buses(cached_predictions)
+        suppressed_messages = Messages.get_suppressed_messages(bus_stop_no)
 
-        predictions_previous = socket.assigns.predictions_current
+        quickest_way_to =
+          RealTime.get_quickest_way_to(bus_stop_no, service_arrival_map, suppressed_messages)
+
+        incoming_buses = get_incoming_buses(cached_predictions, suppressed_messages)
+
         cached_predictions = update_cached_predictions(cached_predictions, bus_stop_no)
 
         socket =
@@ -83,6 +100,10 @@ defmodule Display.Utils.DisplayLiveUtil do
           |> Phoenix.LiveView.assign(
             :predictions_current,
             cached_predictions
+          )
+          |> Phoenix.LiveView.assign(
+            :suppressed_messages,
+            suppressed_messages
           )
           |> Phoenix.LiveView.assign(
             :quickest_way_to,
@@ -135,20 +156,22 @@ defmodule Display.Utils.DisplayLiveUtil do
         is_trigger_next,
         is_prediction_next_slide_scheduled
       ) do
-    predictions_previous = socket.assigns.predictions_current
+    %{predictions_current: predictions_previous} = socket.assigns
 
     scheduled_predictions =
       Scheduled.get_predictions(bus_stop_no)
       |> filter_panel_groups(socket.assigns.panel_id)
 
+    suppressed_messages = Messages.get_suppressed_messages(bus_stop_no)
+
     incoming_buses =
       scheduled_predictions
       |> Enum.map(fn prediction -> prediction["ServiceNo"] end)
-      |> Scheduled.get_incoming_buses(bus_stop_no)
+      |> Scheduled.get_incoming_buses(bus_stop_no, suppressed_messages)
 
     scheduled_predictions = update_scheduled_predictions(scheduled_predictions)
 
-    quickest_way_to = Scheduled.get_quickest_way_to(bus_stop_no)
+    quickest_way_to = Scheduled.get_quickest_way_to(bus_stop_no, suppressed_messages)
 
     socket =
       socket
@@ -175,6 +198,10 @@ defmodule Display.Utils.DisplayLiveUtil do
       |> Phoenix.LiveView.assign(
         :predictions_current,
         scheduled_predictions
+      )
+      |> Phoenix.LiveView.assign(
+        :suppressed_messages,
+        suppressed_messages
       )
       |> Phoenix.LiveView.assign(
         :quickest_way_to,
