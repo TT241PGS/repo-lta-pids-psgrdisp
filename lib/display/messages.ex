@@ -6,7 +6,7 @@ defmodule Display.Messages do
   import Ecto.Query, warn: false
   alias Display.Repo
 
-  alias Display.Messages.{MessageAssignment, MessageData}
+  alias Display.Messages.{MessageAssignment, MessageData, SuppressedMessage}
 
   alias Display.Utils.TimeUtil
 
@@ -73,7 +73,7 @@ defmodule Display.Messages do
 
   # These messages have start time and end time to show on weekdays, saturday and sunday - public holidays
   defp get_messages_option2(panel_id) do
-    current_time = TimeUtil.get_current_time()
+    current_time = TimeUtil.get_current_time_hh_mm()
 
     from(cmd in MessageData,
       join: cma in MessageAssignment,
@@ -356,5 +356,137 @@ defmodule Display.Messages do
 
   defp sum(a, b) do
     a + b
+  end
+
+  def get_suppressed_messages(nil) do
+    %{
+      global_message: nil,
+      service_message_map: %{},
+      hide_services: []
+    }
+  end
+
+  def get_suppressed_messages(bus_stop_no) do
+    bus_stop_no = Integer.to_string(bus_stop_no)
+
+    tasks = [
+      Task.async(fn -> get_suppressed_messages_option1(bus_stop_no) end),
+      Task.async(fn -> get_suppressed_messages_option2(bus_stop_no) end)
+    ]
+
+    Task.yield_many(tasks)
+    |> Enum.reduce([], fn {task, result}, acc ->
+      case result do
+        nil ->
+          Task.shutdown(task, :brutal_kill)
+          exit(:timeout)
+
+        {:exit, reason} ->
+          exit(reason)
+
+        {:ok, []} ->
+          acc
+
+        {:ok, result} ->
+          acc ++ result
+      end
+    end)
+    |> format_suppressed_messages()
+  end
+
+  # These messages have only start date and end date
+  defp get_suppressed_messages_option1(bus_stop_no) do
+    now = TimeUtil.get_time_now()
+
+    from(sm in SuppressedMessage,
+      where:
+        sm.stop_code == ^bus_stop_no and
+          sm.use_rule == true and
+          sm.start_date_time <= ^now and
+          sm.end_date_time >= ^now,
+      select: %{
+        service_nos: sm.service_nos,
+        message: sm.message_to_display,
+        show_service: sm.show_service
+      }
+    )
+    |> Repo.all()
+  end
+
+  # These messages have start time and end time to show on weekdays, saturday and sunday - public holidays
+  defp get_suppressed_messages_option2(bus_stop_no) do
+    current_time = TimeUtil.get_current_time_hh_mm_ss()
+
+    from(sm in SuppressedMessage,
+      where:
+        sm.stop_code == ^bus_stop_no and
+          sm.use_rule == true and
+          sm.start_time_1 <= ^current_time and
+          sm.end_time_1 >= ^current_time,
+      select: %{
+        service_nos: sm.service_nos,
+        message: sm.message_to_display,
+        show_service: sm.show_service,
+        day_type_1: sm.day_type_1,
+        day_type_2: sm.day_type_2,
+        day_type_3: sm.day_type_3
+      }
+    )
+    |> Repo.all()
+    |> filter_messages_on_day_types()
+  end
+
+  defp format_suppressed_messages(messages) do
+    acc_init = %{
+      global_message: nil,
+      service_message_map: %{},
+      hide_services: []
+    }
+
+    messages
+    |> Enum.reduce_while(acc_init, fn
+      %{
+        service_nos: service_nos,
+        message: message,
+        show_service: show_service
+      },
+      acc ->
+        cond do
+          is_nil(service_nos) ->
+            acc =
+              Map.replace(
+                acc,
+                :global_message,
+                "No buses will stop here today due to F1 road closure"
+              )
+
+            {:halt, acc}
+
+          is_list(service_nos) and show_service == true ->
+            acc =
+              Enum.reduce(service_nos, acc, fn service_no, acc ->
+                update_in(
+                  acc,
+                  [:service_message_map, service_no],
+                  fn _ -> message end
+                )
+              end)
+
+            {:cont, acc}
+
+          is_list(service_nos) and show_service == false ->
+            acc =
+              update_in(
+                acc,
+                [:hide_services],
+                &(&1 ++ service_nos)
+              )
+
+            {:cont, acc}
+
+          true ->
+            {:cont, acc}
+        end
+    end)
   end
 end
