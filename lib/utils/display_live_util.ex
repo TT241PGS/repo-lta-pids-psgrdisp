@@ -406,43 +406,35 @@ defmodule Display.Utils.DisplayLiveUtil do
   end
 
   def update_layout(socket, layouts, current_layout_index) do
-    case current_layout_index do
-      nil ->
-        next_layout = Enum.at(layouts, 0)
-        next_duration = Map.get(next_layout, "duration") |> String.to_integer()
+    %{current_layouts: current_layouts} = socket.assigns
 
-        update_layout_prev_timer = socket.assigns.update_layout_timer
-
-        case update_layout_prev_timer do
-          nil -> nil
-          timer_ref -> Process.cancel_timer(timer_ref)
-        end
-
-        update_layout_timer =
-          Process.send_after(
-            self(),
-            :update_layout_repeatedly,
-            next_duration * 1000
-          )
-
-        socket =
-          socket
-          |> Phoenix.LiveView.assign(:current_layout_value, Map.get(next_layout, "value"))
-          |> Phoenix.LiveView.assign(:current_layout_index, 0)
-          |> Phoenix.LiveView.assign(:update_layout_timer, update_layout_timer)
-
+    cond do
+      not is_nil(layouts) and layouts == current_layouts ->
         {:noreply, socket}
 
-      current_index ->
-        next_index = get_next_index(layouts, current_index)
+      true ->
+        next_index =
+          case current_layout_index do
+            nil ->
+              0
+
+            current_index ->
+              get_next_index(layouts, current_index)
+          end
+
         next_layout = Enum.at(layouts, next_index)
         next_duration = Map.get(next_layout, "duration") |> String.to_integer()
 
         update_layout_prev_timer = socket.assigns.update_layout_timer
 
+        multimedia = get_multimedia(next_layout)
+
         case update_layout_prev_timer do
-          nil -> nil
-          timer_ref -> Process.cancel_timer(timer_ref)
+          nil ->
+            nil
+
+          timer_ref ->
+            Process.cancel_timer(timer_ref)
         end
 
         update_layout_timer =
@@ -452,12 +444,20 @@ defmodule Display.Utils.DisplayLiveUtil do
             next_duration * 1000
           )
 
+        Process.send_after(
+          self(),
+          :show_next_layout,
+          next_duration * 1000
+        )
+
         socket =
           socket
+          |> Phoenix.LiveView.assign(:current_layouts, layouts)
           |> Phoenix.LiveView.assign(:current_layout_value, Map.get(next_layout, "value"))
           |> Phoenix.LiveView.assign(:current_layout_index, next_index)
           |> Phoenix.LiveView.assign(:current_layout_panes, Map.get(next_layout, "panes"))
           |> Phoenix.LiveView.assign(:update_layout_timer, update_layout_timer)
+          |> Phoenix.LiveView.assign(:multimedia, multimedia)
 
         {:noreply, socket}
     end
@@ -489,6 +489,59 @@ defmodule Display.Utils.DisplayLiveUtil do
     else
       _ -> predictions
     end
+  end
+
+  def get_cycle_time_from_layouts(nil) do
+    300
+  end
+
+  def get_cycle_time_from_layouts(message_layouts) do
+    message_layouts
+    |> Enum.reduce(nil, fn layout, acc ->
+      cycle_time =
+        get_in(layout, ["panes", "pane1", "config", "cycle_time"]) ||
+          get_in(layout, ["panes", "pane2", "config", "cycle_time"]) ||
+          get_in(layout, ["panes", "pane3", "config", "cycle_time"])
+
+      case cycle_time do
+        nil -> acc
+        cycle_time -> cycle_time |> String.to_integer()
+      end
+    end)
+  end
+
+  def get_multimedia(nil) do
+    nil
+  end
+
+  def get_multimedia(layout) do
+    type = get_in(layout, ["panes", "pane1", "config", "multimediaType", "value"])
+
+    content =
+      case type do
+        nil ->
+          nil
+
+        "IMAGE" ->
+          "/pids-multimedia/" <> resource =
+            get_in(layout, ["panes", "pane1", "config", "file", "fileUrl"])
+
+          "https://pids-multimedia.s3-ap-southeast-1.amazonaws.com/" <> resource
+
+        "VIDEO" ->
+          get_in(layout, ["panes", "pane1", "config", "video", "fileUrl"])
+
+        "IMAGE SEQUENCE" ->
+          get_in(layout, ["panes", "pane1", "config", "files"])
+          |> Enum.map(fn file ->
+            %{
+              "url" => file["image"]["fileUrl"],
+              "duration" => file["duration"]
+            }
+          end)
+      end
+
+    %{type: type, content: content}
   end
 
   defp filter_groups(groups, predictions) when is_bitstring(groups) and is_list(predictions) do
