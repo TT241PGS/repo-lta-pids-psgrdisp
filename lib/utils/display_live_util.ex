@@ -517,6 +517,8 @@ defmodule Display.Utils.DisplayLiveUtil do
   def get_multimedia(layout) do
     type = get_in(layout, ["panes", "pane1", "config", "multimediaType", "value"])
 
+    base_url = "https://pids-multimedia.s3-ap-southeast-1.amazonaws.com/"
+
     content =
       case type do
         nil ->
@@ -526,16 +528,21 @@ defmodule Display.Utils.DisplayLiveUtil do
           "/pids-multimedia/" <> resource =
             get_in(layout, ["panes", "pane1", "config", "file", "fileUrl"])
 
-          "https://pids-multimedia.s3-ap-southeast-1.amazonaws.com/" <> resource
+          base_url <> resource
 
         "VIDEO" ->
-          get_in(layout, ["panes", "pane1", "config", "video", "fileUrl"])
+          "/pids-multimedia/" <> resource =
+            get_in(layout, ["panes", "pane1", "config", "video", "fileUrl"])
+
+          base_url <> resource
 
         "IMAGE SEQUENCE" ->
           get_in(layout, ["panes", "pane1", "config", "files"])
           |> Enum.map(fn file ->
+            "/pids-multimedia/" <> resource = file["image"]["fileUrl"]
+
             %{
-              "url" => file["image"]["fileUrl"],
+              "url" => base_url <> resource,
               "duration" => file["duration"]
             }
           end)
