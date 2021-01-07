@@ -429,6 +429,8 @@ defmodule Display.Utils.DisplayLiveUtil do
 
         multimedia = get_multimedia(next_layout)
 
+        socket = reset_image_sequence_slider_maybe(multimedia, socket)
+
         case update_layout_prev_timer do
           nil ->
             nil
@@ -549,6 +551,26 @@ defmodule Display.Utils.DisplayLiveUtil do
       end
 
     %{type: type, content: content}
+  end
+
+  def reset_image_sequence_slider_maybe(%{type: "IMAGE SEQUENCE"}, socket) do
+    # Clear the previous timer
+    # Call live view show_next_image_sequence
+    # Reset multimedia_image_sequence_current_index
+
+    case socket.assigns.multimedia_image_sequence_next_trigger_at do
+      nil -> nil
+      timer_ref -> Process.cancel_timer(timer_ref)
+    end
+
+    Process.send_after(self(), :show_next_image_sequence, 1)
+
+    socket
+    |> Phoenix.LiveView.assign(:multimedia_image_sequence_current_index, nil)
+  end
+
+  def reset_image_sequence_slider_maybe(_multimedia, socket) do
+    socket
   end
 
   defp filter_groups(groups, predictions) when is_bitstring(groups) and is_list(predictions) do

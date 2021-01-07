@@ -52,7 +52,10 @@ defmodule DisplayWeb.DisplayLive do
         is_show_non_message_template: false,
         skip_realtime: assigns["skip_realtime"] || false,
         update_messages_timeline_timer: nil,
-        multimedia: %{content: nil, type: nil}
+        multimedia: %{content: nil, type: nil},
+        multimedia_image_sequence_next_trigger_at: nil,
+        multimedia_image_sequence_current_index: nil,
+        multimedia_image_sequence_current_url: nil
       )
 
     case Process.get(:"$callers") do
@@ -439,6 +442,64 @@ defmodule DisplayWeb.DisplayLive do
     {:noreply, socket}
   end
 
+  def handle_info(
+        :show_next_image_sequence,
+        %{
+          assigns: %{
+            multimedia: %{type: type}
+          }
+        } = socket
+      )
+      when type != "IMAGE SEQUENCE" do
+    {:noreply, socket}
+  end
+
+  def handle_info(:show_next_image_sequence, socket) do
+    %{
+      multimedia: multimedia,
+      multimedia_image_sequence_current_index: multimedia_image_sequence_current_index
+    } = socket.assigns
+
+    max_index = length(multimedia.content) - 1
+
+    next_index =
+      cond do
+        is_nil(multimedia_image_sequence_current_index) ->
+          0
+
+        multimedia_image_sequence_current_index >= max_index ->
+          0
+
+        true ->
+          multimedia_image_sequence_current_index + 1
+      end
+
+    next_slide = Enum.at(multimedia.content, next_index)
+
+    next_slide_url = Map.get(next_slide, "url")
+
+    next_trigger_at = Map.get(next_slide, "duration") |> String.to_integer()
+
+    case socket.assigns.multimedia_image_sequence_next_trigger_at do
+      nil -> nil
+      timer_ref -> Process.cancel_timer(timer_ref)
+    end
+
+    multimedia_image_sequence_next_trigger_at =
+      Process.send_after(self(), :show_next_image_sequence, next_trigger_at * 1000)
+
+    socket =
+      socket
+      |> assign(:multimedia_image_sequence_current_index, next_index)
+      |> assign(:multimedia_image_sequence_current_url, next_slide_url)
+      |> assign(
+        :multimedia_image_sequence_next_trigger_at,
+        multimedia_image_sequence_next_trigger_at
+      )
+
+    {:noreply, socket}
+  end
+
   @doc """
     This calls itself after certain period of time to update layout every n seconds
   """
@@ -510,6 +571,8 @@ defmodule DisplayWeb.DisplayLive do
     next_duration = Map.get(next_layout, "duration") |> String.to_integer()
 
     multimedia = DisplayLiveUtil.get_multimedia(next_layout)
+
+    socket = DisplayLiveUtil.reset_image_sequence_slider_maybe(multimedia, socket)
 
     update_layout_prev_timer = socket.assigns.update_layout_timer
 
