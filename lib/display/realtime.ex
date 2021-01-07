@@ -84,8 +84,8 @@ defmodule Display.RealTime do
         nil ->
           Map.put(acc, key, [value])
 
-        next_service ->
-          update_in(acc, [key], &(&1 ++ [next_service]))
+        _ ->
+          update_in(acc, [key], &(&1 ++ [value]))
       end
     end)
     |> determine_quickest_way_to
