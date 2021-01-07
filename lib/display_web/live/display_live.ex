@@ -507,7 +507,10 @@ defmodule DisplayWeb.DisplayLive do
     start_time = Timex.now()
 
     Logger.info(":update_layout_repeatedly started")
-    templates = DisplayLiveUtil.get_template_details_from_cms(socket.assigns.panel_id)
+
+    templates =
+      DisplayLiveUtil.get_template_details_from_cms(socket.assigns.panel_id)
+      |> DisplayLiveUtil.discard_inactive_multimedia_layouts()
 
     socket = socket |> assign(:templates, templates)
 

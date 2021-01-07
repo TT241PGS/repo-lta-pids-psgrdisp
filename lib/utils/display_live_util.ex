@@ -585,4 +585,41 @@ defmodule Display.Utils.DisplayLiveUtil do
   defp filter_groups(_groups, predictions) do
     predictions
   end
+
+  def discard_inactive_multimedia_layouts(templates) do
+    Enum.map(templates, fn template ->
+      update_in(template, ["layouts"], &filter_active_multimedia_layout/1)
+    end)
+  end
+
+  defp filter_active_multimedia_layout(layouts) do
+    layouts
+    |> Enum.filter(fn layout ->
+      pane1 = get_in(layout, ["panes", "pane1"])
+
+      cond do
+        get_in(pane1, ["type", "value"]) != "multimedia" ->
+          true
+
+        true ->
+          config = get_in(pane1, ["config"])
+
+          start_date = config["startDate"] |> String.split("T") |> List.first()
+          start_time = config["startTime"]
+
+          start_date_time =
+            "#{start_date}T#{start_time}:00+08:00" |> Timex.parse!("{ISO:Extended}")
+
+          end_date = config["endDate"] |> String.split("T") |> List.first()
+          end_time = config["endTime"]
+          end_date_time = "#{end_date}T#{end_time}:00+08:00" |> Timex.parse!("{ISO:Extended}")
+
+          now = TimeUtil.get_time_now()
+
+          if Timex.compare(now, start_date_time) >= 0 and Timex.compare(now, end_date_time) <= 0,
+            do: true,
+            else: false
+      end
+    end)
+  end
 end
