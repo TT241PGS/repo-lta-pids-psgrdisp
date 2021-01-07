@@ -406,43 +406,37 @@ defmodule Display.Utils.DisplayLiveUtil do
   end
 
   def update_layout(socket, layouts, current_layout_index) do
-    case current_layout_index do
-      nil ->
-        next_layout = Enum.at(layouts, 0)
-        next_duration = Map.get(next_layout, "duration") |> String.to_integer()
+    %{current_layouts: current_layouts} = socket.assigns
 
-        update_layout_prev_timer = socket.assigns.update_layout_timer
-
-        case update_layout_prev_timer do
-          nil -> nil
-          timer_ref -> Process.cancel_timer(timer_ref)
-        end
-
-        update_layout_timer =
-          Process.send_after(
-            self(),
-            :update_layout_repeatedly,
-            next_duration * 1000
-          )
-
-        socket =
-          socket
-          |> Phoenix.LiveView.assign(:current_layout_value, Map.get(next_layout, "value"))
-          |> Phoenix.LiveView.assign(:current_layout_index, 0)
-          |> Phoenix.LiveView.assign(:update_layout_timer, update_layout_timer)
-
+    cond do
+      not is_nil(layouts) and layouts == current_layouts ->
         {:noreply, socket}
 
-      current_index ->
-        next_index = get_next_index(layouts, current_index)
+      true ->
+        next_index =
+          case current_layout_index do
+            nil ->
+              0
+
+            current_index ->
+              get_next_index(layouts, current_index)
+          end
+
         next_layout = Enum.at(layouts, next_index)
         next_duration = Map.get(next_layout, "duration") |> String.to_integer()
 
         update_layout_prev_timer = socket.assigns.update_layout_timer
 
+        multimedia = get_multimedia(next_layout)
+
+        socket = reset_image_sequence_slider_maybe(multimedia, socket)
+
         case update_layout_prev_timer do
-          nil -> nil
-          timer_ref -> Process.cancel_timer(timer_ref)
+          nil ->
+            nil
+
+          timer_ref ->
+            Process.cancel_timer(timer_ref)
         end
 
         update_layout_timer =
@@ -452,12 +446,20 @@ defmodule Display.Utils.DisplayLiveUtil do
             next_duration * 1000
           )
 
+        Process.send_after(
+          self(),
+          :show_next_layout,
+          next_duration * 1000
+        )
+
         socket =
           socket
+          |> Phoenix.LiveView.assign(:current_layouts, layouts)
           |> Phoenix.LiveView.assign(:current_layout_value, Map.get(next_layout, "value"))
           |> Phoenix.LiveView.assign(:current_layout_index, next_index)
           |> Phoenix.LiveView.assign(:current_layout_panes, Map.get(next_layout, "panes"))
           |> Phoenix.LiveView.assign(:update_layout_timer, update_layout_timer)
+          |> Phoenix.LiveView.assign(:multimedia, multimedia)
 
         {:noreply, socket}
     end
@@ -491,6 +493,86 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
+  def get_cycle_time_from_layouts(nil) do
+    300
+  end
+
+  def get_cycle_time_from_layouts(message_layouts) do
+    message_layouts
+    |> Enum.reduce(nil, fn layout, acc ->
+      cycle_time =
+        get_in(layout, ["panes", "pane1", "config", "cycle_time"]) ||
+          get_in(layout, ["panes", "pane2", "config", "cycle_time"]) ||
+          get_in(layout, ["panes", "pane3", "config", "cycle_time"])
+
+      case cycle_time do
+        nil -> acc
+        cycle_time -> cycle_time |> String.to_integer()
+      end
+    end)
+  end
+
+  def get_multimedia(nil) do
+    nil
+  end
+
+  def get_multimedia(layout) do
+    type = get_in(layout, ["panes", "pane1", "config", "multimediaType", "value"])
+
+    base_url = "https://pids-multimedia.s3-ap-southeast-1.amazonaws.com/"
+
+    content =
+      case type do
+        nil ->
+          nil
+
+        "IMAGE" ->
+          "/pids-multimedia/" <> resource =
+            get_in(layout, ["panes", "pane1", "config", "file", "fileUrl"])
+
+          base_url <> resource
+
+        "VIDEO" ->
+          "/pids-multimedia/" <> resource =
+            get_in(layout, ["panes", "pane1", "config", "video", "fileUrl"])
+
+          base_url <> resource
+
+        "IMAGE SEQUENCE" ->
+          get_in(layout, ["panes", "pane1", "config", "files"])
+          |> Enum.map(fn file ->
+            "/pids-multimedia/" <> resource = file["image"]["fileUrl"]
+
+            %{
+              "url" => base_url <> resource,
+              "duration" => file["duration"]
+            }
+          end)
+      end
+
+    %{type: type, content: content}
+  end
+
+  def reset_image_sequence_slider_maybe(%{type: "IMAGE SEQUENCE"}, socket) do
+    # Clear the previous timer
+    # Call live view show_next_image_sequence
+    # Reset multimedia_image_sequence_current_index
+
+    case socket.assigns.multimedia_image_sequence_next_trigger_at do
+      nil -> nil
+      timer_ref -> Process.cancel_timer(timer_ref)
+    end
+
+    Process.send_after(self(), :show_next_image_sequence, 1)
+
+    socket
+    |> Phoenix.LiveView.assign(:multimedia_image_sequence_current_index, nil)
+  end
+
+  def reset_image_sequence_slider_maybe(_multimedia, socket) do
+    socket
+  end
+
   defp filter_groups(groups, predictions) when is_bitstring(groups) and is_list(predictions) do
     groups
     |> String.split(",")
@@ -502,5 +584,42 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   defp filter_groups(_groups, predictions) do
     predictions
+  end
+
+  def discard_inactive_multimedia_layouts(templates) do
+    Enum.map(templates, fn template ->
+      update_in(template, ["layouts"], &filter_active_multimedia_layout/1)
+    end)
+  end
+
+  defp filter_active_multimedia_layout(layouts) do
+    layouts
+    |> Enum.filter(fn layout ->
+      pane1 = get_in(layout, ["panes", "pane1"])
+
+      cond do
+        get_in(pane1, ["type", "value"]) != "multimedia" ->
+          true
+
+        true ->
+          config = get_in(pane1, ["config"])
+
+          start_date = config["startDate"] |> String.split("T") |> List.first()
+          start_time = config["startTime"]
+
+          start_date_time =
+            "#{start_date}T#{start_time}:00+08:00" |> Timex.parse!("{ISO:Extended}")
+
+          end_date = config["endDate"] |> String.split("T") |> List.first()
+          end_time = config["endTime"]
+          end_date_time = "#{end_date}T#{end_time}:00+08:00" |> Timex.parse!("{ISO:Extended}")
+
+          now = TimeUtil.get_time_now()
+
+          if Timex.compare(now, start_date_time) >= 0 and Timex.compare(now, end_date_time) <= 0,
+            do: true,
+            else: false
+      end
+    end)
   end
 end

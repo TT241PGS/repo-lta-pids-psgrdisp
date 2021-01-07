@@ -23,6 +23,7 @@ defmodule DisplayWeb.DisplayLive do
         bus_stop_name: "",
         panel_id: panel_id,
         templates: [],
+        current_layouts: nil,
         current_layout_value: nil,
         current_layout_index: nil,
         current_layout_panes: nil,
@@ -49,7 +50,12 @@ defmodule DisplayWeb.DisplayLive do
         cycle_time: nil,
         quickest_way_to: [],
         is_show_non_message_template: false,
-        skip_realtime: assigns["skip_realtime"] || false
+        skip_realtime: assigns["skip_realtime"] || false,
+        update_messages_timeline_timer: nil,
+        multimedia: %{content: nil, type: nil},
+        multimedia_image_sequence_next_trigger_at: nil,
+        multimedia_image_sequence_current_index: nil,
+        multimedia_image_sequence_current_url: nil
       )
 
     case Process.get(:"$callers") do
@@ -273,6 +279,7 @@ defmodule DisplayWeb.DisplayLive do
     start_time = Timex.now()
     Logger.info(":update_messages_repeatedly started")
     previous_messages = socket.assigns.messages
+    cycle_time = socket.assigns.cycle_time
     new_messages = Messages.get_messages(socket.assigns.panel_id)
 
     new_messages =
@@ -281,21 +288,7 @@ defmodule DisplayWeb.DisplayLive do
         %{text: text, pm: pm}
       end)
 
-    cycle_time =
-      case socket.assigns.current_layout_panes do
-        nil ->
-          # Default to 300 when page loads as cycle_time is needed to show messages
-          300
-
-        panes ->
-          panes
-          |> Enum.reduce(nil, fn {_pane_id, pane}, acc ->
-            case get_in(pane, ["config", "cycle_time"]) do
-              nil -> acc
-              cycle_time -> cycle_time |> String.to_integer()
-            end
-          end)
-      end
+    cycle_time = if cycle_time == nil, do: 300, else: cycle_time
 
     start_time1 = Timex.now()
     new_messages = Messages.get_message_timings(new_messages, cycle_time)
@@ -331,7 +324,8 @@ defmodule DisplayWeb.DisplayLive do
 
     %{
       messages: %{timeline: timeline, message_map: message_map},
-      message_timeline_index: message_timeline_index
+      message_timeline_index: message_timeline_index,
+      update_messages_timeline_timer: update_messages_timeline_timer
     } = socket.assigns
 
     timeline_length = length(timeline)
@@ -409,9 +403,14 @@ defmodule DisplayWeb.DisplayLive do
         do: message_map[message_list_index],
         else: ""
 
-    unless is_nil(next_trigger_at) do
-      Process.send_after(self(), :update_messages_timeline, next_trigger_after * 1000)
+    if not is_nil(next_trigger_at) and not is_nil(update_messages_timeline_timer) do
+      Process.cancel_timer(update_messages_timeline_timer)
     end
+
+    update_messages_timeline_timer =
+      unless is_nil(next_trigger_at) do
+        Process.send_after(self(), :update_messages_timeline, next_trigger_after * 1000)
+      end
 
     socket =
       if new_message_timeline_index == timeline_last_index and message_list_index == nil do
@@ -435,9 +434,68 @@ defmodule DisplayWeb.DisplayLive do
       |> assign(:message_list_index, message_list_index)
       |> assign(:message_timeline_index, new_message_timeline_index)
       |> assign(:message, message)
+      |> assign(:update_messages_timeline_timer, update_messages_timeline_timer)
 
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info(":update_messages_timeline ended successfully (#{elapsed_time})")
+
+    {:noreply, socket}
+  end
+
+  def handle_info(
+        :show_next_image_sequence,
+        %{
+          assigns: %{
+            multimedia: %{type: type}
+          }
+        } = socket
+      )
+      when type != "IMAGE SEQUENCE" do
+    {:noreply, socket}
+  end
+
+  def handle_info(:show_next_image_sequence, socket) do
+    %{
+      multimedia: multimedia,
+      multimedia_image_sequence_current_index: multimedia_image_sequence_current_index
+    } = socket.assigns
+
+    max_index = length(multimedia.content) - 1
+
+    next_index =
+      cond do
+        is_nil(multimedia_image_sequence_current_index) ->
+          0
+
+        multimedia_image_sequence_current_index >= max_index ->
+          0
+
+        true ->
+          multimedia_image_sequence_current_index + 1
+      end
+
+    next_slide = Enum.at(multimedia.content, next_index)
+
+    next_slide_url = Map.get(next_slide, "url")
+
+    next_trigger_at = Map.get(next_slide, "duration") |> String.to_integer()
+
+    case socket.assigns.multimedia_image_sequence_next_trigger_at do
+      nil -> nil
+      timer_ref -> Process.cancel_timer(timer_ref)
+    end
+
+    multimedia_image_sequence_next_trigger_at =
+      Process.send_after(self(), :show_next_image_sequence, next_trigger_at * 1000)
+
+    socket =
+      socket
+      |> assign(:multimedia_image_sequence_current_index, next_index)
+      |> assign(:multimedia_image_sequence_current_url, next_slide_url)
+      |> assign(
+        :multimedia_image_sequence_next_trigger_at,
+        multimedia_image_sequence_next_trigger_at
+      )
 
     {:noreply, socket}
   end
@@ -449,7 +507,10 @@ defmodule DisplayWeb.DisplayLive do
     start_time = Timex.now()
 
     Logger.info(":update_layout_repeatedly started")
-    templates = DisplayLiveUtil.get_template_details_from_cms(socket.assigns.panel_id)
+
+    templates =
+      DisplayLiveUtil.get_template_details_from_cms(socket.assigns.panel_id)
+      |> DisplayLiveUtil.discard_inactive_multimedia_layouts()
 
     socket = socket |> assign(:templates, templates)
 
@@ -478,12 +539,76 @@ defmodule DisplayWeb.DisplayLive do
 
     layouts = templates |> Enum.at(template_index) |> Map.get("layouts")
 
+    message_layouts = templates |> Enum.at(1) |> Map.get("layouts")
+
+    cycle_time = DisplayLiveUtil.get_cycle_time_from_layouts(message_layouts)
+
+    socket =
+      socket
+      |> assign(:cycle_time, cycle_time)
+
     result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
 
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
 
     result
+  end
+
+  def handle_info(:show_next_layout, socket) do
+    start_time = Timex.now()
+
+    %{current_layouts: current_layouts, current_layout_index: current_layout_index} =
+      socket.assigns
+
+    next_index =
+      case current_layout_index do
+        nil ->
+          0
+
+        current_index ->
+          DisplayLiveUtil.get_next_index(current_layouts, current_index)
+      end
+
+    next_layout = Enum.at(current_layouts, next_index)
+    next_duration = Map.get(next_layout, "duration") |> String.to_integer()
+
+    multimedia = DisplayLiveUtil.get_multimedia(next_layout)
+
+    socket = DisplayLiveUtil.reset_image_sequence_slider_maybe(multimedia, socket)
+
+    update_layout_prev_timer = socket.assigns.update_layout_timer
+
+    case update_layout_prev_timer do
+      nil -> nil
+      timer_ref -> Process.cancel_timer(timer_ref)
+    end
+
+    update_layout_timer =
+      Process.send_after(
+        self(),
+        :update_layout_repeatedly,
+        next_duration * 1000
+      )
+
+    Process.send_after(
+      self(),
+      :show_next_layout,
+      next_duration * 1000
+    )
+
+    socket =
+      socket
+      |> Phoenix.LiveView.assign(:current_layout_value, Map.get(next_layout, "value"))
+      |> Phoenix.LiveView.assign(:current_layout_index, next_index)
+      |> Phoenix.LiveView.assign(:current_layout_panes, Map.get(next_layout, "panes"))
+      |> Phoenix.LiveView.assign(:update_layout_timer, update_layout_timer)
+      |> Phoenix.LiveView.assign(:multimedia, multimedia)
+
+    elapsed_time = TimeUtil.get_elapsed_time(start_time)
+    Logger.info(":show_next_layout ended successfully (#{elapsed_time})")
+
+    {:noreply, socket}
   end
 
   def handle_info(
