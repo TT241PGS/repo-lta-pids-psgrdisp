@@ -4,7 +4,7 @@ defmodule Display.Messages.SuppressedMessage do
 
   @primary_key false
   schema "suppressed_message" do
-    field :stop_code, :string
+    field :stop_code, :integer
     field :service_nos, {:array, :string}
     field :start_date_time, :naive_datetime
     field :end_date_time, :naive_datetime

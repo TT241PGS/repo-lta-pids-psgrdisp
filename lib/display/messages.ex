@@ -367,7 +367,7 @@ defmodule Display.Messages do
   end
 
   def get_suppressed_messages(bus_stop_no) do
-    bus_stop_no = Integer.to_string(bus_stop_no)
+    bus_stop_no = bus_stop_no
 
     tasks = [
       Task.async(fn -> get_suppressed_messages_option1(bus_stop_no) end),
