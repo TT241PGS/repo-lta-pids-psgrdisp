@@ -9,17 +9,51 @@ defmodule Display.Buses do
 
   def get_bus_stop_name_by_no(nil), do: nil
 
-  # This should be cached as its expensive
   def get_bus_stop_name_by_no(bus_stop_no) do
-    from(bs in Buses.BusStop,
-      where: bs.point_no == ^bus_stop_no,
-      select: %{
-        point_no: bs.point_no,
-        point_desc: bs.point_desc
-      }
-    )
-    |> Repo.one()
-    |> get_in([:point_desc])
+    result =
+      from(bs in Buses.BusStop,
+        where: bs.point_no == ^bus_stop_no,
+        select: %{
+          point_no: bs.point_no,
+          point_desc: bs.point_desc
+        }
+      )
+      |> Repo.all()
+
+    case result do
+      [] -> nil
+      [one] -> get_in(one, [:point_desc])
+      _ -> nil
+    end
+  end
+
+  def get_bus_hub_name_by_no(nil), do: nil
+
+  def get_bus_hub_name_by_no(bus_stop_no) do
+    result =
+      from(bs in Buses.BushubInterchange,
+        where: bs.point_no == ^bus_stop_no,
+        select: %{
+          stop_name: bs.stop_name
+        },
+        limit: 1
+      )
+      |> Repo.all()
+
+    case result do
+      [] -> nil
+      [one] -> get_in(one, [:stop_name])
+      _ -> nil
+    end
+  end
+
+  def get_bus_hub_or_stop_name_by_no(nil), do: nil
+
+  def get_bus_hub_or_stop_name_by_no(bus_stop_no) do
+    case get_bus_hub_name_by_no(bus_stop_no) do
+      nil -> get_bus_stop_name_by_no(bus_stop_no)
+      stop_name -> stop_name
+    end
   end
 
   def get_bus_stop_from_panel_id(nil), do: nil
