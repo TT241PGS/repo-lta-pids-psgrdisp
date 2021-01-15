@@ -457,7 +457,7 @@ defmodule Display.Messages do
               Map.replace(
                 acc,
                 :global_message,
-                "No buses will stop here today due to F1 road closure"
+                message
               )
 
             {:halt, acc}
