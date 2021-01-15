@@ -26,7 +26,7 @@ defmodule PredictionsRealtimeTwoColumn do
             </div>
             <div class="details">
               <div class="next-bus" :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2", "NextBus3"] }}>
-                <span class={{"indicator", "bg-red": service["NextBus"]["Load"] == "LSD", "bg-yellow-1": service["NextBus"]["Load"] == "SDA", "bg-green-1": service["NextBus"]["Load"] == "SEA"}}></span>
+                <span class={{"indicator", "bg-yellow-1": service["NextBus"]["Load"] in ["LSD", "SDA"], "bg-green-1": service["NextBus"]["Load"] == "SEA"}}></span>
                 <span class="label">{{service[next_bus]["EstimatedArrival"]}}</span>
                 <span class="flex">
                   <img class="bus-feature-icon" src="/images/bus_no_wab.svg" :if={{ service[next_bus]["Feature"] == "" }}>
