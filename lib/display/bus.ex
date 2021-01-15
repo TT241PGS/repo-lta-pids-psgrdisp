@@ -75,7 +75,7 @@ defmodule Display.Buses do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
 
     query = "
-    select distinct bs_outer.dpi_route_code, bs_outer.dest_code, bs_outer.no_of_stops, bs_top.arriving_time from schedule bs_outer
+    select distinct bs_outer.dpi_route_code, bs_outer.dest_code, bs_top.arriving_time from schedule bs_outer
     join lateral (
       select * from schedule bs_inner
       where bs_inner.dpi_route_code = bs_outer.dpi_route_code

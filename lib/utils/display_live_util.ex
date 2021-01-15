@@ -362,12 +362,9 @@ defmodule Display.Utils.DisplayLiveUtil do
       end)
       |> Buses.get_bus_stop_map_by_nos()
 
-    no_of_stops_map = Buses.get_no_of_stops_map_by_bus_stop(bus_stop_no)
-
     cached_predictions
     |> Enum.map(fn service ->
       service
-      |> update_realtime_no_of_stops(no_of_stops_map)
       |> update_realtime_destination(bus_stop_map)
     end)
   end

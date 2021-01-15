@@ -69,14 +69,13 @@ defmodule Display.Scheduled do
 
     rows
     |> Enum.reduce(%{}, fn row, acc ->
-      [dpi_route_code, dest_code, no_of_stops, arriving_time] = row
+      [dpi_route_code, dest_code, arriving_time] = row
       key = {dpi_route_code, dest_code}
 
       arriving_time_formatted = TimeUtil.get_iso_date_from_seconds(arriving_time)
 
       value = %{
         "Status" => "operating_now",
-        "NoOfStops" => no_of_stops,
         "NextBuses" => [
           %{
             "EstimatedArrival" => arriving_time_formatted
