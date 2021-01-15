@@ -56,6 +56,34 @@ defmodule Display.Buses do
     end
   end
 
+  def get_bus_hub_service_mapping_by_no(bus_stop_no) do
+    result =
+      from(bs in Buses.BushubInterchange,
+        where: bs.point_no == ^bus_stop_no,
+        # TODO Add bs.dest_code once added in database
+        distinct: [bs.dpi_route_code, bs.visit_no, bs.berth_label, bs.destination, bs.way_points]
+      )
+      |> Repo.all()
+
+    cond do
+      is_list(result) ->
+        result
+        |> Enum.reduce(%{}, fn service, acc ->
+          # TODO Add bs.dest_code in key once added in database
+          update_in(acc, [{service.dpi_route_code, service.visit_no}], fn _ ->
+            %{
+              "berth_label" => service.berth_label,
+              "destination" => service.destination,
+              "way_points" => service.way_points
+            }
+          end)
+        end)
+
+      true ->
+        %{}
+    end
+  end
+
   def get_bus_stop_from_panel_id(nil), do: nil
 
   def get_bus_stop_from_panel_id(panel_id) do

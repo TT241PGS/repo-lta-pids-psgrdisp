@@ -305,16 +305,32 @@ defmodule Display.Utils.DisplayLiveUtil do
     Map.replace!(prediction, "NextBuses", next_buses)
   end
 
-  def update_realtime_destination(service, bus_stop_map) do
+  def update_realtime_destination(service, bus_stop_map, bus_hub_map) do
     case Access.get(service, "NextBus") do
       nil ->
         service
 
       _ ->
-        update_in(
-          service,
+        update_realtime_destination_hub_or_stop(service, bus_stop_map, bus_hub_map)
+    end
+  end
+
+  defp update_realtime_destination_hub_or_stop(service, bus_stop_map, bus_hub_map) do
+    case Map.get(bus_hub_map, {service["NextBus"], service["DestinationCode"]}) do
+      nil ->
+        service
+        |> update_in(
           ["NextBus", "DestinationCode"],
           &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1 |> String.to_integer())
+        )
+
+      bus_hub ->
+        service
+        |> update_in(
+          ["NextBus", "DestinationCode"],
+          fn _ ->
+            bus_hub["destination"]
+          end
         )
     end
   end
@@ -362,13 +378,15 @@ defmodule Display.Utils.DisplayLiveUtil do
       end)
       |> Buses.get_bus_stop_map_by_nos()
 
+    bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
+
     no_of_stops_map = Buses.get_no_of_stops_map_by_bus_stop(bus_stop_no)
 
     cached_predictions
     |> Enum.map(fn service ->
       service
       |> update_realtime_no_of_stops(no_of_stops_map)
-      |> update_realtime_destination(bus_stop_map)
+      |> update_realtime_destination(bus_stop_map, bus_hub_map)
     end)
   end
 
