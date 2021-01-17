@@ -12,7 +12,8 @@ config :redix,
 
 config :display,
   datamall_base_url: System.get_env("DATAMALL_BASE_URL"),
-  datamall_account_key: System.get_env("DATAMALL_ACCOUNT_KEY")
+  datamall_account_key: System.get_env("DATAMALL_ACCOUNT_KEY"),
+  multimedia_base_url: System.get_env("MULTIMEDIA_BASE_URL")
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

@@ -18,7 +18,8 @@ config :display, DisplayWeb.Endpoint,
 
 config :display,
   datamall_base_url: "${DATAMALL_BASE_URL}",
-  datamall_account_key: "${DATAMALL_ACCOUNT_KEY}"
+  datamall_account_key: "${DATAMALL_ACCOUNT_KEY}",
+  multimedia_base_url: "${MULTIMEDIA_BASE_URL}"
 
 config :redix,
   host: "${REDIS_HOST}",
