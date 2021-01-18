@@ -108,10 +108,10 @@ defmodule Display.Messages do
 
     messages
     |> Enum.filter(fn m ->
-      (m.day_type_1 == true and day_of_week_name == "Sunday") or
-        (m.day_type_1 == true and is_today_public_holiday) or
+      (m.day_type_1 == true and day_of_week_no >= 1 and day_of_week_no <= 5) or
         (m.day_type_2 == true and day_of_week_name == "Saturday") or
-        (m.day_type_3 == true and day_of_week_no >= 1 and day_of_week_no <= 5) or
+        (m.day_type_3 == true and day_of_week_name == "Sunday") or
+        (m.day_type_3 == true and is_today_public_holiday) or
         (m.day_type_1 != true and m.day_type_2 != true and m.day_type_3 != true)
     end)
   end
