@@ -36,7 +36,7 @@ defmodule Display.Messages do
           acc
 
         {:ok, result} ->
-          acc ++ [result |> Enum.at(0)]
+          acc ++ result
       end
     end)
   end
