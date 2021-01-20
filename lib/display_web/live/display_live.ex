@@ -18,10 +18,12 @@ defmodule DisplayWeb.DisplayLive do
 
     socket =
       assign(socket,
+        panel_id: panel_id,
+        skip_realtime: assigns["skip_realtime"] || false,
+        debug: assigns["debug"] || false,
         date_time: TimeUtil.get_display_date_time(),
         bus_stop_no: nil,
         bus_stop_name: "",
-        panel_id: panel_id,
         templates: [],
         current_layouts: nil,
         current_layout_value: nil,
@@ -50,7 +52,6 @@ defmodule DisplayWeb.DisplayLive do
         cycle_time: nil,
         quickest_way_to: [],
         is_show_non_message_template: false,
-        skip_realtime: assigns["skip_realtime"] || false,
         update_messages_timeline_timer: nil,
         multimedia: %{content: nil, type: nil},
         multimedia_image_sequence_next_trigger_at: nil,
@@ -621,6 +622,14 @@ defmodule DisplayWeb.DisplayLive do
       ) do
     Process.send_after(self(), :update_stops_once, 0)
     {:noreply, socket}
+  end
+
+  def render(assigns = %{debug: "true"}) do
+    ~H"""
+    <div style="color: white">
+      <Debug prop={{assigns}} />
+    </div>
+    """
   end
 
   def render(assigns) do
