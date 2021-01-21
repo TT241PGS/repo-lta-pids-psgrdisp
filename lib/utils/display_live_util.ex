@@ -316,12 +316,14 @@ defmodule Display.Utils.DisplayLiveUtil do
           ["NextBus", "DestinationPictograms"],
           fn _ ->
             dest_code =
-              get_in(service,["NextBus", "DestinationCode"])
+              get_in(service, ["NextBus", "DestinationCode"])
               |> String.to_integer()
+
             get_in(destination_pictogram_map, [dest_code]) || []
           end
         )
-        |> update_in(["NextBus", "DestinationCode"],
+        |> update_in(
+          ["NextBus", "DestinationCode"],
           &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1 |> String.to_integer())
         )
     end
@@ -347,8 +349,7 @@ defmodule Display.Utils.DisplayLiveUtil do
           service,
           ["DestinationPictograms"],
           fn _ ->
-            dest_code =
-              get_in(service,["DestinationCode"])
+            dest_code = get_in(service, ["DestinationCode"])
             get_in(destination_pictogram_map, [dest_code]) || []
           end
         )

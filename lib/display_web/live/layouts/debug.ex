@@ -16,7 +16,7 @@ defmodule Debug do
         <section>
         <h3>Message Map (msg_index, msg_text)</h3>
         <p :for={{ {k, v} <- (@prop.messages.message_map || [])}}>
-          <span class="pl20">{{k}}, {{v}} </span>
+          <span class="pl20">{{k}}, {{inspect(v)}} </span>
         </p>
         </section>
         <section>
