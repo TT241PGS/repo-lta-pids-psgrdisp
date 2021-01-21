@@ -118,6 +118,46 @@ defmodule Display.Messages do
     end)
   end
 
+  def get_mrt_alert_messages() do
+    key = "pids:mrt_alerts"
+    cached_data = Display.Redix.command(["GET", key])
+
+    case cached_data do
+      {:ok, nil} ->
+        {:error, :not_found}
+
+      {:ok, data} ->
+        data = data |> Jason.decode!()
+        {:ok, data}
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
+  def merge_all_messages(mrt_alerts, messages) do
+    mrt_alert_pm =
+      case Enum.max_by(messages, fn msg -> msg.pm end, fn -> nil end) do
+        nil -> 100
+        alert -> alert.pm
+      end
+
+    mrt_alerts =
+      mrt_alerts
+      |> Enum.map(fn alert ->
+        %{
+          pm: mrt_alert_pm,
+          text: alert["text"],
+          line:
+            Application.get_env(:display, :multimedia_base_url) <>
+              String.trim(alert["line"]) <> ".png",
+          type: "MRT"
+        }
+      end)
+
+    mrt_alerts ++ messages
+  end
+
   def get_message_timings([], _cycle_time) do
     %{
       message_map: nil,
@@ -220,7 +260,12 @@ defmodule Display.Messages do
     messages
     |> Enum.with_index()
     |> Enum.reduce(%{}, fn {message, index}, acc ->
-      Map.put(acc, index, message.text)
+      Map.put(acc, index, %{
+        text: message.text,
+        pm: message.pm,
+        type: message.type,
+        line: get_in(message, [:line])
+      })
     end)
   end
 

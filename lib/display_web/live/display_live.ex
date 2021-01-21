@@ -48,7 +48,7 @@ defmodule DisplayWeb.DisplayLive do
         previous_messages: %{message_map: nil, timeline: nil},
         message_list_index: nil,
         message_timeline_index: nil,
-        message: "",
+        message: %{},
         cycle_time: nil,
         quickest_way_to: [],
         is_show_non_message_template: false,
@@ -285,9 +285,16 @@ defmodule DisplayWeb.DisplayLive do
 
     new_messages =
       new_messages
-      |> Enum.map(fn %{message_content: text, priority: pm} ->
-        %{text: text, pm: pm}
+      |> Enum.map(fn %{message_content: text, priority: pm, type: type} ->
+        %{text: text, pm: pm, type: type}
       end)
+
+    new_messages =
+      case Messages.get_mrt_alert_messages() do
+        {:ok, data} -> data
+        {:error, _} -> []
+      end
+      |> Messages.merge_all_messages(new_messages)
 
     cycle_time = if cycle_time == nil, do: 300, else: cycle_time
 
@@ -381,14 +388,14 @@ defmodule DisplayWeb.DisplayLive do
 
         next_trigger_at == 0 ->
           previous_timeline = Enum.at(timeline, new_message_timeline_index) |> elem(0)
-          socket.assigns.cycle_time - previous_timeline
+          (socket.assigns.cycle_time - previous_timeline) |> abs
 
         next_trigger_at == socket.assigns.cycle_time ->
           1
 
         message_timeline_index >= 0 ->
           previous_timeline = Enum.at(timeline, new_message_timeline_index) |> elem(0)
-          next_trigger_at - previous_timeline
+          (next_trigger_at - previous_timeline) |> abs
 
         true ->
           next_trigger_at
