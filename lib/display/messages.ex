@@ -53,7 +53,19 @@ defmodule Display.Messages do
       where:
         cma.bus_stop_panel_id == ^panel_id and
           cmd.start_date_time <= ^now and cmd.end_date_time >= ^now,
-      distinct: [cmd.message_data_id, cmd.type, cmd.priority, cmd.message_content,cmd.day_type_1, cmd.day_type_2, cmd.day_type_3, cmd.start_date_time, cmd.end_date_time, cmd.start_time_1, cmd.end_time_1]
+      distinct: [
+        cmd.message_data_id,
+        cmd.type,
+        cmd.priority,
+        cmd.message_content,
+        cmd.day_type_1,
+        cmd.day_type_2,
+        cmd.day_type_3,
+        cmd.start_date_time,
+        cmd.end_date_time,
+        cmd.start_time_1,
+        cmd.end_time_1
+      ]
     )
     |> Repo.all()
   end
@@ -71,7 +83,19 @@ defmodule Display.Messages do
         cma.bus_stop_panel_id == ^panel_id and
           cmd.start_time_1 <= ^current_time and
           cmd.end_time_1 >= ^current_time,
-      distinct: [cmd.message_data_id, cmd.type, cmd.priority, cmd.message_content, cmd.day_type_1, cmd.day_type_2, cmd.day_type_3, cmd.start_date_time, cmd.end_date_time, cmd.start_time_1, cmd.end_time_1]
+      distinct: [
+        cmd.message_data_id,
+        cmd.type,
+        cmd.priority,
+        cmd.message_content,
+        cmd.day_type_1,
+        cmd.day_type_2,
+        cmd.day_type_3,
+        cmd.start_date_time,
+        cmd.end_date_time,
+        cmd.start_time_1,
+        cmd.end_time_1
+      ]
     )
     |> Repo.all()
     |> filter_messages_on_day_types()

@@ -25,7 +25,7 @@ defmodule Display.Poi do
         |> String.split(",")
         |> Enum.map(fn url ->
           Application.get_env(:display, :multimedia_base_url) <> String.trim(url)
-          end)
+        end)
       end)
     end)
   end

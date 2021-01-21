@@ -14,7 +14,7 @@ defmodule Display.Poi.PoiStopsMapping do
   @field [
     :point_no,
     :poi_code,
-    :comments,
+    :comments
   ]
   def changeset(poi_stops_mapping, params \\ %{}) do
     cast(poi_stops_mapping, params, @field)
