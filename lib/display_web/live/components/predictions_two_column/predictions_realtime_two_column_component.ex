@@ -18,11 +18,14 @@ defmodule PredictionsRealtimeTwoColumn do
           </div>
         </div>
         <div class={{"flex", "mb-30": service_index < 5, hidden: Enum.member?(@suppressed_messages.hide_services, service["ServiceNo"])}} :for={{ {service, service_index} <- Enum.with_index(stopPredictionsColumn) }}>
-          <div class="sc-bdnylx dciVXD bus-info">{{service["ServiceNo"]}}</div>
+          <div class="sc-bdnylx dciVXD bus-info">
+            {{service["ServiceNo"]}}
+            <span :if={{not is_nil(service["NextBus"]["BerthLabel"])}} style="font-size: 40px; font-weight: bold;">{{service["NextBus"]["BerthLabel"]}}</span>
+          </div>
           <div class="bus-info-message" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) != nil}}>{{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]])}}</div>
           <div class="next-buses" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) == nil}}>
             <div class="next-buses-heading-info">
-              <p>{{service["NextBus"]["DestinationCode"]}}</p>
+              <p>{{service["NextBus"]["Destination"]}}</p>
               <div class="poi-wrapper" :if={{is_list(service["NextBus"]["DestinationPictograms"])}} :for={{ poi <- service["NextBus"]["DestinationPictograms"] }}>
                 <img src="{{poi}}" alt="">
               </div>
@@ -39,6 +42,7 @@ defmodule PredictionsRealtimeTwoColumn do
                 </span>
               </div>
             </div>
+            <p :if={{not is_nil(service["NextBus"]["WayPoints"])}} style="color: white; font-size: 40px; padding-left: 20px">Via: {{service["NextBus"]["WayPoints"]}}</p>
           </div>
         </div>
       </div>

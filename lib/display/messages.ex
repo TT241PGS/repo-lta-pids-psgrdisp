@@ -201,7 +201,7 @@ defmodule Display.Messages do
   #     {156, 1},
   #     {186, 2},
   #     {216, 2},
-  #     %{246 => nil}
+  #     {246 => nil}
   #   ]
   # }
   def get_message_timings(messages, cycle_time) do

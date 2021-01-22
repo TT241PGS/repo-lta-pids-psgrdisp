@@ -87,7 +87,7 @@ defmodule DisplayWeb.DisplayLive do
       Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
       |> get_in([:bus_stop_no])
 
-    bus_stop_name = Buses.get_bus_stop_name_by_no(bus_stop_no)
+    bus_stop_name = Buses.get_bus_hub_or_stop_name_by_no(bus_stop_no)
 
     socket =
       socket
@@ -132,7 +132,7 @@ defmodule DisplayWeb.DisplayLive do
       Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
       |> get_in([:bus_stop_no])
 
-    bus_stop_name = Buses.get_bus_stop_name_by_no(bus_stop_no)
+    bus_stop_name = Buses.get_bus_hub_or_stop_name_by_no(bus_stop_no)
 
     socket =
       socket

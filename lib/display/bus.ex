@@ -9,17 +9,97 @@ defmodule Display.Buses do
 
   def get_bus_stop_name_by_no(nil), do: nil
 
-  # This should be cached as its expensive
   def get_bus_stop_name_by_no(bus_stop_no) do
-    from(bs in Buses.BusStop,
-      where: bs.point_no == ^bus_stop_no,
-      select: %{
-        point_no: bs.point_no,
-        point_desc: bs.point_desc
-      }
+    result =
+      from(bs in Buses.BusStop,
+        where: bs.point_no == ^bus_stop_no,
+        select: %{
+          point_no: bs.point_no,
+          point_desc: bs.point_desc
+        }
+      )
+      |> Repo.all()
+
+    case result do
+      [] -> nil
+      [one] -> get_in(one, [:point_desc])
+      _ -> nil
+    end
+  end
+
+  def get_bus_hub_name_by_no(nil), do: nil
+
+  def get_bus_hub_name_by_no(bus_stop_no) do
+    result =
+      from(bs in Buses.BushubInterchange,
+        where: bs.point_no == ^bus_stop_no,
+        select: %{
+          stop_name: bs.stop_name
+        },
+        limit: 1
+      )
+      |> Repo.all()
+
+    case result do
+      [] -> nil
+      [one] -> get_in(one, [:stop_name])
+      _ -> nil
+    end
+  end
+
+  def get_bus_hub_or_stop_name_by_no(nil), do: nil
+
+  def get_bus_hub_or_stop_name_by_no(bus_stop_no) do
+    case get_bus_hub_name_by_no(bus_stop_no) do
+      nil -> get_bus_stop_name_by_no(bus_stop_no)
+      stop_name -> stop_name
+    end
+  end
+
+  def get_bus_hub_service_mapping_by_no(bus_stop_no) do
+    result =
+      from(bs in Buses.BushubInterchange,
+        where: bs.point_no == ^bus_stop_no,
+        distinct: [
+          bs.dpi_route_code,
+          bs.direction,
+          bs.visit_no,
+          bs.berth_label,
+          bs.destination,
+          bs.way_points
+        ]
+      )
+      |> Repo.all()
+
+    cond do
+      is_list(result) ->
+        result
+        |> Enum.reduce(%{}, fn service, acc ->
+          update_in(acc, [{service.dpi_route_code, service.direction, service.visit_no}], fn _ ->
+            %{
+              "berth_label" => service.berth_label,
+              "destination" => service.destination,
+              "way_points" => service.way_points
+            }
+          end)
+        end)
+
+      true ->
+        %{}
+    end
+  end
+
+  def get_bus_direction_from_destination_code(nil), do: nil
+
+  def get_service_direction_map(bus_stop_no) do
+    from(s in Buses.Schedule,
+      where: s.point_no == ^bus_stop_no,
+      distinct: [s.dpi_route_code, s.dest_code, s.direction]
     )
-    |> Repo.one()
-    |> get_in([:point_desc])
+    |> Repo.all()
+    |> Enum.reduce(%{}, fn service, acc ->
+      Map.put(acc, {service.dpi_route_code, service.dest_code}, service.direction)
+    end)
   end
 
   def get_bus_stop_from_panel_id(nil), do: nil
