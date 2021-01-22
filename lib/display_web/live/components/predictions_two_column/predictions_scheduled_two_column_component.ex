@@ -24,8 +24,10 @@ defmodule PredictionsScheduledTwoColumn do
           <div class="bus-info-message" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) != nil}}>{{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]])}}</div>
           <div class="next-buses" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) == nil and service["Status"] == "operating_now"}}>
             <div class="next-buses-heading-info">
-              <span class="stops">{{service["NoOfStops"]}}<i class="ml-1rem fas fa-arrow-right"></i></span>
               <p>{{service["DestinationCode"]}}</p>
+              <div class="poi-wrapper" :if={{is_list(service["DestinationPictograms"])}} :for={{ poi <- service["DestinationPictograms"] }}>
+                <img src="{{poi}}" alt="">
+              </div>
             </div>
             <div class="details">
               <div class="next-bus" :for={{ next_bus <- service["NextBuses"] }}>

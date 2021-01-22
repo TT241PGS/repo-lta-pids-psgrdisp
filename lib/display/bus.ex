@@ -3,7 +3,7 @@ defmodule Display.Buses do
 
   import Ecto.Query, warn: false
   use Timex
-  alias Display.{Buses, Repo}
+  alias Display.{Buses, Poi, Repo}
   alias Display.Utils.TimeUtil
   alias Ecto.Adapters.SQL
 
@@ -137,7 +137,7 @@ defmodule Display.Buses do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
 
     query = "
-    select distinct bs_outer.dpi_route_code, bs_outer.dest_code, bs_outer.no_of_stops, bs_top.arriving_time from schedule bs_outer
+    select distinct bs_outer.dpi_route_code, bs_outer.dest_code, bs_top.arriving_time from schedule bs_outer
     join lateral (
       select * from schedule bs_inner
       where bs_inner.dpi_route_code = bs_outer.dpi_route_code
@@ -250,7 +250,7 @@ defmodule Display.Buses do
   end
 
   def get_poi_metadata_map(poi_list) do
-    from(p in Buses.PoiStop,
+    from(p in Poi.PoiStop,
       where: p.stop_code in ^poi_list
     )
     |> Repo.all()

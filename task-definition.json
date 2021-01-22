@@ -75,6 +75,10 @@
         {
           "name": "SECRET_KEY_BASE",
           "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_SECRET_KEY_BASE"
+        },
+        {
+          "name": "MULTIMEDIA_BASE_URL",
+          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_MULTIMEDIA_BASE_URL"
         }
       ],
       "logConfiguration": {
@@ -96,7 +100,9 @@
   "networkMode": "awsvpc",
   "volumes": [],
   "placementConstraints": [],
-  "requiresCompatibilities": ["FARGATE"],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
   "cpu": "512",
   "memory": "1024"
 }

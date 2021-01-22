@@ -1,4 +1,4 @@
-defmodule Display.Buses.PoiStop do
+defmodule Display.Poi.PoiStop do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -8,8 +8,10 @@ defmodule Display.Buses.PoiStop do
     field :stop_name, :string
     field :poi_type, :string
     field :poi_name, :string
-    field :poi_pictogram, {:array, :string}
-    field :poi_rank, :integer
+    field :poi_pictogram, :string
+    field :poi_rank, :string
+    field :poi_code, :string
+    field :effective_date, :utc_datetime
 
     timestamps()
   end
@@ -20,7 +22,9 @@ defmodule Display.Buses.PoiStop do
     :poi_type,
     :poi_name,
     :poi_pictogram,
-    :poi_rank
+    :poi_rank,
+    :poi_code,
+    :effective_date
   ]
   def changeset(poi_stop, params \\ %{}) do
     cast(poi_stop, params, @field)

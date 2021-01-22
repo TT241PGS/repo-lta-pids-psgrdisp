@@ -3,7 +3,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   require Logger
 
-  alias Display.{Buses, Messages, RealTime, Scheduled, Templates}
+  alias Display.{Buses, Messages, Poi, RealTime, Scheduled, Templates}
   alias Display.Utils.{TimeUtil}
 
   def incoming_bus_reducer(service, acc) do
@@ -305,17 +305,40 @@ defmodule Display.Utils.DisplayLiveUtil do
     Map.replace!(prediction, "NextBuses", next_buses)
   end
 
-  def update_realtime_destination(service, bus_stop_map, bus_hub_map) do
+  def update_realtime_destination(service, bus_stop_map, destination_pictogram_map, bus_hub_map) do
     case Access.get(service, "NextBus") do
       nil ->
         service
 
       _ ->
-        update_realtime_destination_hub_or_stop(service, bus_stop_map, bus_hub_map)
+        update_realtime_destination_hub_or_stop(
+          service,
+          bus_stop_map,
+          destination_pictogram_map,
+          bus_hub_map
+        )
     end
   end
 
-  defp update_realtime_destination_hub_or_stop(service, bus_stop_map, bus_hub_map) do
+  defp update_realtime_destination_hub_or_stop(
+         service,
+         bus_stop_map,
+         destination_pictogram_map,
+         bus_hub_map
+       ) do
+    service =
+      service
+      |> update_in(
+        ["NextBus", "DestinationPictograms"],
+        fn _ ->
+          dest_code =
+            get_in(service, ["NextBus", "DestinationCode"])
+            |> String.to_integer()
+
+          get_in(destination_pictogram_map, [dest_code]) || []
+        end
+      )
+
     case Map.get(bus_hub_map, {service["NextBus"], service["DestinationCode"]}) do
       nil ->
         service
@@ -345,7 +368,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     Map.put(service, "NoOfStops", no_of_stops)
   end
 
-  def update_scheduled_destination(service, bus_stop_map) do
+  def update_scheduled_destination(service, bus_stop_map, destination_pictogram_map) do
     case Access.get(service, "DestinationCode") do
       nil ->
         service
@@ -353,6 +376,13 @@ defmodule Display.Utils.DisplayLiveUtil do
       _ ->
         update_in(
           service,
+          ["DestinationPictograms"],
+          fn _ ->
+            dest_code = get_in(service, ["DestinationCode"])
+            get_in(destination_pictogram_map, [dest_code]) || []
+          end
+        )
+        |> update_in(
           ["DestinationCode"],
           &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1)
         )
@@ -370,23 +400,33 @@ defmodule Display.Utils.DisplayLiveUtil do
         |> update_estimated_arrival("NextBus3")
       end)
 
-    bus_stop_map =
+    dest_codes =
       cached_predictions
       |> Enum.map(fn service ->
         service
         |> get_in(["NextBus", "DestinationCode"])
       end)
+
+    bus_stop_map =
+      dest_codes
       |> Buses.get_bus_stop_map_by_nos()
 
     bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
 
-    no_of_stops_map = Buses.get_no_of_stops_map_by_bus_stop(bus_stop_no)
+    IO.inspect(bus_hub_map)
+
+    destination_pictogram_map =
+      dest_codes
+      |> Poi.get_many_destinations_pictogram()
 
     cached_predictions
     |> Enum.map(fn service ->
       service
-      |> update_realtime_no_of_stops(no_of_stops_map)
-      |> update_realtime_destination(bus_stop_map, bus_hub_map)
+      |> update_realtime_destination_hub_or_stop(
+        bus_stop_map,
+        destination_pictogram_map,
+        bus_hub_map
+      )
     end)
   end
 
@@ -398,18 +438,25 @@ defmodule Display.Utils.DisplayLiveUtil do
         update_scheduled_arrival(prediction)
       end)
 
-    bus_stop_map =
+    dest_codes =
       scheduled_predictions
       |> Enum.map(fn service ->
         service
         |> get_in(["DestinationCode"])
       end)
+
+    bus_stop_map =
+      dest_codes
       |> Buses.get_bus_stop_map_by_nos()
+
+    destination_pictogram_map =
+      dest_codes
+      |> Poi.get_many_destinations_pictogram()
 
     scheduled_predictions
     |> Enum.map(fn service ->
       service
-      |> update_scheduled_destination(bus_stop_map)
+      |> update_scheduled_destination(bus_stop_map, destination_pictogram_map)
     end)
   end
 
@@ -537,7 +584,7 @@ defmodule Display.Utils.DisplayLiveUtil do
   def get_multimedia(layout) do
     type = get_in(layout, ["panes", "pane1", "config", "multimediaType", "value"])
 
-    base_url = "https://pids-multimedia.s3-ap-southeast-1.amazonaws.com/"
+    base_url = Application.get_env(:display, :multimedia_base_url)
 
     content =
       case type do

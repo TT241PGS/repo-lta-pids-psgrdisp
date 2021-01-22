@@ -36,7 +36,7 @@ defmodule Display.Messages do
           acc
 
         {:ok, result} ->
-          acc ++ [result |> Enum.at(0)]
+          acc ++ result
       end
     end)
   end
@@ -53,18 +53,19 @@ defmodule Display.Messages do
       where:
         cma.bus_stop_panel_id == ^panel_id and
           cmd.start_date_time <= ^now and cmd.end_date_time >= ^now,
-      select: %{
-        type: cmd.type,
-        priority: cmd.priority,
-        message_content: cmd.message_content,
-        day_type_1: cmd.day_type_1,
-        day_type_2: cmd.day_type_2,
-        day_type_3: cmd.day_type_3,
-        start_date_time: cmd.start_date_time,
-        end_date_time: cmd.end_date_time,
-        start_time_1: cmd.start_time_1,
-        end_time_1: cmd.end_time_1
-      }
+      distinct: [
+        cmd.message_data_id,
+        cmd.type,
+        cmd.priority,
+        cmd.message_content,
+        cmd.day_type_1,
+        cmd.day_type_2,
+        cmd.day_type_3,
+        cmd.start_date_time,
+        cmd.end_date_time,
+        cmd.start_time_1,
+        cmd.end_time_1
+      ]
     )
     |> Repo.all()
   end
@@ -82,18 +83,19 @@ defmodule Display.Messages do
         cma.bus_stop_panel_id == ^panel_id and
           cmd.start_time_1 <= ^current_time and
           cmd.end_time_1 >= ^current_time,
-      select: %{
-        type: cmd.type,
-        priority: cmd.priority,
-        message_content: cmd.message_content,
-        day_type_1: cmd.day_type_1,
-        day_type_2: cmd.day_type_2,
-        day_type_3: cmd.day_type_3,
-        start_date_time: cmd.start_date_time,
-        end_date_time: cmd.end_date_time,
-        start_time_1: cmd.start_time_1,
-        end_time_1: cmd.end_time_1
-      }
+      distinct: [
+        cmd.message_data_id,
+        cmd.type,
+        cmd.priority,
+        cmd.message_content,
+        cmd.day_type_1,
+        cmd.day_type_2,
+        cmd.day_type_3,
+        cmd.start_date_time,
+        cmd.end_date_time,
+        cmd.start_time_1,
+        cmd.end_time_1
+      ]
     )
     |> Repo.all()
     |> filter_messages_on_day_types()
@@ -108,12 +110,52 @@ defmodule Display.Messages do
 
     messages
     |> Enum.filter(fn m ->
-      (m.day_type_1 == true and day_of_week_name == "Sunday") or
-        (m.day_type_1 == true and is_today_public_holiday) or
+      (m.day_type_1 == true and day_of_week_no >= 1 and day_of_week_no <= 5) or
         (m.day_type_2 == true and day_of_week_name == "Saturday") or
-        (m.day_type_3 == true and day_of_week_no >= 1 and day_of_week_no <= 5) or
+        (m.day_type_3 == true and day_of_week_name == "Sunday") or
+        (m.day_type_3 == true and is_today_public_holiday) or
         (m.day_type_1 != true and m.day_type_2 != true and m.day_type_3 != true)
     end)
+  end
+
+  def get_mrt_alert_messages() do
+    key = "pids:mrt_alerts"
+    cached_data = Display.Redix.command(["GET", key])
+
+    case cached_data do
+      {:ok, nil} ->
+        {:error, :not_found}
+
+      {:ok, data} ->
+        data = data |> Jason.decode!()
+        {:ok, data}
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
+  def merge_all_messages(mrt_alerts, messages) do
+    mrt_alert_pm =
+      case Enum.max_by(messages, fn msg -> msg.pm end, fn -> nil end) do
+        nil -> 100
+        alert -> alert.pm
+      end
+
+    mrt_alerts =
+      mrt_alerts
+      |> Enum.map(fn alert ->
+        %{
+          pm: mrt_alert_pm,
+          text: alert["text"],
+          line:
+            Application.get_env(:display, :multimedia_base_url) <>
+              String.trim(alert["line"]) <> ".png",
+          type: "MRT"
+        }
+      end)
+
+    mrt_alerts ++ messages
   end
 
   def get_message_timings([], _cycle_time) do
@@ -218,7 +260,12 @@ defmodule Display.Messages do
     messages
     |> Enum.with_index()
     |> Enum.reduce(%{}, fn {message, index}, acc ->
-      Map.put(acc, index, message.text)
+      Map.put(acc, index, %{
+        text: message.text,
+        pm: message.pm,
+        type: message.type,
+        line: get_in(message, [:line])
+      })
     end)
   end
 
@@ -457,7 +504,7 @@ defmodule Display.Messages do
               Map.replace(
                 acc,
                 :global_message,
-                "No buses will stop here today due to F1 road closure"
+                message
               )
 
             {:halt, acc}
