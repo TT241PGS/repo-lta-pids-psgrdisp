@@ -60,8 +60,14 @@ defmodule Display.Buses do
     result =
       from(bs in Buses.BushubInterchange,
         where: bs.point_no == ^bus_stop_no,
-        # TODO Add bs.dest_code once added in database
-        distinct: [bs.dpi_route_code, bs.visit_no, bs.berth_label, bs.destination, bs.way_points]
+        distinct: [
+          bs.dpi_route_code,
+          bs.direction,
+          bs.visit_no,
+          bs.berth_label,
+          bs.destination,
+          bs.way_points
+        ]
       )
       |> Repo.all()
 
@@ -69,8 +75,7 @@ defmodule Display.Buses do
       is_list(result) ->
         result
         |> Enum.reduce(%{}, fn service, acc ->
-          # TODO Add bs.dest_code in key once added in database
-          update_in(acc, [{service.dpi_route_code, service.visit_no}], fn _ ->
+          update_in(acc, [{service.dpi_route_code, service.direction, service.visit_no}], fn _ ->
             %{
               "berth_label" => service.berth_label,
               "destination" => service.destination,
@@ -82,6 +87,19 @@ defmodule Display.Buses do
       true ->
         %{}
     end
+  end
+
+  def get_bus_direction_from_destination_code(nil), do: nil
+
+  def get_service_direction_map(bus_stop_no) do
+    from(s in Buses.Schedule,
+      where: s.point_no == ^bus_stop_no,
+      distinct: [s.dpi_route_code, s.dest_code, s.direction]
+    )
+    |> Repo.all()
+    |> Enum.reduce(%{}, fn service, acc ->
+      Map.put(acc, {service.dpi_route_code, service.dest_code}, service.direction)
+    end)
   end
 
   def get_bus_stop_from_panel_id(nil), do: nil

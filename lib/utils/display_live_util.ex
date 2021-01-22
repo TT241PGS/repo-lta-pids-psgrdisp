@@ -326,34 +326,73 @@ defmodule Display.Utils.DisplayLiveUtil do
          destination_pictogram_map,
          bus_hub_map
        ) do
+    dest_code =
+      case get_in(service, ["NextBus", "DestinationCode"]) do
+        nil -> nil
+        value -> String.to_integer(value)
+      end
+
+    direction = get_in(service, ["NextBus", "Direction"])
+
+    visit_no =
+      case get_in(service, ["NextBus", "VisitNumber"]) do
+        nil -> nil
+        value -> String.to_integer(value)
+      end
+
     service =
       service
       |> update_in(
         ["NextBus", "DestinationPictograms"],
         fn _ ->
-          dest_code =
-            get_in(service, ["NextBus", "DestinationCode"])
-            |> String.to_integer()
-
           get_in(destination_pictogram_map, [dest_code]) || []
         end
       )
 
-    case Map.get(bus_hub_map, {service["NextBus"], service["DestinationCode"]}) do
+    bus_hub_key = {service["ServiceNo"], direction, visit_no}
+
+    case Map.get(
+           bus_hub_map,
+           bus_hub_key
+         ) do
       nil ->
         service
-        |> update_in(
-          ["NextBus", "DestinationCode"],
-          &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1 |> String.to_integer())
+        |> put_in(
+          ["NextBus", "Destination"],
+          Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, dest_code)
         )
 
       bus_hub ->
         service
         |> update_in(
-          ["NextBus", "DestinationCode"],
+          ["NextBus", "Destination"],
           fn _ ->
             bus_hub["destination"]
           end
+        )
+        |> put_in(
+          ["NextBus", "BerthLabel"],
+          bus_hub["berth_label"]
+        )
+        |> put_in(
+          ["NextBus", "WayPoints"],
+          bus_hub["way_points"]
+        )
+    end
+  end
+
+  defp add_realtime_direction(service, service_direction_map) do
+    case get_in(service, ["NextBus", "DestinationCode"]) do
+      nil ->
+        nil
+
+      dest_code ->
+        key = {service["ServiceNo"], String.to_integer(dest_code)}
+
+        service
+        |> put_in(
+          ["NextBus", "Direction"],
+          get_in(service_direction_map, [key])
         )
     end
   end
@@ -412,22 +451,27 @@ defmodule Display.Utils.DisplayLiveUtil do
       |> Buses.get_bus_stop_map_by_nos()
 
     bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
-
-    IO.inspect(bus_hub_map)
+    # service_direction_map is needed as bushub_interchange table does not have destination code
+    # Hence destination_code from realtime prediction is mapped with schedule table to get direction
+    service_direction_map = Buses.get_service_direction_map(bus_stop_no)
 
     destination_pictogram_map =
       dest_codes
       |> Poi.get_many_destinations_pictogram()
 
+    cached_predictions =
+      cached_predictions
+      |> Enum.map(fn service ->
+        service
+        |> add_realtime_direction(service_direction_map)
+        |> update_realtime_destination_hub_or_stop(
+          bus_stop_map,
+          destination_pictogram_map,
+          bus_hub_map
+        )
+      end)
+
     cached_predictions
-    |> Enum.map(fn service ->
-      service
-      |> update_realtime_destination_hub_or_stop(
-        bus_stop_map,
-        destination_pictogram_map,
-        bus_hub_map
-      )
-    end)
   end
 
   def update_scheduled_predictions(scheduled_predictions) do

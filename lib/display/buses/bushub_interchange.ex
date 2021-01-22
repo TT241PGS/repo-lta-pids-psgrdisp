@@ -26,7 +26,7 @@ defmodule Display.Buses.BushubInterchange do
     :way_points,
     :lta_comment,
     :stop_name,
-    :visit_no,
+    :visit_no
   ]
   def changeset(bushub_interchange, params \\ %{}) do
     cast(bushub_interchange, params, @field)
