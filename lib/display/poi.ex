@@ -29,4 +29,21 @@ defmodule Display.Poi do
       end)
     end)
   end
+
+  def get_poi_metadata_map(poi_list) do
+    from(p in Poi,
+      join: psm in PoiStopsMapping,
+      on: p.code == psm.poi_code,
+      where: psm.point_no in ^poi_list,
+      select: %{
+        stop_code: psm.point_no,
+        poi_name: p.name,
+        pictograms: p.pictogram_url
+      }
+    )
+    |> Repo.all()
+    |> Enum.reduce(%{}, fn poi, acc ->
+      Map.put(acc, poi.stop_code, poi.poi_name)
+    end)
+  end
 end
