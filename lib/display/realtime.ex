@@ -1,6 +1,6 @@
 defmodule Display.RealTime do
   @moduledoc false
-  alias Display.Buses
+  alias Display.{Buses, Poi}
   alias Display.Utils.TimeUtil
 
   def get_predictions_realtime(bus_stop_id) do
@@ -109,7 +109,7 @@ defmodule Display.RealTime do
   defp add_poi_metadata(quickest_way_to_map) do
     poi_metadata_map =
       Enum.map(quickest_way_to_map, fn {k, _v} -> k end)
-      |> Buses.get_poi_metadata_map()
+      |> Poi.get_poi_metadata_map()
 
     Enum.map(quickest_way_to_map, fn {k, v} ->
       v

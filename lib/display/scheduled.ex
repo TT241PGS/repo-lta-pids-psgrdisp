@@ -1,7 +1,7 @@
 defmodule Display.Scheduled do
   @moduledoc false
 
-  alias Display.Buses
+  alias Display.{Buses, Poi}
   alias Display.Utils.TimeUtil
 
   @doc """
@@ -307,7 +307,7 @@ defmodule Display.Scheduled do
   defp add_poi_metadata(quickets_way_to_map) do
     poi_metadata_map =
       Map.keys(quickets_way_to_map)
-      |> Buses.get_poi_metadata_map()
+      |> Poi.get_poi_metadata_map()
 
     Enum.map(quickets_way_to_map, fn {k, v} ->
       v

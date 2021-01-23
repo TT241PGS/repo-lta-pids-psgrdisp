@@ -3,7 +3,7 @@ defmodule Display.Buses do
 
   import Ecto.Query, warn: false
   use Timex
-  alias Display.{Buses, Poi, Repo}
+  alias Display.{Buses, Repo}
   alias Display.Utils.TimeUtil
   alias Ecto.Adapters.SQL
 
@@ -265,15 +265,5 @@ defmodule Display.Buses do
     group by t_outer.poi_stop,t_top.service,t_top.time_taken
     "
     SQL.query!(Repo, query, [])
-  end
-
-  def get_poi_metadata_map(poi_list) do
-    from(p in Poi.PoiStop,
-      where: p.stop_code in ^poi_list
-    )
-    |> Repo.all()
-    |> Enum.reduce(%{}, fn poi, acc ->
-      Map.put(acc, poi.stop_code, poi.poi_name)
-    end)
   end
 end
