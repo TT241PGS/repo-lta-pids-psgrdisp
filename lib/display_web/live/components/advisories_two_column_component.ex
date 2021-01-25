@@ -2,7 +2,11 @@ defmodule AdvisoriesTwoColumn do
   @moduledoc false
   use Surface.LiveComponent
 
+  alias DisplayWeb.DisplayLive.Utils
+
   property message, :map, default: %{}
+  property panes, :map, default: %{}
+  property current_pane, :string, default: "pane2"
 
   def render(assigns) do
     ~H"""
@@ -16,7 +20,9 @@ defmodule AdvisoriesTwoColumn do
           <img class="tag" src="{{get_in(@message, [:line])}}" alt="">
         </div>
       </div>
-      <div class="advisory-content">{{get_in(@message, [:text])}}</div>
+      <div class={{Utils.get_message_class_names(@panes, @current_pane, @message)}}>
+        {{get_in(@message, [:text])}}
+      </div>
     </div>
     """
   end
