@@ -50,3 +50,28 @@ body {
   width: 3840px;
   height: 2160px;
 }
+
+.portrait {
+  width: 2160px;
+  height: 3840px;
+
+  .row-odd {
+    .next-bus,
+    .destination-bus-stop,
+    .bus-info-message,
+    .group-info .left-info,
+    .group-info .right-info {
+      background-color: #565656;
+    }
+  }
+
+  .row-even {
+    .next-bus,
+    .destination-bus-stop,
+    .bus-info-message,
+    .group-info .left-info,
+    .group-info .right-info {
+      background-color: #3d3d3d;
+    }
+  }
+}

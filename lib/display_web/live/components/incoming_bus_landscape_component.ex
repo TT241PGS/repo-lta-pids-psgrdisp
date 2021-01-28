@@ -1,4 +1,4 @@
-defmodule IncomingBusTwoColumn do
+defmodule IncomingBusLandscape do
   @moduledoc false
   use Surface.LiveComponent
 
@@ -7,9 +7,8 @@ defmodule IncomingBusTwoColumn do
   def render(assigns) do
     ~H"""
     <div class="flex incoming-buses">
-      <div class="incoming-bus-card">incoming<br>bus</div>
-
-      <div class="bus-card inverted no-bottom-border" :for={{ bus <- @incoming_buses }}>
+      <div class="incoming-bus-card">incoming bus</div>
+      <div class="bus-card inverted no-bottom-border arriving" :for={{ bus <- @incoming_buses }}>
         <span class="number">{{bus["service_no"]}}</span>
         <span class="status">{{bus["time"]}}</span>
       </div>

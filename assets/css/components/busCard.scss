@@ -70,3 +70,58 @@
     color: #fff;
   }
 }
+
+.portrait {
+  .bus-card {
+    background: transparent;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-direction: column-reverse;
+
+    &.arriving {
+      .status {
+        border: 6px solid #eee;
+        color: #eee;
+        font-size: 62px;
+        background: transparent;
+        line-height: 88px;
+      }
+    }
+
+    .status {
+      height: 100px;
+      width: 325px;
+      border-radius: 25px;
+      font-size: 62px;
+      background: #565656;
+      color: #fff;
+      line-height: 100px;
+      margin-bottom: 33px;
+    }
+
+    .number {
+      width: 325px;
+      height: 120px;
+      line-height: 120px;
+      border-radius: 25px;
+      @extend .portrait-bg-green;
+      text-align: center;
+      font-size: 80px;
+      font-weight: bold;
+    }
+  }
+
+  .incoming-bus-card {
+    position: absolute;
+    top: -70px;
+    left: -4px;
+    background-color: #eee;
+    border-radius: 25px 25px 0 0;
+    color: #303030;
+    font-size: 42px;
+    line-height: 51px;
+    padding: 9.5px 34px;
+    text-transform: uppercase;
+  }
+}

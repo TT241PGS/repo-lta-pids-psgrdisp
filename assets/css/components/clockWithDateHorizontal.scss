@@ -47,3 +47,18 @@
     @include letter-spacing(50);
   }
 }
+
+.portrait {
+  .clock-with-date-horizontal {
+    margin-left: 0;
+    width: 100%;
+
+    .date {
+      left: 573px;
+      width: 1038px;
+    }
+    .time {
+      width: 550px;
+    }
+  }
+}

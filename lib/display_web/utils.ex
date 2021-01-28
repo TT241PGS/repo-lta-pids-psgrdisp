@@ -27,4 +27,40 @@ defmodule DisplayWeb.DisplayLive.Utils do
     end)
     |> Enum.join(" ")
   end
+
+  def get_stop_predictions_realtime_set(prop, service_per_page) do
+    case service_per_page do
+      "5" -> prop.predictions_realtime_5_per_page
+      "7" -> prop.predictions_realtime_7_per_page
+      "10" -> prop.predictions_realtime_10_per_page
+      _ -> []
+    end
+  end
+
+  def get_stop_predictions_scheduled_set(prop, service_per_page) do
+    case service_per_page do
+      "5" -> prop.predictions_scheduled_5_per_page
+      "7" -> prop.predictions_scheduled_7_per_page
+      "10" -> prop.predictions_scheduled_10_per_page
+      _ -> []
+    end
+  end
+
+  def get_realtime_active_index(prop, service_per_page) do
+    case service_per_page do
+      "5" -> prop.predictions_realtime_5_per_page_index
+      "7" -> prop.predictions_realtime_7_per_page_index
+      "10" -> prop.predictions_realtime_10_per_page_index
+      _ -> nil
+    end
+  end
+
+  def get_scheduled_active_index(prop, service_per_page) do
+    case service_per_page do
+      "5" -> prop.predictions_scheduled_5_per_page_index
+      "7" -> prop.predictions_scheduled_7_per_page_index
+      "10" -> prop.predictions_scheduled_10_per_page_index
+      _ -> nil
+    end
+  end
 end

@@ -1,4 +1,4 @@
-defmodule AdvisoriesTwoColumn do
+defmodule AdvisoriesPortrait do
   @moduledoc false
   use Surface.LiveComponent
 
@@ -10,7 +10,7 @@ defmodule AdvisoriesTwoColumn do
 
   def render(assigns) do
     ~H"""
-    <div class="advisories-container m-top-component">
+    <div class="advisories-container">
       <div class="heading-wrapper">
         <div class="heading">
           <h1 :if={{get_in(@message, [:type]) == "MRT"}}>MRT Status</h1>

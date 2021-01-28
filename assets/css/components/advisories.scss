@@ -42,12 +42,25 @@
     font-size: 60px;
     line-height: 80px;
     padding: 50px 47px;
-    margin-top: 70px;
   }
 }
 
 .dark {
   .advisories-container {
     color: #fff;
+  }
+}
+
+.portrait {
+  .advisories-container {
+    margin-top: 160px;
+    border: 6px solid #565656;
+    .heading-wrapper .heading {
+      width: 550px;
+    }
+    .advisory-content {
+      font-size: 50px;
+      line-height: 65px;
+    }
   }
 }

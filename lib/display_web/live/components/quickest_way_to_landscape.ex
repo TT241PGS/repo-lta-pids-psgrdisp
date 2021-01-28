@@ -1,4 +1,4 @@
-defmodule QuickestWayToTwoColumn do
+defmodule QuickestWayToLandscape do
   @moduledoc false
   use Surface.LiveComponent
 

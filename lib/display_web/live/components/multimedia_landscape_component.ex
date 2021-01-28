@@ -1,4 +1,4 @@
-defmodule MultimediaTwoColumn do
+defmodule MultimediaLandscape do
   @moduledoc false
   use Surface.LiveComponent
 

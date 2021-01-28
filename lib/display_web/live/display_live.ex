@@ -31,6 +31,7 @@ defmodule DisplayWeb.DisplayLive do
         current_layout_panes: nil,
         update_layout_timer: nil,
         is_multi_layout: false,
+        layout_mode: nil,
         incoming_buses: [],
         predictions_previous: [],
         predictions_current: [],
@@ -42,6 +43,18 @@ defmodule DisplayWeb.DisplayLive do
         predictions_scheduled_set_2_column: [],
         predictions_scheduled_set_1_column_index: nil,
         predictions_scheduled_set_2_column_index: nil,
+        predictions_realtime_5_per_page: [],
+        predictions_realtime_7_per_page: [],
+        predictions_realtime_10_per_page: [],
+        predictions_realtime_5_per_page_index: nil,
+        predictions_realtime_7_per_page_index: nil,
+        predictions_realtime_10_per_page_index: nil,
+        predictions_scheduled_5_per_page: [],
+        predictions_scheduled_7_per_page: [],
+        predictions_scheduled_10_per_page: [],
+        predictions_scheduled_5_per_page_index: nil,
+        predictions_scheduled_7_per_page_index: nil,
+        predictions_scheduled_10_per_page_index: nil,
         is_prediction_next_slide_scheduled: false,
         messages: %{message_map: nil, timeline: nil},
         suppressed_messages: %{global_message: nil, service_message_map: %{}, hide_services: []},
@@ -191,7 +204,19 @@ defmodule DisplayWeb.DisplayLive do
       predictions_scheduled_set_1_column: predictions_scheduled_set_1_column,
       predictions_scheduled_set_2_column: predictions_scheduled_set_2_column,
       predictions_scheduled_set_1_column_index: predictions_scheduled_set_1_column_index,
-      predictions_scheduled_set_2_column_index: predictions_scheduled_set_2_column_index
+      predictions_scheduled_set_2_column_index: predictions_scheduled_set_2_column_index,
+      predictions_realtime_5_per_page: predictions_realtime_5_per_page,
+      predictions_realtime_7_per_page: predictions_realtime_7_per_page,
+      predictions_realtime_10_per_page: predictions_realtime_10_per_page,
+      predictions_realtime_5_per_page_index: predictions_realtime_5_per_page_index,
+      predictions_realtime_7_per_page_index: predictions_realtime_7_per_page_index,
+      predictions_realtime_10_per_page_index: predictions_realtime_10_per_page_index,
+      predictions_scheduled_5_per_page: predictions_scheduled_5_per_page,
+      predictions_scheduled_7_per_page: predictions_scheduled_7_per_page,
+      predictions_scheduled_10_per_page: predictions_scheduled_10_per_page,
+      predictions_scheduled_5_per_page_index: predictions_scheduled_5_per_page_index,
+      predictions_scheduled_7_per_page_index: predictions_scheduled_7_per_page_index,
+      predictions_scheduled_10_per_page_index: predictions_scheduled_10_per_page_index
     } = socket.assigns
 
     next_trigger_after =
@@ -206,6 +231,24 @@ defmodule DisplayWeb.DisplayLive do
           @slider_speed
 
         length(predictions_scheduled_set_2_column) > 0 ->
+          @slider_speed
+
+        length(predictions_realtime_5_per_page) > 0 ->
+          @slider_speed
+
+        length(predictions_realtime_7_per_page) > 0 ->
+          @slider_speed
+
+        length(predictions_realtime_10_per_page) > 0 ->
+          @slider_speed
+
+        length(predictions_scheduled_5_per_page) > 0 ->
+          @slider_speed
+
+        length(predictions_scheduled_7_per_page) > 0 ->
+          @slider_speed
+
+        length(predictions_scheduled_10_per_page) > 0 ->
           @slider_speed
 
         true ->
@@ -251,6 +294,48 @@ defmodule DisplayWeb.DisplayLive do
         determine_prediction_next_index(
           predictions_scheduled_set_2_column,
           predictions_scheduled_set_2_column_index
+        )
+      )
+      |> assign(
+        :predictions_realtime_5_per_page_index,
+        determine_prediction_next_index(
+          predictions_realtime_5_per_page,
+          predictions_realtime_5_per_page_index
+        )
+      )
+      |> assign(
+        :predictions_realtime_7_per_page_index,
+        determine_prediction_next_index(
+          predictions_realtime_7_per_page,
+          predictions_realtime_7_per_page_index
+        )
+      )
+      |> assign(
+        :predictions_realtime_10_per_page_index,
+        determine_prediction_next_index(
+          predictions_realtime_10_per_page,
+          predictions_realtime_10_per_page_index
+        )
+      )
+      |> assign(
+        :predictions_scheduled_5_per_page_index,
+        determine_prediction_next_index(
+          predictions_scheduled_5_per_page,
+          predictions_scheduled_5_per_page_index
+        )
+      )
+      |> assign(
+        :predictions_scheduled_7_per_page_index,
+        determine_prediction_next_index(
+          predictions_scheduled_7_per_page,
+          predictions_scheduled_7_per_page_index
+        )
+      )
+      |> assign(
+        :predictions_scheduled_10_per_page_index,
+        determine_prediction_next_index(
+          predictions_scheduled_10_per_page,
+          predictions_scheduled_10_per_page_index
         )
       )
 
@@ -522,6 +607,12 @@ defmodule DisplayWeb.DisplayLive do
 
     socket = socket |> assign(:templates, templates)
 
+    layout_mode =
+      case length(templates) > 0 do
+        true -> List.first(templates) |> get_in(["orientation", "value"])
+        _ -> nil
+      end
+
     %{
       messages: messages,
       current_layout_index: current_layout_index,
@@ -554,6 +645,7 @@ defmodule DisplayWeb.DisplayLive do
     socket =
       socket
       |> assign(:cycle_time, cycle_time)
+      |> assign(:layout_mode, layout_mode)
 
     result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
 
@@ -661,6 +753,27 @@ defmodule DisplayWeb.DisplayLive do
         ~H"""
         <div class={{"content-wrapper landscape #{theme}"}}>
           <LandscapeThreePaneALayout prop={{assigns}}/>
+        </div>
+        """
+
+      "portrait_two_pane" ->
+        ~H"""
+        <div class={{"content-wrapper portrait #{theme}"}}>
+          <PortraitTwoPaneLayout prop={{assigns}} service_per_page="10"/>
+        </div>
+        """
+
+      "portrait_three_pane" ->
+        ~H"""
+        <div class={{"content-wrapper portrait #{theme}"}}>
+          <PortraitThreePaneALayout prop={{assigns}} service_per_page="7"/>
+        </div>
+        """
+
+      "portrait_three_pane_b" ->
+        ~H"""
+        <div class={{"content-wrapper portrait #{theme}"}}>
+          <PortraitThreePaneBLayout prop={{assigns}} service_per_page="5"/>
         </div>
         """
 

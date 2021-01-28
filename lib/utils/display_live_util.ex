@@ -89,6 +89,24 @@ defmodule Display.Utils.DisplayLiveUtil do
             :predictions_realtime_set_2_column,
             create_predictions_set_2_column(cached_predictions)
           )
+          |> Phoenix.LiveView.assign(:predictions_scheduled_5_per_page, [])
+          |> Phoenix.LiveView.assign(:predictions_scheduled_7_per_page, [])
+          |> Phoenix.LiveView.assign(:predictions_scheduled_10_per_page, [])
+          |> Phoenix.LiveView.assign(:predictions_scheduled_5_per_page_index, nil)
+          |> Phoenix.LiveView.assign(:predictions_scheduled_7_per_page_index, nil)
+          |> Phoenix.LiveView.assign(:predictions_scheduled_10_per_page_index, nil)
+          |> Phoenix.LiveView.assign(
+            :predictions_realtime_5_per_page,
+            create_predictions_5_per_page(cached_predictions)
+          )
+          |> Phoenix.LiveView.assign(
+            :predictions_realtime_7_per_page,
+            create_predictions_7_per_page(cached_predictions)
+          )
+          |> Phoenix.LiveView.assign(
+            :predictions_realtime_10_per_page,
+            create_predictions_10_per_page(cached_predictions)
+          )
           |> Phoenix.LiveView.assign(
             :incoming_buses,
             incoming_buses
@@ -187,6 +205,24 @@ defmodule Display.Utils.DisplayLiveUtil do
         :predictions_scheduled_set_2_column,
         create_predictions_set_2_column(scheduled_predictions)
       )
+      |> Phoenix.LiveView.assign(:predictions_realtime_5_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_7_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_10_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_5_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_realtime_7_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_realtime_10_per_page_index, nil)
+      |> Phoenix.LiveView.assign(
+        :predictions_scheduled_5_per_page,
+        create_predictions_5_per_page(scheduled_predictions)
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_scheduled_7_per_page,
+        create_predictions_7_per_page(scheduled_predictions)
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_scheduled_10_per_page,
+        create_predictions_10_per_page(scheduled_predictions)
+      )
       |> Phoenix.LiveView.assign(
         :incoming_buses,
         incoming_buses
@@ -280,6 +316,31 @@ defmodule Display.Utils.DisplayLiveUtil do
       end)
 
     if columns == 2, do: Enum.chunk_every(cached_predictions, 2), else: cached_predictions
+  end
+
+  def create_predictions_5_per_page(cached_predictions) do
+    create_predictions_rowwise(cached_predictions, 5)
+  end
+
+  def create_predictions_7_per_page(cached_predictions) do
+    create_predictions_rowwise(cached_predictions, 7)
+  end
+
+  def create_predictions_10_per_page(cached_predictions) do
+    create_predictions_rowwise(cached_predictions, 10)
+  end
+
+  defp create_predictions_rowwise(cached_predictions, max_rows) do
+    cached_predictions
+    |> Enum.with_index()
+    |> Enum.reduce([], fn {prediction, index}, acc ->
+      remainder = rem(index, max_rows)
+      quotient = div(index, max_rows)
+
+      if remainder == 0,
+        do: List.insert_at(acc, quotient, [prediction]),
+        else: List.update_at(acc, quotient, &(&1 ++ [prediction]))
+    end)
   end
 
   def update_estimated_arrival(service, next_bus) do
@@ -626,7 +687,20 @@ defmodule Display.Utils.DisplayLiveUtil do
   end
 
   def get_multimedia(layout) do
-    type = get_in(layout, ["panes", "pane1", "config", "multimediaType", "value"])
+    pane_no =
+      ["pane1", "pane2", "pane3"]
+      |> Enum.reduce(nil, fn pane_no, acc ->
+        case get_in(layout, ["panes", pane_no, "config", "multimediaType", "value"]) do
+          nil -> acc
+          _ -> pane_no
+        end
+      end)
+
+    type =
+      case is_bitstring(pane_no) do
+        true -> get_in(layout, ["panes", pane_no, "config", "multimediaType", "value"])
+        false -> nil
+      end
 
     base_url = Application.get_env(:display, :multimedia_base_url)
 
@@ -637,18 +711,18 @@ defmodule Display.Utils.DisplayLiveUtil do
 
         "IMAGE" ->
           "/pids-multimedia/" <> resource =
-            get_in(layout, ["panes", "pane1", "config", "file", "fileUrl"])
+            get_in(layout, ["panes", pane_no, "config", "file", "fileUrl"])
 
           base_url <> resource
 
         "VIDEO" ->
           "/pids-multimedia/" <> resource =
-            get_in(layout, ["panes", "pane1", "config", "video", "fileUrl"])
+            get_in(layout, ["panes", pane_no, "config", "video", "fileUrl"])
 
           base_url <> resource
 
         "IMAGE SEQUENCE" ->
-          get_in(layout, ["panes", "pane1", "config", "files"])
+          get_in(layout, ["panes", pane_no, "config", "files"])
           |> Enum.map(fn file ->
             "/pids-multimedia/" <> resource = file["image"]["fileUrl"]
 
