@@ -31,7 +31,7 @@ defmodule PredictionsRealtimeTwoColumnLandscape do
               </div>
             </div>
             <div class="details">
-              <div class="next-bus" :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2", "NextBus3"] }}>
+              <div class={{"next-bus", "highlight": is_nil(service["NextBus2"]) and is_nil(service["NextBus3"])}} :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2", "NextBus3"] }}>
                 <span class={{"indicator", "bg-yellow-1": service[next_bus]["Load"] in ["LSD", "SDA"], "bg-green-1": service[next_bus]["Load"] == "SEA"}}></span>
                 <span class="label">{{service[next_bus]["EstimatedArrival"]}}</span>
                 <span class="flex">

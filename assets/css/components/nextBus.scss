@@ -88,6 +88,11 @@
   .next-bus {
     border: 3px solid $charcoal;
     color: #fff;
+
+    &.highlight {
+      background: #fff;
+      color: $charcoal;
+    }
   }
 }
 

@@ -25,7 +25,7 @@ defmodule PredictionsScheduledPortrait do
           <div class="bus-info-message" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) == nil and service["Status"] == "last_trip_departed"}}>{{service["DestinationCode"]}}<br>Last trip for the day has departed.</div>
           <div class="bus-info-message" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) != nil}}>{{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]])}}</div>
           <div class="next-buses flex" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) == nil and service["Status"] == "operating_now"}}>
-            <div class="next-bus" :if={{ index < 2 }} :for={{ {next_bus, index} <- Enum.with_index(service["NextBuses"]) }}>
+            <div class={{"next-bus", "highlight": next_bus["isLastBus"] == true}} :if={{ index < 2 }} :for={{ {next_bus, index} <- Enum.with_index(service["NextBuses"]) }}>
               <span class="label">{{next_bus["EstimatedArrival"]}}</span>
             </div>
             <div class="destination-bus-stop">
