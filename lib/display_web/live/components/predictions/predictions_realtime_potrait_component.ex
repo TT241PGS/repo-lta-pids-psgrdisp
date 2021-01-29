@@ -23,7 +23,7 @@ defmodule PredictionsRealtimePortrait do
           </div>
           <div class="bus-info-message" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) != nil}}>{{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]])}}</div>
           <div class="next-buses flex" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) == nil}}>
-            <div class="next-bus" :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2"] }}>
+            <div class={{"next-bus", "highlight": is_nil(service["NextBus2"]) and is_nil(service["NextBus3"])}} :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2"] }}>
               <span class={{"indicator", "bg-yellow-1": service[next_bus]["Load"] in ["LSD", "SDA"], "bg-green-1": service[next_bus]["Load"] == "SEA"}}></span>
               <span class="label">{{service[next_bus]["EstimatedArrival"]}}</span>
               <span class="flex">
