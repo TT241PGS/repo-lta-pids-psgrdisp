@@ -34,20 +34,39 @@
     }
 
     .tags {
-      padding-left: 580px;
+      position: absolute;
+      padding: 19px 40px 30px 580px;
+      display: flex;
+      align-items: center;
+      left: 0;
+      top: 0;
+      margin: 0;
     }
   }
 
   .advisory-content {
     font-size: 60px;
     line-height: 80px;
-    padding: 50px 47px;
-    margin-top: 70px;
+    padding: 120px 47px 50px 47px;
   }
 }
 
 .dark {
   .advisories-container {
     color: #fff;
+  }
+}
+
+.portrait {
+  .advisories-container {
+    margin-top: 160px;
+    border: 6px solid #565656;
+    .heading-wrapper .heading {
+      width: 550px;
+    }
+    .advisory-content {
+      font-size: 50px;
+      line-height: 65px;
+    }
   }
 }

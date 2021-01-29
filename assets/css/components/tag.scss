@@ -1,7 +1,5 @@
 .tag {
-  min-width: 150px;
-  height: 64px;
-  padding: 0 31.25px;
+  height: 40px;
   line-height: 64px;
   font-size: 48px;
   border-radius: 10px;
@@ -15,5 +13,13 @@
 .dark {
   .tag {
     color: #fff;
+  }
+}
+
+.portrait {
+  .tag {
+    height: 54px;
+    font-size: 41px;
+    line-height: 54px;
   }
 }

@@ -50,3 +50,33 @@
     }
   }
 }
+
+.portrait {
+  .heading-info {
+    position: absolute;
+    top: 0;
+
+    &.services {
+      left: 0;
+    }
+
+    &.arriving {
+      left: 436px;
+    }
+
+    &.nextBus {
+      left: 862px;
+    }
+
+    &.destination {
+      left: 1288px;
+    }
+
+    + .page-count {
+      right: 0;
+      position: absolute;
+      top: 0;
+      font-size: 48px;
+    }
+  }
+}

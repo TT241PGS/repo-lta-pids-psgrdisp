@@ -1,4 +1,4 @@
-defmodule QuickestWayToTwoColumn do
+defmodule QuickestWayToLandscape do
   @moduledoc false
   use Surface.LiveComponent
 
@@ -12,10 +12,11 @@ defmodule QuickestWayToTwoColumn do
             class="heading-info">BUS</span></div>
         <div class="flex">
           <div class="destination-card-with-multiple-tags col-span-4">
-            <div class="text">{{service["poi_name"]}}</div>
-            <div class="tags hidden">
-              <span class="tag bg-green-1">Ewl</span>
-              <span class="tag bg-red">nsl</span>
+            <div class="text">{{get_in(service, ["poi","poi_name"])}}</div>
+            <div class="tags">
+              <div class="poi-wrapper" :if={{is_list(get_in(service, ["poi", "pictograms"]))}} :for={{ poi <- get_in(service, ["poi", "pictograms"]) }}>
+                <img class="tag" src="{{poi}}" alt="">
+              </div>
             </div>
             <div class="floating-arrow right">
               <i class="fas fa-arrow-left"></i>

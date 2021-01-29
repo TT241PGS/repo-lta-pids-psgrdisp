@@ -43,7 +43,23 @@ defmodule Display.Poi do
     )
     |> Repo.all()
     |> Enum.reduce(%{}, fn poi, acc ->
-      Map.put(acc, poi.stop_code, poi.poi_name)
+      pictograms =
+        case is_bitstring(poi.pictograms) do
+          true ->
+            poi.pictograms
+            |> String.split(",")
+            |> Enum.map(fn url ->
+              Application.get_env(:display, :multimedia_base_url) <> String.trim(url)
+            end)
+
+          false ->
+            []
+        end
+
+      Map.put(acc, poi.stop_code, %{
+        "poi_name" => poi.poi_name,
+        "pictograms" => pictograms
+      })
     end)
   end
 end

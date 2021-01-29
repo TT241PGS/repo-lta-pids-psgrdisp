@@ -311,7 +311,7 @@ defmodule Display.Scheduled do
 
     Enum.map(quickets_way_to_map, fn {k, v} ->
       v
-      |> Map.put("poi_name", Map.get(poi_metadata_map, k))
+      |> Map.put("poi", Map.get(poi_metadata_map, k))
       |> update_in(["arriving_time_at_origin"], &TimeUtil.get_eta_from_seconds_past_today/1)
     end)
   end

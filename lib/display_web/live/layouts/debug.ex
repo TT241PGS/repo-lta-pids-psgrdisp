@@ -28,6 +28,10 @@ defmodule Debug do
         <h2>Suppressed Messages</h2>
         <p>{{inspect(@prop.suppressed_messages)}}</p>
       </section>
+      <section>
+        <h2>Layout Mode</h2>
+        <p>{{inspect(@prop.layout_mode)}}</p>
+      </section>
     </div>
     """
   end

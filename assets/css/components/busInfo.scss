@@ -15,3 +15,13 @@
     color: #fff;
   }
 }
+
+.portrait.dark {
+  .bus-info {
+    @extend .portrait-bg-green;
+    height: 250px;
+    width: 416px;
+    color: #303030;
+    margin-right: 20px;
+  }
+}
