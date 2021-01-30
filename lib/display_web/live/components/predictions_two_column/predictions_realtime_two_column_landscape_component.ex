@@ -31,9 +31,10 @@ defmodule PredictionsRealtimeTwoColumnLandscape do
               </div>
             </div>
             <div class="details">
-              <div class={{"next-bus", "highlight": is_nil(service["NextBus2"]) and is_nil(service["NextBus3"])}} :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2", "NextBus3"] }}>
+              <div class="next-bus" :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2", "NextBus3"] }}>
                 <span class={{"indicator", "bg-yellow-1": service[next_bus]["Load"] in ["LSD", "SDA"], "bg-green-1": service[next_bus]["Load"] == "SEA"}}></span>
                 <span class="label">{{service[next_bus]["EstimatedArrival"]}}</span>
+                <span class="badge" :if={{is_nil(service["NextBus2"]) and is_nil(service["NextBus3"])}}>Last Bus</span>
                 <span class="flex">
                   <img class="bus-feature-icon" src="/images/bus_no_wab.svg" :if={{ service[next_bus]["Feature"] == "" }}>
                   <img class="bus-feature-icon" src="/images/bus_sd.svg" :if={{ service[next_bus]["Type"] == "SD" }}>

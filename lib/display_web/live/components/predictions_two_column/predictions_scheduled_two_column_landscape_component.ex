@@ -30,8 +30,9 @@ defmodule PredictionsScheduledTwoColumnLandscape do
               </div>
             </div>
             <div class="details">
-              <div class={{"next-bus", "highlight": next_bus["isLastBus"] == true}} :for={{ next_bus <- service["NextBuses"] }}>
+              <div class="next-bus" :for={{ next_bus <- service["NextBuses"] }}>
                 <span class="indicator bg-charcoal"></span>
+                <span class="badge" :if={{next_bus["isLastBus"] == true}}>Last Bus</span>
                 <span class="label mb-0 font-bold">{{next_bus["EstimatedArrival"]}}</span>
               </div>
             </div>
