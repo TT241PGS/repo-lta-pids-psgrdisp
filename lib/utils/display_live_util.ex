@@ -778,14 +778,21 @@ defmodule Display.Utils.DisplayLiveUtil do
   defp filter_active_multimedia_layout(layouts) do
     layouts
     |> Enum.filter(fn layout ->
-      pane1 = get_in(layout, ["panes", "pane1"])
 
-      cond do
-        get_in(pane1, ["type", "value"]) != "multimedia" ->
-          true
+      multimedia_pane_no =
+        ["pane1", "pane2", "pane3"]
+        |> Enum.reduce(nil, fn pane_no, acc ->
+          case get_in(layout, ["panes", pane_no, "config", "multimediaType", "value"]) do
+            nil -> acc
+            _ -> pane_no
+          end
+        end)
+
+      case is_bitstring(multimedia_pane_no) do
+
 
         true ->
-          config = get_in(pane1, ["config"])
+          config = get_in(layout, ["panes", multimedia_pane_no, "config"])
 
           start_date = config["startDate"] |> String.split("T") |> List.first()
           start_time = config["startTime"]
@@ -802,6 +809,8 @@ defmodule Display.Utils.DisplayLiveUtil do
           if Timex.compare(now, start_date_time) >= 0 and Timex.compare(now, end_date_time) <= 0,
             do: true,
             else: false
+
+        false -> true
       end
     end)
   end
