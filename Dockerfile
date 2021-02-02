@@ -104,7 +104,7 @@ RUN chmod 755 $HOME
 
 USER app
 
-EXPOSE 80
+EXPOSE 4000
 
 ENTRYPOINT [ "/opt/app/bin/display" ]
 
