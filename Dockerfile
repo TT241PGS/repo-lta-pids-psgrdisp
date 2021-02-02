@@ -92,9 +92,17 @@ RUN apk add --no-cache ncurses-libs openssl bash
 ENV MIX_ENV=prod \
   REPLACE_OS_VARS=true
 
+RUN addgroup -g 1000 -S app && \
+  adduser -u 1000 -S app -G app
+
 WORKDIR $HOME
 
 COPY --from=releaser /opt/built .
+
+RUN chown -R app:app $HOME
+RUN chmod 755 $HOME
+
+USER app
 
 EXPOSE 80
 
