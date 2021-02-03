@@ -778,7 +778,6 @@ defmodule Display.Utils.DisplayLiveUtil do
   defp filter_active_multimedia_layout(layouts) do
     layouts
     |> Enum.filter(fn layout ->
-
       multimedia_pane_no =
         ["pane1", "pane2", "pane3"]
         |> Enum.reduce(nil, fn pane_no, acc ->
@@ -789,8 +788,6 @@ defmodule Display.Utils.DisplayLiveUtil do
         end)
 
       case is_bitstring(multimedia_pane_no) do
-
-
         true ->
           config = get_in(layout, ["panes", multimedia_pane_no, "config"])
 
@@ -810,7 +807,8 @@ defmodule Display.Utils.DisplayLiveUtil do
             do: true,
             else: false
 
-        false -> true
+        false ->
+          true
       end
     end)
   end

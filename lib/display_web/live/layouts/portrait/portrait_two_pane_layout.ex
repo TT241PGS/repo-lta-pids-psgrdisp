@@ -9,7 +9,7 @@ defmodule PortraitTwoPaneLayout do
 
   def render(assigns) do
     ~H"""
-    <div>
+    <div style="flex-direction: column; height: 100%; display: flex">
       <BusStopInfo busStopName={{@prop.bus_stop_name}} busStopNo={{@prop.bus_stop_no}} />
       <DateTimeHorizontal day={{@prop.date_time.day}} date={{@prop.date_time.date}} time={{@prop.date_time.time}}/>
       <IncomingBusPortrait incoming_buses={{@prop.incoming_buses}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "next_buses_arriving_at_stop" and length(@prop.incoming_buses) > 0}} />
