@@ -69,7 +69,8 @@ defmodule DisplayWeb.DisplayLive do
         multimedia: %{content: nil, type: nil},
         multimedia_image_sequence_next_trigger_at: nil,
         multimedia_image_sequence_current_index: nil,
-        multimedia_image_sequence_current_url: nil
+        multimedia_image_sequence_current_url: nil,
+        zoom: assigns["zoom"] || 1
       )
 
     case Process.get(:"$callers") do
