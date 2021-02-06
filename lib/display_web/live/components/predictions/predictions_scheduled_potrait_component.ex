@@ -33,8 +33,8 @@ defmodule PredictionsScheduledPortrait do
               <p>{{service["DestinationCode"]}}</p>
               <div class="next-bus-station-with-tags">
                 <div class="tags">
-                  <div class="poi-wrapper" :if={{is_list(service["DestinationPictograms"])}} :for={{ poi <- service["DestinationPictograms"] }}>
-                    <img src="{{poi}}" alt="">
+                  <div class="poi-wrapper" :if={{is_list(service["DestinationPictograms"])}}>
+                    <img :for={{ poi <- service["DestinationPictograms"] }} src="{{poi}}" alt="">
                   </div>
                 </div>
                 <div :if={{not is_nil(service["WayPoints"])}} class="text">{{service["WayPoints"]}}</div>

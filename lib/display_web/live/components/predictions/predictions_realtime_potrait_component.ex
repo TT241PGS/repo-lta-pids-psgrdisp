@@ -38,8 +38,8 @@ defmodule PredictionsRealtimePortrait do
               <p>{{service["NextBus"]["Destination"]}}</p>
               <div class="next-bus-station-with-tags">
                 <div class="tags">
-                  <div class="poi-wrapper" :if={{is_list(service["NextBus"]["DestinationPictograms"])}} :for={{ poi <- service["NextBus"]["DestinationPictograms"] }}>
-                    <img src="{{poi}}" alt="">
+                  <div class="poi-wrapper" :if={{is_list(service["NextBus"]["DestinationPictograms"])}}>
+                    <img :for={{ poi <- service["NextBus"]["DestinationPictograms"] }} src="{{poi}}" alt="">
                   </div>
                 </div>
                 <div :if={{not is_nil(service["NextBus"]["WayPoints"])}} class="text">{{service["NextBus"]["WayPoints"]}}</div>

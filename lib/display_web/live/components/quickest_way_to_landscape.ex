@@ -14,8 +14,8 @@ defmodule QuickestWayToLandscape do
           <div class="destination-card-with-multiple-tags col-span-4">
             <div class="text">{{get_in(service, ["poi","poi_name"])}}</div>
             <div class="tags">
-              <div class="poi-wrapper" :if={{is_list(get_in(service, ["poi", "pictograms"]))}} :for={{ poi <- get_in(service, ["poi", "pictograms"]) }}>
-                <img class="tag" src="{{poi}}" alt="">
+              <div class="poi-wrapper" :if={{is_list(get_in(service, ["poi", "pictograms"]))}}>
+                <img :for={{ poi <- get_in(service, ["poi", "pictograms"]) }} class="tag" src="{{poi}}" alt="">
               </div>
             </div>
             <div class="floating-arrow right">

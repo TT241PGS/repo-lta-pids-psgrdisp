@@ -26,8 +26,8 @@ defmodule PredictionsRealtimeTwoColumnLandscape do
           <div class="next-buses" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) == nil}}>
             <div class="next-buses-heading-info">
               <p>{{service["NextBus"]["Destination"]}}</p>
-              <div class="poi-wrapper" :if={{is_list(service["NextBus"]["DestinationPictograms"])}} :for={{ poi <- service["NextBus"]["DestinationPictograms"] }}>
-                <img src="{{poi}}" alt="">
+              <div class="poi-wrapper" :if={{is_list(service["NextBus"]["DestinationPictograms"])}}>
+                <img :for={{ poi <- service["NextBus"]["DestinationPictograms"] }} src="{{poi}}" alt="">
               </div>
             </div>
             <div class="details">

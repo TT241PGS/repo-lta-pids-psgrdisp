@@ -14,8 +14,8 @@ defmodule QuickestWayToPortrait do
             <div class="left-info">
               <p>{{get_in(service, ["poi","poi_name"])}}</p>
               <div class="tags">
-                <div class="poi-wrapper" :if={{is_list(get_in(service, ["poi", "pictograms"]))}} :for={{ poi <- get_in(service, ["poi", "pictograms"]) }}>
-                  <img class="tag" src="{{poi}}" alt="">
+                <div class="poi-wrapper" :if={{is_list(get_in(service, ["poi", "pictograms"]))}}>
+                  <img :for={{ poi <- get_in(service, ["poi", "pictograms"]) }} class="tag" src="{{poi}}" alt="">
                 </div>
               </div>
               <div class="floating-arrow"><i class="fas fa-arrow-right"></i></div>
