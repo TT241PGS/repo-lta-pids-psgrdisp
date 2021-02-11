@@ -50,7 +50,6 @@ defmodule Display.MixProject do
       {:httpoison, "~> 1.4"},
       {:ok, "~>2.3.0"},
       {:mock, "~> 0.3.0", only: :test},
-      {:distillery, "~> 2.0"},
       {:redix, ">= 0.0.0"},
       {:timex, "~> 3.5"},
       {:surface, "~> 0.1.0-alpha.2"},
