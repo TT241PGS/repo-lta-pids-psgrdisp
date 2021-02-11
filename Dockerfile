@@ -1,6 +1,7 @@
-FROM elixir:1.10.3-alpine as base
+FROM elixir:1.11.2-alpine as base
 
 ENV HOME=/opt/app
+ENV MIX_ENV=prod
 
 RUN mix do local.hex --force, local.rebar --force
 
@@ -27,30 +28,10 @@ RUN npm i
 RUN npm run deploy
 
 ########################################################################
-FROM elixir:1.10.3-alpine as releaser
-
-# The following are build arguments used to change variable parts of the image.
-# The name of your application/release (required)
-ARG APP_NAME=display
-# The version of the application we are building (required)
-ARG APP_VERSION=1.0.0
-# The environment to build with
-ARG MIX_ENV=prod
-
-ENV APP_NAME=${APP_NAME} \
-  APP_VERSION=${APP_VERSION} \
-  MIX_ENV=${MIX_ENV}
+FROM elixir:1.11.2-alpine as releaser
 
 ENV HOME=/opt/app
-
-ARG ERLANG_COOKIE
-ENV ERLANG_COOKIE $ERLANG_COOKIE
-
-# dependencies for comeonin
-# RUN apk add --no-cache build-base cmake
-
 ENV MIX_ENV=prod
-ENV SECRET_KEY_BASE=yq2XDL2EK7JCIQTsUmT+G4DNn9omjTN+5hko0IKJB+RxxzwaEtYliKIU/L1EIH57
 
 WORKDIR $HOME
 
@@ -69,28 +50,20 @@ RUN mix phx.digest
 # Release
 RUN \
   mkdir -p /opt/built && \
-  MIX_ENV=prod mix distillery.release --verbose --env=prod && \
-  cp _build/${MIX_ENV}/rel/${APP_NAME}/releases/${APP_VERSION}/${APP_NAME}.tar.gz /opt/built && \
-  cd /opt/built && \
-  tar -xzf ${APP_NAME}.tar.gz && \
-  rm ${APP_NAME}.tar.gz
+  MIX_ENV=prod mix release --path _build/${MIX_ENV}/rel/latest && \
+  mv _build/${MIX_ENV}/rel/latest /opt/built
 
 ########################################################################
 # Downgraded to 3.9 due to https://github.com/processone/docker-ejabberd/issues/46
 FROM alpine:3.9
 
-# The name of your application/release (required)
-ARG APP_NAME=display
-
 ENV LANG=en_US.UTF-8 \
   HOME=/opt/app/ \
   TERM=xterm \
-  LANG=C.UTF-8
+  LANG=C.UTF-8 \
+  MIX_ENV=prod
 
 RUN apk add --no-cache ncurses-libs openssl bash
-
-ENV MIX_ENV=prod \
-  REPLACE_OS_VARS=true
 
 RUN addgroup -g 1000 -S app && \
   adduser -u 1000 -S app -G app
@@ -106,6 +79,6 @@ USER app
 
 EXPOSE 4000
 
-ENTRYPOINT [ "/opt/app/bin/display" ]
+ENTRYPOINT [ "/opt/app/latest/bin/display" ]
 
-CMD ["foreground"]
+CMD ["start"]
