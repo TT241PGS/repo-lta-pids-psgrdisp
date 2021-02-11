@@ -1,5 +1,6 @@
 _build/
 cover/
 deps/
+.elixir_ls/
 assets/node_modules/
 .env.*

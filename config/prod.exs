@@ -10,20 +10,5 @@ use Mix.Config
 # which you should run after static files are built and
 # before starting your production server.
 
-config :display, DisplayWeb.Endpoint,
-  http: [port: "${API_PORT}"],
-  url: [host: "${HOST}", port: "${API_PORT}"],
-  server: true,
-  secret_key_base: "${SECRET_KEY_BASE}"
-
-config :display,
-  datamall_base_url: "${DATAMALL_BASE_URL}",
-  datamall_account_key: "${DATAMALL_ACCOUNT_KEY}",
-  multimedia_base_url: "${MULTIMEDIA_BASE_URL}"
-
-config :redix,
-  host: "${REDIS_HOST}",
-  port: "${REDIS_PORT}"
-
 # Do not print debug messages in production
 config :logger, level: :info

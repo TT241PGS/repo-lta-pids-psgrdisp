@@ -65,14 +65,6 @@
           "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_REDIS_PORT"
         },
         {
-          "name": "DATAMALL_BASE_URL",
-          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_DATAMALL_BASE_URL"
-        },
-        {
-          "name": "DATAMALL_ACCOUNT_KEY",
-          "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_DATAMALL_ACCOUNT_KEY"
-        },
-        {
           "name": "SECRET_KEY_BASE",
           "valueFrom": "arn:aws:ssm:ap-southeast-1:485380287493:parameter/DISPLAY_NIGHTLY_SECRET_KEY_BASE"
         },
