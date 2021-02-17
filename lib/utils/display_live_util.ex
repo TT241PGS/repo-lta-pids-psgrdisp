@@ -71,6 +71,8 @@ defmodule Display.Utils.DisplayLiveUtil do
         quickest_way_to =
           RealTime.get_quickest_way_to(bus_stop_no, service_arrival_map, suppressed_messages)
 
+          quickest_way_to = quickest_way_to
+
         incoming_buses = get_incoming_buses(cached_predictions, suppressed_messages)
 
         cached_predictions = update_cached_predictions(cached_predictions, bus_stop_no)

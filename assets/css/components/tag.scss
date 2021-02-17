@@ -1,25 +1,34 @@
 .tag {
-  height: 40px;
-  line-height: 64px;
-  font-size: 48px;
-  border-radius: 10px;
+  color: #fff;
   text-transform: uppercase;
-
-  + .tag {
-    margin-left: 10px;
-  }
 }
 
-.dark {
+.landscape {
   .tag {
-    color: #fff;
+    min-width: 116px;
+    height: 48px;
+    padding: 0 25px;
+    line-height: 48px;
+    font-size: 36px;
+    border-radius: 10px;
+
+    + .tag {
+      margin-left: 10px;
+    }
   }
 }
 
 .portrait {
   .tag {
-    height: 54px;
-    font-size: 41px;
-    line-height: 54px;
+    min-width: 64.5px;
+    height: 27px;
+    font-size: 20.5px;
+    line-height: 27px;
+    padding: 0 15.625px;
+    border-radius: 5px;
+
+    + .tag {
+      margin-left: 5px;
+    }
   }
 }

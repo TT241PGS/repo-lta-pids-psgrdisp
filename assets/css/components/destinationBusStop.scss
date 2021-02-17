@@ -1,34 +1,70 @@
-.portrait {
+.landscape {
   .destination-bus-stop {
-    width: 772px;
-    height: 250px;
+    width: 693px;
+    height: 225px;
     border-radius: 0 35px 35px 0;
-    padding: 26px 40px;
+    padding: 24px 36px;
+    margin-right: 1px;
 
     p {
       font-size: 50px;
       line-height: 60px;
       color: #fff;
       margin-top: 0;
-      margin-bottom: 11px;
+      margin-bottom: 10px;
       font-weight: bold;
     }
 
     .tags {
-      margin-bottom: 29px;
+      margin-bottom: 26px;
     }
 
     .tag {
-      width: 100px;
-      height: 40px;
-      font-size: 30px;
-      line-height: 40px;
-      padding: 0 21px;
+      width: 90px;
+      height: 36px;
+      font-size: 27px;
+      line-height: 36px;
+      padding: 0 19px;
     }
 
     .text {
       font-size: 38px;
       line-height: 46px;
+    }
+  }
+}
+
+.portrait {
+  .destination-bus-stop {
+    width: 386px;
+    height: 125px;
+    border-radius: 0 17.5px 17.5px 0;
+    padding: 13px 20px;
+
+    p {
+      font-size: 25px;
+      line-height: 30px;
+      color: #fff;
+      margin-top: 0;
+      margin-bottom: 5.5px;
+      font-weight: bold;
+    }
+
+    .tags {
+      margin-bottom: 14.5px;
+    }
+
+    .tag {
+      width: 50px;
+      height: 20px;
+      font-size: 15px;
+      line-height: 20px;
+      padding: 0 10.5px;
+    }
+
+    .text {
+      font-size: 19px;
+      line-height: 23px;
     }
   }
 }

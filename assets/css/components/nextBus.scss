@@ -1,135 +1,99 @@
-.next-bus {
-  height: 157px;
-  position: relative;
-  display: flex;
-  line-height: 157px;
-  border-radius: 0 0 50px 0;
+.landscape {
+  .next-bus {
+    color: #fff;
+    height: 225px;
+    position: relative;
+    display: flex;
+    line-height: 225px;
 
-  .indicator {
-    width: 10px;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
-  .label {
-    font-size: 72px;
-    font-weight: bold;
-  }
-
-  &.no-icon {
-    .label {
-      font-weight: bold !important;
+    .indicator {
+      width: 10px;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
-  }
-
-  &.highlighted {
-    background-color: $offWhite;
 
     .label {
-      color: $charcoal;
-    }
-  }
-}
-
-.next-bus {
-  width: 564px;
-  margin-right: 50px;
-  padding: 0 30px;
-  align-items: center;
-  justify-content: space-between;
-
-  label {
-    font-weight: bold;
-  }
-
-  svg {
-    height: 50px;
-  }
-
-  + .next-bus {
-    width: 324px;
-    margin-right: 57px;
-    line-height: 1;
-    display: block;
-    padding: 30px 0 0 36px;
-
-    .label {
-      line-height: 87px;
-      font-weight: normal;
+      font-size: 72px;
+      font-weight: bold;
     }
 
     &.no-icon {
-      justify-content: center;
-      justify-content: center;
-      display: flex;
-      align-items: center;
-      padding: 0;
-    }
-
-    & + .next-bus {
-      width: 321px;
-      padding: 30px 0 0 36px;
-      margin: 0;
-
-      &.no-icon {
-        justify-content: center;
-        justify-content: center;
-        display: flex;
-        align-items: center;
-        padding: 0;
+      .label {
+        font-weight: bold !important;
       }
     }
+
+    &.highlighted {
+      background-color: $offWhite;
+
+      .label {
+        color: $charcoal;
+      }
+    }
+
+    .bus-info-landscape {
+      height: 225px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 30px 0;
+      line-height: 1;
+    }
   }
-}
 
-.dark {
   .next-bus {
-    border: 3px solid $charcoal;
-    color: #fff;
+    width: 353px;
+    margin-right: 18px;
+    padding: 0 30px;
+    align-items: center;
+    justify-content: space-between;
 
-    .badge {
-      position: absolute;
-      top: 0px;
-      right: 0px;
-      height: 40px;
-      line-height: 40px;
-      text-align: center;
-      padding: 0px 18px;
-      border-bottom-left-radius: 10px;
-      font-size: 24px;
+    a label {
       font-weight: bold;
-      background: $offWhite;
-      color: $charcoal;
+    }
+
+    svg {
+      height: 50px;
+    }
+
+    + .next-bus {
+      width: 356px;
     }
   }
 }
 
 .portrait {
   .next-bus {
-    width: 406px;
-    height: 250px;
+    color: #fff;
+    width: 203px;
+    height: 125px;
     border-radius: 0;
-    margin-right: 20px;
+    margin-right: 10px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding: 41px 41px 31px 41px;
-
-    &.scheduled {
-      padding-top: 61px;
-    }
+    padding: 15.5px 20.5px;
 
     .label {
-      font-size: 72px;
-      line-height: 87px;
+      font-size: 36px;
+      line-height: 43.5px;
       font-weight: bold;
 
       .number {
-        font-size: 92px;
-        line-height: 111px;
+        font-size: 46px;
+        line-height: 55.5px;
       }
+    }
+
+    .indicator {
+      width: 5px;
+    }
+
+    svg {
+      height: 25px;
     }
   }
 }

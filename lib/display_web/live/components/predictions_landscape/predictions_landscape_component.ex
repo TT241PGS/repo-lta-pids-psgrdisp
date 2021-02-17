@@ -1,4 +1,4 @@
-defmodule PredictionsTwoColumn do
+defmodule PredictionsLandscape do
   @moduledoc false
   use Surface.LiveComponent
 
@@ -12,9 +12,9 @@ defmodule PredictionsTwoColumn do
 
   def render(assigns) do
     ~H"""
-    <div class="predictions-two-column">
-      <PredictionsRealtimeTwoColumnLandscape :if={{ length(@stopPredictionsRealtimeSet) > 0 and is_nil(@suppressed_messages.global_message) }} stopPredictionsSet={{@stopPredictionsRealtimeSet}} activeIndex={{@realtimeActiveIndex}} suppressed_messages={{@suppressed_messages}}/>
-      <PredictionsScheduledTwoColumnLandscape :if={{ length(@stopPredictionsRealtimeSet) <= 0 and is_nil(@suppressed_messages.global_message) }} stopPredictionsSet={{@stopPredictionsScheduledSet}} activeIndex={{@scheduledActiveIndex}} suppressed_messages={{@suppressed_messages}}/>
+    <div class="buses">
+      <PredictionsRealtimeLandscape :if={{ length(@stopPredictionsRealtimeSet) > 0 and is_nil(@suppressed_messages.global_message) }} stopPredictionsSet={{@stopPredictionsRealtimeSet}} activeIndex={{@realtimeActiveIndex}} suppressed_messages={{@suppressed_messages}}/>
+      <PredictionsScheduledLandscape :if={{ length(@stopPredictionsRealtimeSet) <= 0 and is_nil(@suppressed_messages.global_message) }} stopPredictionsSet={{@stopPredictionsScheduledSet}} activeIndex={{@scheduledActiveIndex}} suppressed_messages={{@suppressed_messages}}/>
       <div style="min-height: 1460px; color: white; display: flex; align-items: center; justify-content: center" :if={{ @suppressed_messages.global_message != nil }}>
         <h1>{{@suppressed_messages.global_message}}</h1>
       </div>

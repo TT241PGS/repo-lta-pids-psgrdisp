@@ -38,6 +38,18 @@ body {
   display: flex;
 }
 
+.flex-col {
+  flex-direction: column;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.w-full {
+  width: 100%;
+}
+
 .justify-between {
   justify-content: space-between;
 }
@@ -49,6 +61,62 @@ body {
 .landscape {
   width: 3840px;
   height: 2160px;
+
+  .row-odd {
+    .next-bus,
+    .destination-bus-stop,
+    .bus-info-message,
+    .group-info .left-info,
+    .group-info .right-info {
+      background-color: #565656;
+    }
+  }
+
+  .row-even {
+    .next-bus,
+    .destination-bus-stop,
+    .bus-info-message,
+    .group-info .left-info,
+    .group-info .right-info {
+      background-color: #3d3d3d;
+    }
+  }
+
+  .is-visible-in-landscape {
+    display: block;
+  }
+
+  .is-visible-in-portrait {
+    display: none;
+  }
+
+  .mb-row {
+    margin-bottom: 20px;
+  }
+
+  .container .quickest-way {
+    margin-top: 0px;
+    position: absolute;
+    top: 810px;
+  }
+
+  .multimedia {
+    position: absolute;
+    top: 1130px;
+    width: 1850px;
+  }
+
+  .container .advisories-container {
+    position: absolute;
+    top: 1650px;
+    width: 1835px;
+  }
+
+  .incoming-buses {
+    position: absolute;
+    top: 150px;
+  }
+  
 }
 
 .portrait {

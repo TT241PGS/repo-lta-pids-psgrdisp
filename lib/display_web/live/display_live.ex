@@ -743,17 +743,24 @@ defmodule DisplayWeb.DisplayLive do
         </div>
         """
 
-      "landscape_two_pane_b" ->
+      "landscape_three_pane" ->
         ~H"""
         <div class={{"content-wrapper landscape #{theme}"}}>
-          <LandscapeTwoPaneBLayout prop={{assigns}}/>
+          <LandscapeThreePaneLayout prop={{assigns}}/>
         </div>
         """
 
-      "landscape_three_pane_a" ->
+      "landscape_four_pane_a" ->
         ~H"""
         <div class={{"content-wrapper landscape #{theme}"}}>
-          <LandscapeThreePaneALayout prop={{assigns}}/>
+          <LandscapeFourPaneALayout prop={{assigns}}/>
+        </div>
+        """
+
+      "landscape_four_pane_b" ->
+        ~H"""
+        <div class={{"content-wrapper landscape #{theme}"}}>
+          <LandscapeFourPaneBLayout prop={{assigns}}/>
         </div>
         """
 

@@ -1,4 +1,4 @@
-defmodule PredictionsScheduledTwoColumnLandscape do
+defmodule PredictionsScheduledLandscape do
   @moduledoc false
   use Surface.LiveComponent
 

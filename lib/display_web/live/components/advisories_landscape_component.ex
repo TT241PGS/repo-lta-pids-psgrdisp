@@ -13,7 +13,7 @@ defmodule AdvisoriesLandscape do
     <div class="advisories-container m-top-component">
       <div class="heading-wrapper">
         <div class="heading">
-          <h1 :if={{get_in(@message, [:type]) == "MRT"}}>MRT Status</h1>
+          <h1 :if={{get_in(@message, [:type]) == "MRT"}}>MRT</h1>
           <h1 :if={{get_in(@message, [:type]) != "MRT"}}>Advisories</h1>
         </div>
         <div class="tags" :if={{is_bitstring(get_in(@message, [:line]))}}>
