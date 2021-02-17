@@ -49,9 +49,11 @@
 
 .phx-disconnected {
   cursor: wait;
+  display: none;
 }
 .phx-disconnected * {
   pointer-events: none;
+  display: none;
 }
 
 @keyframes slideInFromLeft {
