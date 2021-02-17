@@ -82,7 +82,12 @@
           "awslogs-stream-prefix": "ecs"
         }
       },
-      "mountPoints": [],
+      "mountPoints": [
+        {
+          "containerPath": "/tmp/efs/fs1",
+          "sourceVolume": "efs-config"
+        }
+      ],
       "volumesFrom": []
     }
   ],
@@ -90,11 +95,17 @@
   "taskRoleArn": "arn:aws:iam::485380287493:role/ecs-full-access",
   "executionRoleArn": "arn:aws:iam::485380287493:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
-  "volumes": [],
-  "placementConstraints": [],
-  "requiresCompatibilities": [
-    "FARGATE"
+  "volumes": [
+    {
+      "name": "efs-config",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-b5986cf5",
+        "transitEncryption": "ENABLED"
+      }
+    }
   ],
+  "placementConstraints": [],
+  "requiresCompatibilities": ["FARGATE"],
   "cpu": "512",
   "memory": "1024"
 }
