@@ -14,7 +14,7 @@ defmodule LandscapeOnePaneLayout do
       <div class="container two-columns">
         <PredictionsLandscape suppressed_messages={{@prop.suppressed_messages}} realtimeActiveIndex={{@prop.predictions_realtime_14_per_page_index}} scheduledActiveIndex={{@prop.predictions_scheduled_14_per_page_index}} stopPredictionsRealtimeSet={{@prop.predictions_realtime_14_per_page}} stopPredictionsScheduledSet={{@prop.predictions_scheduled_14_per_page}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}} twoColumn=true/>
       </div>
-      <MultimediaLandscape multimedia={{@prop.multimedia}} image_sequence_url={{@prop.multimedia_image_sequence_current_url}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "multimedia"}}/>
+      <MultimediaLandscape multimedia={{@prop.multimedia}} image_sequence_url={{@prop.multimedia_image_sequence_current_url}} onePane=true :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "multimedia"}}/>
     </div>
     """
   end

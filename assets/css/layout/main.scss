@@ -108,6 +108,11 @@ body {
     position: absolute;
     top: 1130px;
     width: 1850px;
+
+    &.one-pane {
+      top: 150px;
+      width: 3800px;
+    }
   }
 
   .container .advisories-container {
