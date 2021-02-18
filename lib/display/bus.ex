@@ -105,11 +105,11 @@ defmodule Display.Buses do
   def get_bus_stop_from_panel_id(nil), do: nil
 
   def get_bus_stop_from_panel_id(panel_id) do
-    from(pb in Buses.PanelBus,
+    from(pb in Buses.PanelBusStop,
       where: pb.panel_id == ^panel_id,
       select: %{
         panel_id: pb.panel_id,
-        bus_stop_no: pb.bus_stop_no
+        bus_stop_no: pb.point_no
       }
     )
     |> Repo.one()

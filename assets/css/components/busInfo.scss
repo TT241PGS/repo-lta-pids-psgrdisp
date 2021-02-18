@@ -1,27 +1,24 @@
 .bus-info {
-  width: 498px;
-  height: 238px;
-  font-size: 125px;
-  line-height: 238px;
+  @extend .portrait-bg-green;
+  width: 391px;
+  height: 225px;
+  font-size: 106px;
+  line-height: 225px;
   text-align: center;
-  @include letter-spacing(50);
-  border-radius: 50px 0 0 50px;
-  margin-right: 25px;
-}
-
-.dark {
-  .bus-info {
-    background-color: $charcoal;
-    color: #fff;
-  }
+  @include letter-spacing(10);
+  border-radius: 35px 0 0 35px;
+  margin-right: 18px;
+  color: #303030;
+  font-weight: bold;
 }
 
 .portrait.dark {
   .bus-info {
-    @extend .portrait-bg-green;
-    height: 250px;
-    width: 416px;
-    color: #303030;
-    margin-right: 20px;
+    height: 125px;
+    width: 208px;
+    margin-right: 10px;
+    font-size: 62.5px;
+    line-height: 119px;
+    border-radius: 25px 0 0 25px;
   }
 }

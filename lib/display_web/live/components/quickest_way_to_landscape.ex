@@ -3,28 +3,28 @@ defmodule QuickestWayToLandscape do
   use Surface.LiveComponent
 
   property services, :string, default: ""
+  property maxLength, :integer, default: 4
 
   def render(assigns) do
     ~H"""
-    <div class="container two-columns">
-      <div class={{"column", "left-column": service_index == 0, "right-column": service_index == 1}} :for={{ {service, service_index} <- Enum.with_index(@services) }}>
-        <div class="flex justify-between heading"><span class="heading-info">DESTINATION</span><span
-            class="heading-info">BUS</span></div>
-        <div class="flex">
-          <div class="destination-card-with-multiple-tags col-span-4">
-            <div class="text">{{get_in(service, ["poi","poi_name"])}}</div>
-            <div class="tags">
-              <div class="poi-wrapper" :if={{is_list(get_in(service, ["poi", "pictograms"]))}}>
-                <img :for={{ poi <- get_in(service, ["poi", "pictograms"]) }} class="tag" src="{{poi}}" alt="">
+    <div class="quickest-way">
+      <div class="floating-heading">quickest way to</div>
+      <div class="row">
+        <div class={{"row-odd": index in [0,2], "row-even": index in [1,3]}} :for={{ {service, index} <- @services |> Enum.take(@maxLength) |> Enum.with_index() }}>
+          <div class="group-info">
+            <div class="left-info">
+              <p>{{get_in(service, ["poi","poi_name"])}}</p>
+              <div class="tags">
+                <div class="poi-wrapper" :if={{is_list(get_in(service, ["poi", "pictograms"]))}}>
+                  <img :for={{ poi <- get_in(service, ["poi", "pictograms"]) }} class="tag" src="{{poi}}" alt="">
+                </div>
               </div>
+              <div class="floating-arrow"><i class="fas fa-arrow-right"></i></div>
             </div>
-            <div class="floating-arrow right">
-              <i class="fas fa-arrow-left"></i>
+            <div class="right-info bus">
+              <span class="number">{{service["service_no"]}}</span>
+              <span class="status">{{service["arriving_time_at_origin"]}}</span>
             </div>
-          </div>
-          <div class="bus-card">
-            <span class="number">{{service["service_no"]}}</span>
-            <span class="status">{{service["arriving_time_at_origin"]}}</span>
           </div>
         </div>
       </div>

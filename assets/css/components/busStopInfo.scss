@@ -33,8 +33,21 @@
 
 .portrait {
   .bus-stop-info {
-    padding-left: 361px;
+    padding-left: 180.5px;
     width: 100%;
-    margin-bottom: 50px;
+    margin-bottom: 25px;
+    height: 56.5px;
+    border-radius: 12.5px;
+
+    .bus-stop-number {
+      width: 162.5px;
+      padding: 0 25px;
+    }
+
+    .bus-stop-name,
+    .bus-stop-number {
+      line-height: 56.5px;
+      font-size: 30px;
+    }
   }
 }

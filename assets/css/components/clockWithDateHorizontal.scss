@@ -52,13 +52,30 @@
   .clock-with-date-horizontal {
     margin-left: 0;
     width: 100%;
+    height: 56.5px;
+    border-radius: 12.5px 0 12.5px 12.5px;
+
+    .day,
+    .date,
+    .time {
+      line-height: 56.5px;
+      font-size: 30px;
+    }
+
+    .day {
+      padding-left: 24.5px;
+      width: 283px;
+    }
 
     .date {
-      left: 573px;
-      width: 1038px;
+      left: 286.5px;
+      width: 519px;
+      border-radius: 0 0 0 30px;
+      padding-left: 21.5px;
     }
+
     .time {
-      width: 550px;
+      width: 225px;
     }
   }
 }

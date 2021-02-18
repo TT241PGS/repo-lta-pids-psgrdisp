@@ -1,11 +1,12 @@
 .bus-info-message {
-  width: 1322px;
-  height: 238px;
-  font-size: 60px;
-  border-radius: 0 50px 50px 0;
+  width: 1436px;
+  height: 225px;
+  font-size: 54px;
+  line-height: 65px;
+  border-radius: 0 35px 35px 0;
   display: flex;
   align-items: center;
-  padding: 0 58px;
+  padding: 0 45px;
 }
 
 .dark {
@@ -17,6 +18,10 @@
 
 .portrait {
   .bus-info-message {
-    width: 1624px;
+    width: 812px;
+    height: 125px;
+    font-size: 30px;
+    border-radius: 0 25px 25px 0;
+    padding: 0 29px;
   }
 }
