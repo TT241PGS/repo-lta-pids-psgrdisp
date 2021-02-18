@@ -58,6 +58,10 @@ body {
   margin-bottom: 30px;
 }
 
+.mr-30 {
+  margin-right: 30px;
+}
+
 .landscape {
   width: 3840px;
   height: 2160px;
@@ -142,4 +146,10 @@ body {
       background-color: #3d3d3d;
     }
   }
+}
+
+.grid-row-7 {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(7, auto);    
 }

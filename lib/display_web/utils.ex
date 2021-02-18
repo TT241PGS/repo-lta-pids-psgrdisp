@@ -33,6 +33,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
       "5" -> prop.predictions_realtime_5_per_page
       "7" -> prop.predictions_realtime_7_per_page
       "10" -> prop.predictions_realtime_10_per_page
+      "14" -> prop.predictions_realtime_14_per_page
       _ -> []
     end
   end
@@ -42,6 +43,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
       "5" -> prop.predictions_scheduled_5_per_page
       "7" -> prop.predictions_scheduled_7_per_page
       "10" -> prop.predictions_scheduled_10_per_page
+      "14" -> prop.predictions_scheduled_14_per_page
       _ -> []
     end
   end
@@ -51,6 +53,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
       "5" -> prop.predictions_realtime_5_per_page_index
       "7" -> prop.predictions_realtime_7_per_page_index
       "10" -> prop.predictions_realtime_10_per_page_index
+      "14" -> prop.predictions_realtime_14_per_page_index
       _ -> nil
     end
   end
@@ -60,6 +63,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
       "5" -> prop.predictions_scheduled_5_per_page_index
       "7" -> prop.predictions_scheduled_7_per_page_index
       "10" -> prop.predictions_scheduled_10_per_page_index
+      "14" -> prop.predictions_scheduled_14_per_page_index
       _ -> nil
     end
   end

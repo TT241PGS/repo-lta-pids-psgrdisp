@@ -71,8 +71,6 @@ defmodule Display.Utils.DisplayLiveUtil do
         quickest_way_to =
           RealTime.get_quickest_way_to(bus_stop_no, service_arrival_map, suppressed_messages)
 
-          quickest_way_to = quickest_way_to
-
         incoming_buses = get_incoming_buses(cached_predictions, suppressed_messages)
 
         cached_predictions = update_cached_predictions(cached_predictions, bus_stop_no)
@@ -94,9 +92,11 @@ defmodule Display.Utils.DisplayLiveUtil do
           |> Phoenix.LiveView.assign(:predictions_scheduled_5_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_7_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_10_per_page, [])
+          |> Phoenix.LiveView.assign(:predictions_scheduled_14_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_5_per_page_index, nil)
           |> Phoenix.LiveView.assign(:predictions_scheduled_7_per_page_index, nil)
           |> Phoenix.LiveView.assign(:predictions_scheduled_10_per_page_index, nil)
+          |> Phoenix.LiveView.assign(:predictions_scheduled_14_per_page_index, nil)
           |> Phoenix.LiveView.assign(
             :predictions_realtime_5_per_page,
             create_predictions_5_per_page(cached_predictions)
@@ -108,6 +108,10 @@ defmodule Display.Utils.DisplayLiveUtil do
           |> Phoenix.LiveView.assign(
             :predictions_realtime_10_per_page,
             create_predictions_10_per_page(cached_predictions)
+          )
+          |> Phoenix.LiveView.assign(
+            :predictions_realtime_14_per_page,
+            create_predictions_14_per_page(cached_predictions)
           )
           |> Phoenix.LiveView.assign(
             :incoming_buses,
@@ -210,9 +214,11 @@ defmodule Display.Utils.DisplayLiveUtil do
       |> Phoenix.LiveView.assign(:predictions_realtime_5_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_7_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_10_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_14_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_5_per_page_index, nil)
       |> Phoenix.LiveView.assign(:predictions_realtime_7_per_page_index, nil)
       |> Phoenix.LiveView.assign(:predictions_realtime_10_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_realtime_14_per_page_index, nil)
       |> Phoenix.LiveView.assign(
         :predictions_scheduled_5_per_page,
         create_predictions_5_per_page(scheduled_predictions)
@@ -224,6 +230,10 @@ defmodule Display.Utils.DisplayLiveUtil do
       |> Phoenix.LiveView.assign(
         :predictions_scheduled_10_per_page,
         create_predictions_10_per_page(scheduled_predictions)
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_scheduled_14_per_page,
+        create_predictions_14_per_page(scheduled_predictions)
       )
       |> Phoenix.LiveView.assign(
         :incoming_buses,
@@ -330,6 +340,10 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   def create_predictions_10_per_page(cached_predictions) do
     create_predictions_rowwise(cached_predictions, 10)
+  end
+
+  def create_predictions_14_per_page(cached_predictions) do
+    create_predictions_rowwise(cached_predictions, 14)
   end
 
   defp create_predictions_rowwise(cached_predictions, max_rows) do
