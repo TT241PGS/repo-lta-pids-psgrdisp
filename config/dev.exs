@@ -9,20 +9,20 @@ config :husky,
   json_codec: Jason
 
 config :redix,
-  host: System.fetch_env("REDIS_HOST"),
-  port: System.fetch_env("REDIS_PORT")
+  host: System.fetch_env!("REDIS_HOST"),
+  port: System.fetch_env!("REDIS_PORT")
 
 config :display, Display.Repo,
   adapter: Ecto.Adapters.Postgres,
-  hostname: System.fetch_env("POSTGRES_HOST"),
-  port: System.fetch_env("POSTGRES_PORT"),
-  database: System.fetch_env("POSTGRES_DB"),
-  username: System.fetch_env("POSTGRES_USER"),
-  password: System.fetch_env("POSTGRES_PASSWORD"),
-  pool_size: System.fetch_env("POSTGRES_POOL_SIZE")
+  hostname: System.fetch_env!("POSTGRES_HOST"),
+  port: System.fetch_env!("POSTGRES_PORT"),
+  database: System.fetch_env!("POSTGRES_DB"),
+  username: System.fetch_env!("POSTGRES_USER"),
+  password: System.fetch_env!("POSTGRES_PASSWORD"),
+  pool_size: System.fetch_env!("POSTGRES_POOL_SIZE") |> String.to_integer()
 
 config :display,
-  multimedia_base_url: System.fetch_env("MULTIMEDIA_BASE_URL")
+  multimedia_base_url: System.fetch_env!("MULTIMEDIA_BASE_URL")
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

@@ -12,7 +12,7 @@ defmodule Display.MixProject do
       aliases: aliases(),
       deps: deps(),
       releases: [
-        app: [
+        display: [
           config_providers: [{Config.Reader, "/tmp/efs/fs1/elixir-config/display/runtime.exs"}]
         ]
       ]
