@@ -19,7 +19,7 @@ config :display, Display.Repo,
   database: System.fetch_env!("POSTGRES_DB"),
   username: System.fetch_env!("POSTGRES_USER"),
   password: System.fetch_env!("POSTGRES_PASSWORD"),
-  pool_size: System.fetch_env!("POSTGRES_POOL_SIZE") |> String.to_integer
+  pool_size: System.fetch_env!("POSTGRES_POOL_SIZE") |> String.to_integer()
 
 config :display,
   multimedia_base_url: System.fetch_env!("MULTIMEDIA_BASE_URL")
