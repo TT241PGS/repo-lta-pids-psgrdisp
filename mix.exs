@@ -10,7 +10,12 @@ defmodule Display.MixProject do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: [
+        display: [
+          config_providers: [{Config.Reader, "/tmp/efs/fs1/elixir-config/display/runtime.exs"}]
+        ]
+      ]
     ]
   end
 

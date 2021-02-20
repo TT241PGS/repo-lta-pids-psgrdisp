@@ -12,3 +12,5 @@ use Mix.Config
 
 # Do not print debug messages in production
 config :logger, level: :info
+
+# ALL OTHER CONFIGURATIONS ARE DYNAMICALLY LOADED from runtime.exs in a mounted volume
