@@ -4,12 +4,12 @@ defmodule Display.Buses.PanelConfiguration do
   import Ecto.Changeset
 
   @primary_key false
-  schema "panel_configuration" do
-    field :panel_id, :string
-    field :day_group, :string
-    field :night_group, :string
-    field :service_group, :string
-    field :service_group_type, :string
+  schema "pids_panel_cnfig" do
+    field :panel_id, :string, source: :panel_id_num
+    field :day_group, :string, source: :day_grp_txt
+    field :night_group, :string, source: :night_grp_txt
+    field :service_group, :string, source: :svc_grp_txt
+    field :service_group_type, :string, source: :svc_grp_typ_txt
   end
 
   @field [

@@ -4,18 +4,17 @@ defmodule Display.Buses.PanelBusStop do
   import Ecto.Changeset
 
   @primary_key false
-  schema "panel_bus_stop" do
-    field :panel_id, :string, primary_key: true
-    field :bus_stop_code, :string
-    field :point_no, :integer
-    field :panel_type, :string
-    field :area, :string
-    field :desc, :string
-    field :longitude, :float
-    field :latitude, :float
-    field :active, :boolean
+  schema "pids_panel_bus_stop" do
+    field :panel_id, :string, primary_key: true, source: :panel_id_num
+    field :bus_stop_code, :string, source: :bus_stop_cd_txt
+    field :point_no, :integer, source: :pt_no_num
+    field :panel_type, :string, source: :panel_typ_txt
+    field :area, :string, source: :area_txt
+    field :desc, :string, source: :desc_txt
+    field :longitude, :float, source: :longtd_num_cnt
+    field :latitude, :float, source: :lattd_num_cnt
 
-    timestamps()
+    timestamps(inserted_at_source: :insert_at_dttm, updated_at_source: :upd_at_dttm)
   end
 
   @field [

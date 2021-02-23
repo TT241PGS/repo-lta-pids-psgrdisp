@@ -3,17 +3,17 @@ defmodule Display.Poi.PoiStop do
   import Ecto.Changeset
 
   @primary_key false
-  schema "poi_stops" do
-    field :stop_code, :integer
-    field :stop_name, :string
-    field :poi_type, :string
-    field :poi_name, :string
-    field :poi_pictogram, :string
-    field :poi_rank, :string
-    field :poi_code, :string
-    field :effective_date, :utc_datetime
+  schema "pids_poi_stops" do
+    field :stop_code, :integer, source: :stop_cd_num
+    field :stop_name, :string, source: :stop_nam_txt
+    field :poi_type, :string, source: :poi_typ_txt
+    field :poi_name, :string, source: :poi_nam_txt
+    field :poi_pictogram, :string, source: :poi_pictogram_txt
+    field :poi_rank, :string, source: :poi_rank_num
+    field :poi_code, :string, source: :poi_cd_txt
+    field :effective_date, :utc_datetime, source: :eff_dt_dttm
 
-    timestamps()
+    timestamps(inserted_at_source: :insert_at_dttm, updated_at_source: :upd_at_dttm)
   end
 
   @field [
