@@ -3,15 +3,15 @@ defmodule Display.Poi.Poi do
   import Ecto.Changeset
 
   @primary_key false
-  schema "poi" do
-    field :code, :string, primary_key: true
-    field :name, :string
-    field :type, :string
-    field :rank, :integer
-    field :pictogram_url, :string
-    field :effective_date, :utc_datetime
+  schema "pids_poi" do
+    field :code, :string, primary_key: true, source: :cd_txt
+    field :name, :string, source: :nam_txt
+    field :type, :string, source: :typ_txt
+    field :rank, :integer, source: :rank_num
+    field :pictogram_url, :string, source: :pictogram_url_txt
+    field :effective_date, :utc_datetime, source: :eff_dt_dtmm
 
-    timestamps()
+    timestamps(inserted_at_source: :insert_at_dttm, updated_at_source: :upd_at_dttm)
   end
 
   @field [

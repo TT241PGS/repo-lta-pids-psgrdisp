@@ -4,11 +4,11 @@ defmodule Display.Templates.TemplateAssignment do
   import Ecto.Changeset
 
   @primary_key false
-  schema "cms_template_assignment" do
-    field :bus_stop_group_id, :string
-    field :bus_stop_panel_id, :string
-    field :template_data_id, :string
-    field :template_set_code, :string
+  schema "pids_cms_tmplt_asign" do
+    field :bus_stop_group_id, :string, source: :bus_stop_grp_id_num
+    field :bus_stop_panel_id, :string, source: :bus_stop_panel_id_num
+    field :template_data_id, :string, source: :tmplt_data_id_num
+    field :template_set_code, :string, source: :tmplt_set_cd_txt
   end
 
   @doc false

@@ -229,17 +229,17 @@ defmodule Display.Buses do
   def get_scheduled_quickest_way_to_by_bus_stop(bus_stop_no) do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
     query = "
-    select distinct t_top.service, t_outer.poi_stop, t_top.time_period, t_top.time_taken from quickest_way_to_poi t_outer
+    select distinct t_top.svc_txt, t_outer.poi_stop_num, t_top.tm_prd_num, t_top.time_taken_num from pids_quickest_way_to_poi t_outer
     join lateral (
-        select * from quickest_way_to_poi t_inner
-        where t_inner.departure_stop = t_outer.departure_stop
-        and t_inner.poi_stop = t_outer.poi_stop
-        and t_inner.time_period > #{now_in_seconds_past_today}
-        order by t_inner.time_period asc
+        select * from pids_quickest_way_to_poi t_inner
+        where t_inner.depart_stop_num = t_outer.depart_stop_num
+        and t_inner.poi_stop_num = t_outer.poi_stop_num
+        and t_inner.tm_prd_num > #{now_in_seconds_past_today}
+        order by t_inner.tm_prd_num asc
         limit 2
     ) t_top on true
-    where t_outer.departure_stop=#{bus_stop_no}
-    order by t_top.time_period,t_outer.poi_stop
+    where t_outer.depart_stop_num=#{bus_stop_no}
+    order by t_top.tm_prd_num,t_outer.poi_stop_num
     limit 4;
     "
     SQL.query!(Repo, query, [])
@@ -251,18 +251,18 @@ defmodule Display.Buses do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
     next_hour_in_seconds_past_today = now_in_seconds_past_today * 60
     query = "
-    select distinct t_outer.poi_stop, t_top.service, t_top.time_taken from quickest_way_to_poi t_outer
+    select distinct t_outer.poi_stop_num, t_top.svc_txt, t_top.time_taken_num from pids_quickest_way_to_poi t_outer
     join lateral (
-        select * from quickest_way_to_poi t_inner
-        where t_inner.departure_stop = t_outer.departure_stop
-        and t_inner.poi_stop = t_outer.poi_stop
-        and t_inner.time_period > #{now_in_seconds_past_today}
-        and t_inner.time_period <= #{next_hour_in_seconds_past_today}
-        order by t_inner.time_period
+        select * from pids_quickest_way_to_poi t_inner
+        where t_inner.depart_stop_num = t_outer.depart_stop_num
+        and t_inner.poi_stop_num = t_outer.poi_stop_num
+        and t_inner.tm_prd_num > #{now_in_seconds_past_today}
+        and t_inner.tm_prd_num <= #{next_hour_in_seconds_past_today}
+        order by t_inner.tm_prd_num
         limit 5
     ) t_top on true
-    where t_outer.departure_stop=#{bus_stop_no}
-    group by t_outer.poi_stop,t_top.service,t_top.time_taken
+    where t_outer.depart_stop_num=#{bus_stop_no}
+    group by t_outer.poi_stop_num,t_top.svc_txt,t_top.time_taken_num
     "
     SQL.query!(Repo, query, [])
   end

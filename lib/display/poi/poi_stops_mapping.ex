@@ -3,12 +3,12 @@ defmodule Display.Poi.PoiStopsMapping do
   import Ecto.Changeset
 
   @primary_key false
-  schema "poi_stops_mapping" do
-    field :point_no, :integer, primary_key: true
-    field :poi_code, :string, primary_key: true
-    field :comments, :string
+  schema "pids_poi_stops_map" do
+    field :point_no, :integer, primary_key: true, source: :pt_no_num
+    field :poi_code, :string, primary_key: true, source: :poi_cd_txt
+    field :comments, :string, source: :comnt_txt
 
-    timestamps()
+    timestamps(inserted_at_source: :insert_at_dttm, updated_at_source: :upd_at_dttm)
   end
 
   @field [

@@ -4,12 +4,12 @@ defmodule Display.Messages.MessageAssignment do
   import Ecto.Changeset
 
   @primary_key false
-  schema "cms_message_assignment" do
-    field :message_data_id, :string
-    field :bus_stop_panel_id, :string
-    field :bus_stop_group_id, :string
-    field :bus_stop_id, :string
-    field :service_id, :string
+  schema "pids_cms_msg_asign" do
+    field :message_data_id, :string, source: :msg_data_id_num
+    field :bus_stop_panel_id, :string, source: :bus_stop_panel_id_num
+    field :bus_stop_group_id, :string, source: :bus_stop_grp_id_num
+    field :bus_stop_id, :string, source: :bus_stop_id_num
+    field :service_id, :string, source: :svc_id_num
   end
 
   @doc false
