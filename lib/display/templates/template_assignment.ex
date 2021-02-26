@@ -7,7 +7,7 @@ defmodule Display.Templates.TemplateAssignment do
   schema "pids_cms_tmplt_asign" do
     field :bus_stop_group_id, :string, source: :bus_stop_grp_id_num
     field :bus_stop_panel_id, :string, source: :bus_stop_panel_id_num
-    field :template_data_id, :string, source: :tmplt_data_id_num
+    field :template_data_id, :string, source: :tmplt_dat_id_num
     field :template_set_code, :string, source: :tmplt_set_cd_txt
   end
 

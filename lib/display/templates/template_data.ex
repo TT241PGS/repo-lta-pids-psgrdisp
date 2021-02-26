@@ -3,8 +3,8 @@ defmodule Display.Templates.TemplateData do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:template_data_id, :string, autogenerate: false, source: :orntn_txt}
-  schema "pids_cms_tmplt_data" do
+  @primary_key {:template_data_id, :string, autogenerate: false, source: :tmplt_dat_id_num}
+  schema "pids_cms_tmplt_dat" do
     field :orientation, :string, source: :orntn_txt
     field :requester, :string, source: :reqtr_txt
     field :template_detail, :string, source: :tmplt_dtl_txt

@@ -5,7 +5,7 @@ defmodule Display.Messages.MessageAssignment do
 
   @primary_key false
   schema "pids_cms_msg_asign" do
-    field :message_data_id, :string, source: :msg_data_id_num
+    field :message_data_id, :string, source: :msg_dat_id_num
     field :bus_stop_panel_id, :string, source: :bus_stop_panel_id_num
     field :bus_stop_group_id, :string, source: :bus_stop_grp_id_num
     field :bus_stop_id, :string, source: :bus_stop_id_num

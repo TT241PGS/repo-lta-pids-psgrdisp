@@ -3,8 +3,8 @@ defmodule Display.Messages.MessageData do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:message_data_id, :string, autogenerate: false, source: :msg_data_id_num}
-  schema "pids_cms_msg_data" do
+  @primary_key {:message_data_id, :string, autogenerate: false, source: :msg_dat_id_num}
+  schema "pids_cms_msg_dat" do
     field :name, :string, source: :nam_txt
     field :type, :string, source: :typ_txt
     field :priority, :integer, source: :prrty_num
