@@ -4,7 +4,7 @@ defmodule Display.Buses.BusStop do
   import Ecto.Changeset
 
   @primary_key false
-  schema "stop" do
+  schema "pids_stop" do
     field :base_version, :integer, primary_key: true
     field :point_type, :integer, primary_key: true
     field :point_no, :integer, primary_key: true

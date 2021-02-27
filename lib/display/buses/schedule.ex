@@ -5,7 +5,7 @@ defmodule Display.Buses.Schedule do
   import Ecto.Changeset
 
   @primary_key false
-  schema "schedule" do
+  schema "pids_schedule" do
     field :base_version, :integer
     field :line_no, :integer
     field :route_abbr, :string
