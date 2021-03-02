@@ -8,7 +8,7 @@ defmodule Display.Poi.PoiStopsMapping do
     field :poi_code, :string, primary_key: true, source: :poi_cd_txt
     field :comments, :string, source: :comnt_txt
 
-    timestamps(inserted_at_source: :insert_at_dttm, updated_at_source: :upd_at_dttm)
+    timestamps(inserted_at_source: :crt_dttm, updated_at_source: :upd_dttm)
   end
 
   @field [

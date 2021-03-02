@@ -18,7 +18,7 @@ defmodule Display.Messages.SuppressedMessage do
     field :lta_comment, :string, source: :lta_comnt_txt
     field :use_rule, :boolean, source: :use_rule_ind
 
-    timestamps(inserted_at_source: :insert_at_dttm, updated_at_source: :upd_at_dttm)
+    timestamps(inserted_at_source: :crt_dttm, updated_at_source: :upd_dttm)
   end
 
   @field [
