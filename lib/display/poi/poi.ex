@@ -11,7 +11,7 @@ defmodule Display.Poi.Poi do
     field :pictogram_url, :string, source: :pictogram_url_txt
     field :effective_date, :utc_datetime, source: :eff_dt_dtmm
 
-    timestamps(inserted_at_source: :insert_at_dttm, updated_at_source: :upd_at_dttm)
+    timestamps(inserted_at_source: :crt_dttm, updated_at_source: :upd_dttm)
   end
 
   @field [

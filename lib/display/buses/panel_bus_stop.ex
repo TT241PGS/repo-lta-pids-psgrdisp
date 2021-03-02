@@ -11,10 +11,10 @@ defmodule Display.Buses.PanelBusStop do
     field :panel_type, :string, source: :panel_typ_txt
     field :area, :string, source: :area_txt
     field :desc, :string, source: :desc_txt
-    field :longitude, :float, source: :longtd_num_cnt
-    field :latitude, :float, source: :lattd_num_cnt
+    field :longitude, :float, source: :longtd_num
+    field :latitude, :float, source: :lattd_num
 
-    timestamps(inserted_at_source: :insert_at_dttm, updated_at_source: :upd_at_dttm)
+    timestamps(inserted_at_source: :crt_dttm, updated_at_source: :upd_dttm)
   end
 
   @field [
