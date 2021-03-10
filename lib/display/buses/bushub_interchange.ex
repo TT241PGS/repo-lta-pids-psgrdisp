@@ -3,7 +3,7 @@ defmodule Display.Buses.BushubInterchange do
   import Ecto.Changeset
 
   @primary_key false
-  schema "bushub_interchange_mapping" do
+  schema "pids_bushub_interchange_mapping" do
     field :point_no, :integer
     field :dpi_route_code, :string
     field :direction, :integer
