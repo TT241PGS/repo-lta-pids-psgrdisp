@@ -726,21 +726,28 @@ defmodule Display.Utils.DisplayLiveUtil do
           nil
 
         "IMAGE" ->
-          "/pids-multimedia/" <> resource =
+          resource =
             get_in(layout, ["panes", pane_no, "config", "file", "fileUrl"])
+            |> String.split("/")
+            |> List.last()
 
           base_url <> resource
 
         "VIDEO" ->
-          "/pids-multimedia/" <> resource =
+          resource =
             get_in(layout, ["panes", pane_no, "config", "video", "fileUrl"])
+            |> String.split("/")
+            |> List.last()
 
           base_url <> resource
 
         "IMAGE SEQUENCE" ->
           get_in(layout, ["panes", pane_no, "config", "files"])
           |> Enum.map(fn file ->
-            "/pids-multimedia/" <> resource = file["image"]["fileUrl"]
+            resource =
+              file["image"]["fileUrl"]
+              |> String.split("/")
+              |> List.last()
 
             %{
               "url" => base_url <> resource,
