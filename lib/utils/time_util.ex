@@ -59,6 +59,7 @@ defmodule Display.Utils.TimeUtil do
     %{
       day: Timex.format!(get_time_now(), "%A", :strftime),
       date: Timex.format!(get_time_now(), "%d %B %Y", :strftime),
+      date_short: Timex.format!(get_time_now(), "%d %b", :strftime),
       time: Timex.format!(get_time_now(), "%H:%M", :strftime)
     }
   end

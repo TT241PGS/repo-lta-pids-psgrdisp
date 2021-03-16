@@ -89,14 +89,14 @@
 
 .portrait {
   .heading {
-    margin: 25px 0 5px;
-    height: 30px;
+    margin: 50px 0 10px;
+    height: 60px;
   }
 
   .heading-info {
-    font-size: 16px;
-    border-radius: 12.5px 12.5px 0 12.5px;
-    padding: 6.25px 17px;
+    font-size: 32px;
+    border-radius: 25px 25px 0 25px;
+    padding: 11.5px 34px;
     text-transform: uppercase;
 
     &.services {
@@ -104,22 +104,22 @@
     }
 
     &.arriving {
-      left: 218px;
+      left: 436px;
     }
 
     &.nextBus {
-      left: 431px;
+      left: 862px;
     }
 
     &.destination {
-      left: 644px;
+      left: 1288px;
     }
 
     + .page-count {
       right: 0;
       position: absolute;
       top: 0;
-      font-size: 24px;
+      font-size: 48px;
     }
   }
 }

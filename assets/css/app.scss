@@ -11,6 +11,7 @@
 
 @import 'components/busStopInfo.scss';
 @import 'components/clockWithDateHorizontal.scss';
+@import 'components/portraitClock.scss';
 @import 'components/headingInfo.scss';
 @import 'components/busInfo.scss';
 @import 'components/nextBuses.scss';
@@ -125,6 +126,7 @@ body {
 .poi-wrapper {
   img {
     padding-right: 10px;
+    height: 30px;
   }
 }
 
