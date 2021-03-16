@@ -148,7 +148,7 @@ defmodule Display.Utils.TimeUtil do
         "Arr"
 
       eta >= 3600 ->
-        "> 60 min"
+        "60 min"
 
       true ->
         "#{floor(eta / 60)} min"
@@ -163,7 +163,7 @@ defmodule Display.Utils.TimeUtil do
         "Arr"
 
       eta > 60 ->
-        "> 60 min"
+        "60 min"
 
       true ->
         "#{eta} min"

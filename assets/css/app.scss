@@ -16,6 +16,7 @@
 @import 'components/busInfo.scss';
 @import 'components/nextBuses.scss';
 @import 'components/nextBus.scss';
+@import 'components/berth.scss';
 @import 'components/busInfoMessage.scss';
 @import 'components/destinationCard.scss';
 @import 'components/tag.scss';
@@ -164,5 +165,21 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: normal;
+  }
+}
+
+.portrait {
+  .incoming-buses {
+    justify-content: flex-start;
+
+    .bus-card:not(:last-child) {
+      margin-right: 82px;
+    }
+  }
+
+  .advisories-container {
+    position: absolute;
+    top: 3100px;
+    width: 2048px;
   }
 }

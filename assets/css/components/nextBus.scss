@@ -66,6 +66,13 @@
 }
 
 .portrait {
+
+  .bushub {
+    .next-bus {
+      width: 327px;
+    }
+  }
+
   .next-bus {
     position: relative;
     color: #fff;
@@ -76,7 +83,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 31px 41px;
+    padding: 31px 10px 31px 41px;
 
     .label {
       font-size: 72px;

@@ -75,34 +75,33 @@
     }
 
     .heading-wrapper {
-      padding: 12px 0 0 0;
 
       h1 {
-        font-size: 27.5px;
-        line-height: 33.5px;
+        font-size: 55px;
+        line-height: 67px;
       }
 
       svg {
-        margin-right: 8px;
-        width: 19px;
+        margin-right: 16px;
+        width: 38px;
       }
 
       .tags {
-        padding-left: 290px;
+        padding-left: 20px;
       }
     }
 
     .heading-wrapper .heading {
-      width: 275px;
-      border-radius: 12.5px 0 35px 12.5px;
-      padding: 9.5px 20px 15px;
-      height: 56.5px;
+      width: 550px;
+      border-radius: 25px 0 70px 25px;
+      padding: 19px 40px 30px;
+      height: 113px;
     }
 
     .advisory-content {
-      font-size: 25px;
-      line-height: 32.5px;
-      padding: 19.5px 24px;
+      font-size: 50px;
+      line-height: 65px;
+      padding: 39px 48px;
     }
   }
 }

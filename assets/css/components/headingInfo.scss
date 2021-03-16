@@ -57,6 +57,21 @@
 }
 
 .landscape {
+
+  .bushub {
+
+    .heading-info {
+      &.nextBus {
+        left: 702px;
+      }
+    
+      &.destination {
+        left: 1130px;
+      }
+    }
+    
+  }
+
   .heading-info {
     &.services {
       left: 0;
@@ -73,8 +88,13 @@
       width: 356px;
     }
 
+    &.berthHead {
+      width: 163px;
+      left: 1052px;
+    }
+
     &.destination {
-      left: 1153px;
+      left: 1223px;
       width: 383px;
     }
 
@@ -93,6 +113,20 @@
     height: 60px;
   }
 
+  .bushub {
+
+    .heading-info {
+      &.nextBus {
+        left: 782px;
+      }
+    
+      &.destination {
+        left: 1330px;
+      }
+    }
+    
+  }
+
   .heading-info {
     font-size: 32px;
     border-radius: 25px 25px 0 25px;
@@ -109,6 +143,11 @@
 
     &.nextBus {
       left: 862px;
+    }
+
+    &.berthHead {
+      left: 1126px;
+      width: 180px;
     }
 
     &.destination {

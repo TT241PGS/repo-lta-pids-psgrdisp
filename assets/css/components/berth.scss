@@ -1,0 +1,29 @@
+.portrait {
+  .berth {
+    width: 182px;
+    height: 250px;
+    border: 8px #99db53 solid;
+    background-color: #303030;
+    margin-right: 20px;
+    color: #fff;
+    line-height: 234px;
+    font-size: 88px;
+    @include letter-spacing(20);
+    text-align: center;
+  }
+}
+
+.landscape {
+  .berth {
+    width: 163px;
+    height: 225px;
+    border: 8px #99db53 solid;
+    background-color: #303030;
+    margin-right: 10px;
+    color: #fff;
+    line-height: 209px;
+    font-size: 80px;
+    @include letter-spacing(10);
+    text-align: center;
+  }
+}

@@ -75,8 +75,17 @@ defmodule Display.Utils.DisplayLiveUtil do
 
         cached_predictions = update_cached_predictions(cached_predictions, bus_stop_no)
 
+        is_bushub =
+          Enum.reduce_while(cached_predictions, false, fn x, acc ->
+            case get_in(x, ["NextBus", "BerthLabel"]) |> is_bitstring do
+              true -> {:halt, true}
+              _ -> {:cont, acc}
+            end
+          end)
+
         socket =
           socket
+          |> Phoenix.LiveView.assign(:is_bushub, is_bushub)
           |> Phoenix.LiveView.assign(:predictions_scheduled_set_1_column, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_set_2_column, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_set_1_column_index, nil)
