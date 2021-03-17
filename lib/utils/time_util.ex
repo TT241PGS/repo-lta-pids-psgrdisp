@@ -59,6 +59,7 @@ defmodule Display.Utils.TimeUtil do
     %{
       day: Timex.format!(get_time_now(), "%A", :strftime),
       date: Timex.format!(get_time_now(), "%d %B %Y", :strftime),
+      date_short: Timex.format!(get_time_now(), "%d %b", :strftime),
       time: Timex.format!(get_time_now(), "%H:%M", :strftime)
     }
   end
@@ -147,7 +148,7 @@ defmodule Display.Utils.TimeUtil do
         "Arr"
 
       eta >= 3600 ->
-        "> 60 min"
+        "60 min"
 
       true ->
         "#{floor(eta / 60)} min"
@@ -162,7 +163,7 @@ defmodule Display.Utils.TimeUtil do
         "Arr"
 
       eta > 60 ->
-        "> 60 min"
+        "60 min"
 
       true ->
         "#{eta} min"

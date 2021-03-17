@@ -1,0 +1,18 @@
+.portrait-clock {
+  color: #fff;
+  width: 290px;
+
+  .time {
+    font-size: 72px;
+    line-height: 87px;
+    @include letter-spacing(100);
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .date,
+  .day {
+    font-size: 30px;
+    line-height: 36px;
+  }
+}

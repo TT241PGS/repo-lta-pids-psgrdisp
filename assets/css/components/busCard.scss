@@ -83,37 +83,37 @@
   .bus-card {
     &.arriving {
       .status {
-        border: 3px solid #eee;
-        font-size: 31px;
-        line-height: 44px;
+        border: 6px solid #eee;
+        font-size: 62px;
+        line-height: 88px;
       }
     }
 
     .status {
-      height: 50px;
-      width: 162.5px;
-      border-radius: 12.5px;
-      font-size: 31px;
-      line-height: 50px;
-      margin-bottom: 16.5px;
+      height: 100px;
+      width: 325px;
+      border-radius: 25px;
+      font-size: 62px;
+      line-height: 100px;
+      margin-bottom: 33px;
     }
 
     .number {
-      width: 162.5px;
-      height: 60px;
-      line-height: 60px;
-      border-radius: 12.5px;
+      width: 325px;
+      height: 120px;
+      line-height: 120px;
+      border-radius: 25px;
       @extend .portrait-bg-green;
-      font-size: 40px;
+      font-size: 80px;
     }
   }
 
   .incoming-bus-card {
-    top: -35px;
-    left: -2px;
-    border-radius: 12.5px 12.5px 0 0;
-    font-size: 21px;
-    line-height: 25.5px;
-    padding: 4.25px 17px;
+    top: -70px;
+    left: -4px;
+    border-radius: 25px 25px 0 0;
+    font-size: 42px;
+    line-height: 51px;
+    padding: 9.5px 34px;
   }
 }
