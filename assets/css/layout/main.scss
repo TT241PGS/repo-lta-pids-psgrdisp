@@ -162,6 +162,19 @@ body {
         font-size: 117px;
         line-height: 111px;
       }
+
+      &.no-more {
+        .label {
+          font-size: 40px;
+          line-height: 65px;
+        }
+      }
+
+      &.scheduled {
+        .label {
+          font-size: 100px;
+        }
+      }
     }
   }
 

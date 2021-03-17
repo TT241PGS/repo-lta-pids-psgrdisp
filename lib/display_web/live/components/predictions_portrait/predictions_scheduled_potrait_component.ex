@@ -30,6 +30,9 @@ defmodule PredictionsScheduledPortrait do
               <span class="badge" :if={{next_bus["isLastBus"] == true}}>Last Bus</span>
               <span class="label">{{next_bus["EstimatedArrival"]}}</span>
             </div>
+            <div class="next-bus scheduled no-more" :if={{ length(service["NextBuses"]) == 1 }}>
+              <span class="label">No More Next Bus</span>
+            </div>
             <div :if={{@is_bushub == true}} class="berth">{{get_in(service, ["NextBus", "BerthLabel"])}}</div>
             <div class="destination-bus-stop">
               <p>{{service["DestinationCode"]}}</p>

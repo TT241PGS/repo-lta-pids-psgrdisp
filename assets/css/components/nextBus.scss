@@ -19,6 +19,13 @@
       font-weight: bold;
     }
 
+    &.no-more {
+      .label {
+        font-size: 40px;
+        line-height: 65px;
+      }
+    }
+
     &.no-icon {
       .label {
         font-weight: bold !important;
@@ -30,6 +37,12 @@
 
       .label {
         color: $charcoal;
+      }
+    }
+
+    &.scheduled {
+      .label {
+        font-size: 100px;
       }
     }
 
