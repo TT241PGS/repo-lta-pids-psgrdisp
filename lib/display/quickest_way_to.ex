@@ -5,12 +5,17 @@ defmodule Display.QuickestWayTo do
   use Timex
   alias Display.Repo
   alias Display.QuickestWayTo.QuickestWayTo
+  alias Display.Utils.TimeUtil
 
   def get_many_destinations_pictogram(bus_stop_no) when not is_number(bus_stop_no), do: nil
 
   def get_quickest_way_to_list_by_bus_stop(bus_stop_no) do
+    now = TimeUtil.get_time_now()
+
     from(qwt in QuickestWayTo,
-      where: qwt.bus_stop_code == ^bus_stop_no,
+      # The qwt.effective_date in DB is assumed to be in UTC
+      where: qwt.bus_stop_code == ^bus_stop_no and qwt.effective_date <= ^now,
+      or_where: qwt.bus_stop_code == ^bus_stop_no and is_nil(qwt.effective_date),
       order_by: qwt.sort_order,
       select: %{
         poi_code: qwt.poi_code,
