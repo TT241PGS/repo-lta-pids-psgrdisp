@@ -38,6 +38,7 @@ defmodule Display.Poi do
       select: %{
         stop_code: psm.point_no,
         poi_name: p.name,
+        poi_code: p.code,
         pictograms: p.pictogram_url
       }
     )
@@ -58,6 +59,7 @@ defmodule Display.Poi do
 
       Map.put(acc, poi.stop_code, %{
         "poi_name" => poi.poi_name,
+        "poi_code" => poi.poi_code,
         "pictograms" => pictograms
       })
     end)

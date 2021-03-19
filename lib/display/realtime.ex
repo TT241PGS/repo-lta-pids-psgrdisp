@@ -1,6 +1,6 @@
 defmodule Display.RealTime do
   @moduledoc false
-  alias Display.{Buses, Poi}
+  alias Display.{Buses, Poi, QuickestWayTo}
   alias Display.Utils.TimeUtil
 
   def get_predictions_cached(bus_stop_id) do
@@ -63,7 +63,8 @@ defmodule Display.RealTime do
       value = %{
         "arriving_time_at_origin" => service_arrival_time,
         "arriving_time_at_destination" => travel_time + service_arrival_time,
-        "service_no" => dpi_route_code
+        "service_no" => dpi_route_code,
+        "type" => "main"
       }
 
       case Map.get(acc, key) do
@@ -76,6 +77,7 @@ defmodule Display.RealTime do
     end)
     |> determine_quickest_way_to
     |> add_poi_metadata()
+    |> QuickestWayTo.transform_quickest_way_to(bus_stop_no)
   end
 
   defp determine_quickest_way_to(quickest_way_to_map) do

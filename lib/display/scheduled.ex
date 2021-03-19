@@ -1,7 +1,7 @@
 defmodule Display.Scheduled do
   @moduledoc false
 
-  alias Display.{Buses, Poi}
+  alias Display.{Buses, Poi, QuickestWayTo}
   alias Display.Utils.TimeUtil
 
   @doc """
@@ -269,7 +269,8 @@ defmodule Display.Scheduled do
       value = %{
         "arriving_time_at_origin" => arriving_time_at_origin,
         "travel_time" => travel_time,
-        "service_no" => dpi_route_code
+        "service_no" => dpi_route_code,
+        "type" => "main"
       }
 
       case Map.get(acc, key) do
@@ -282,6 +283,7 @@ defmodule Display.Scheduled do
       end
     end)
     |> add_poi_metadata()
+    |> QuickestWayTo.transform_quickest_way_to(bus_stop_no)
   end
 
   defp determine_quickest_way_to(first_service, second_service) do
