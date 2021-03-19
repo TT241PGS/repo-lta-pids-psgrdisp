@@ -2,8 +2,8 @@ defmodule QuickestWayToLandscape do
   @moduledoc false
   use Surface.LiveComponent
 
-  property services, :string, default: ""
-  property maxLength, :integer, default: 4
+  property(services, :string, default: "")
+  property(maxLength, :integer, default: 4)
 
   def render(assigns) do
     ~H"""
@@ -21,9 +21,10 @@ defmodule QuickestWayToLandscape do
               </div>
               <div class="floating-arrow"><i class="fas fa-arrow-right"></i></div>
             </div>
-            <div class="right-info bus">
-              <span class="number">{{service["service_no"]}}</span>
-              <span class="status">{{service["arriving_time_at_origin"]}}</span>
+            <div class={{"right-info", "bus", alternate: get_in(service, ["type"]) == "alternate", main: get_in(service, ["type"]) == "main"}}>
+              <span :if={{get_in(service, ["type"]) == "main"}} class="number">{{service["service_no"]}}</span>
+              <span :if={{get_in(service, ["type"]) == "main"}} class="status">{{service["arriving_time_at_origin"]}}</span>
+              <span :if={{get_in(service, ["type"]) == "alternate"}} class="text">{{service["poi"]["poi_message"]}}</span>
             </div>
           </div>
         </div>

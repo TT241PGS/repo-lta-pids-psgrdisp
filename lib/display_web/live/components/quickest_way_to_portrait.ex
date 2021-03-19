@@ -2,14 +2,14 @@ defmodule QuickestWayToPortrait do
   @moduledoc false
   use Surface.LiveComponent
 
-  property services, :string, default: ""
+  property(services, :string, default: "")
 
   def render(assigns) do
     ~H"""
     <div class="quickest-way">
       <div class="floating-heading">quickest way to</div>
       <div class="row">
-        <div class={{"row-odd": index in [0,1], "row-even": index in [2,3]}} :for={{ {service, index} <- Enum.with_index(@services) }}>
+        <div class={{"row-odd": index in [0,1], "row-even": index in [2,3]}} :for={{ {service, index} <- Enum.with_index(@services) |> Enum.take(4) }}>
           <div class="group-info">
             <div class="left-info">
               <p>{{get_in(service, ["poi","poi_name"])}}</p>
@@ -20,9 +20,10 @@ defmodule QuickestWayToPortrait do
               </div>
               <div class="floating-arrow"><i class="fas fa-arrow-right"></i></div>
             </div>
-            <div class="right-info bus">
-              <span class="number">{{service["service_no"]}}</span>
-              <span class="status">{{service["arriving_time_at_origin"]}}</span>
+            <div class={{"right-info", "bus", alternate: get_in(service, ["type"]) == "alternate", main: get_in(service, ["type"]) == "main"}}>
+              <span :if={{get_in(service, ["type"]) == "main"}} class="number">{{service["service_no"]}}</span>
+              <span :if={{get_in(service, ["type"]) == "main"}} class="status">{{service["arriving_time_at_origin"]}}</span>
+              <span :if={{get_in(service, ["type"]) == "alternate"}} class="text">{{service["poi"]["poi_message"]}}</span>
             </div>
           </div>
         </div>
