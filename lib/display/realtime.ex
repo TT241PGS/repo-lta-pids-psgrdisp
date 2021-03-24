@@ -105,4 +105,48 @@ defmodule Display.RealTime do
       |> update_in(["arriving_time_at_origin"], &TimeUtil.get_eta_from_seconds_past_today/1)
     end)
   end
+
+  def set_last_bus(realtime_predictions, last_bus_map) do
+    realtime_predictions
+    |> Enum.map(fn service ->
+      cond do
+        Access.get(service, "NextBus2") |> is_nil && Access.get(service, "NextBus3") |> is_nil ->
+          put_in(
+            service,
+            ["NextBus", "isLastBus"],
+            is_last_bus?(service["ServiceNo"], service["NextBus"], last_bus_map)
+          )
+
+        Access.get(service, "NextBus3") |> is_nil ->
+          put_in(
+            service,
+            ["NextBus2", "isLastBus"],
+            is_last_bus?(service["ServiceNo"], service["NextBus2"], last_bus_map)
+          )
+
+        true ->
+          put_in(service, ["NextBus", "isLastBus"], false)
+      end
+    end)
+  end
+
+  defp is_last_bus?(service_no, next_bus, last_bus_map) do
+    dest_code = next_bus["DestinationCode"]
+    last_bus = get_in(last_bus_map, [{service_no, dest_code |> String.to_integer()}])
+    next_bus_time = next_bus["EstimatedArrival"]
+
+    case Access.get(last_bus, "time_iso") do
+      nil ->
+        false
+
+      last_bus_time ->
+        # TRUE if next bus arrival time is after one minute less than scheduled last bus arrival time
+        # One minute buffer to show last bus, buffer is needed as the last bus would have already left the stop otherwise
+        # So last bus will be shown just before a minute of scheduled last bus arrival time
+        Timex.after?(
+          DateTime.from_iso8601(next_bus_time) |> elem(1),
+          DateTime.from_iso8601(last_bus_time) |> elem(1) |> DateTime.add(-60, :second)
+        )
+    end
+  end
 end
