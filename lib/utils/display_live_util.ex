@@ -56,7 +56,11 @@ defmodule Display.Utils.DisplayLiveUtil do
       ) do
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
-        cached_predictions = filter_panel_groups(cached_predictions, socket.assigns.panel_id)
+        last_bus_map = Buses.get_last_buses_map(bus_stop_no)
+
+        cached_predictions =
+          filter_panel_groups(cached_predictions, socket.assigns.panel_id)
+          |> RealTime.set_last_bus(last_bus_map)
 
         service_arrival_map =
           cached_predictions

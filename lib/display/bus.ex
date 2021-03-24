@@ -150,6 +150,37 @@ defmodule Display.Buses do
     Map.get(no_of_stops_map, {dpi_route_code, dest_code})
   end
 
+  @doc """
+  Get timing of last bus of each service in a bus_stop
+  Returns a map with key {service_no, dest_code}
+  Example:
+  %{
+    {"17", 17009} => %{
+      "time_iso" => "2020-10-19T06:12:13+08:00",
+      "time_seconds" => 22333
+    },
+    {"30", 17009} => %{
+      "time_iso" => "2020-10-20T00:01:04+08:00",
+      "time_seconds" => 86464
+    }
+  }
+  """
+  def get_last_buses_map(bus_stop_no) do
+    %Postgrex.Result{rows: rows} = Buses.get_last_bus_by_service_by_bus_stop(bus_stop_no)
+
+    rows
+    |> Enum.reduce(%{}, fn [dpi_route_code, dest_code, arriving_time], acc ->
+      key = {dpi_route_code, dest_code}
+
+      value = %{
+        "time_seconds" => arriving_time,
+        "time_iso" => TimeUtil.get_iso_date_from_seconds(arriving_time)
+      }
+
+      Map.put(acc, key, value)
+    end)
+  end
+
   # TODO: Query with BaseVersion, OperatingDay
   def get_bus_schedule_by_bus_stop(bus_stop_no) do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()

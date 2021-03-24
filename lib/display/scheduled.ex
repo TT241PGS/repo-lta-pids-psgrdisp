@@ -29,7 +29,7 @@ defmodule Display.Scheduled do
   def get_predictions(bus_stop_no) do
     [
       Task.async(fn -> get_active_services_map(bus_stop_no) end),
-      Task.async(fn -> get_last_buses_map(bus_stop_no) end),
+      Task.async(fn -> Buses.get_last_buses_map(bus_stop_no) end),
       Task.async(fn -> get_all_services(bus_stop_no) end)
     ]
     |> Task.yield_many(5000)
@@ -166,37 +166,6 @@ defmodule Display.Scheduled do
     |> Enum.sort_by(&{&1["time"], &1["service_no"]})
     |> Enum.map(fn incoming_bus ->
       update_in(incoming_bus, ["time"], &TimeUtil.get_eta_from_seconds_past_today(&1))
-    end)
-  end
-
-  @doc """
-  Get timing of last bus of each service in a bus_stop
-  Returns a map with key {service_no, direction}
-  Example:
-  %{
-    {"17", 1} => %{
-      "time_iso" => "2020-10-19T06:12:13+08:00",
-      "time_seconds" => 22333
-    },
-    {"30", 2} => %{
-      "time_iso" => "2020-10-20T00:01:04+08:00",
-      "time_seconds" => 86464
-    }
-  }
-  """
-  def get_last_buses_map(bus_stop_no) do
-    %Postgrex.Result{rows: rows} = Buses.get_last_bus_by_service_by_bus_stop(bus_stop_no)
-
-    rows
-    |> Enum.reduce(%{}, fn [dpi_route_code, dest_code, arriving_time], acc ->
-      key = {dpi_route_code, dest_code}
-
-      value = %{
-        "time_seconds" => arriving_time,
-        "time_iso" => TimeUtil.get_iso_date_from_seconds(arriving_time)
-      }
-
-      Map.put(acc, key, value)
     end)
   end
 
