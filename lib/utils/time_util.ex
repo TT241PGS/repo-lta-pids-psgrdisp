@@ -144,7 +144,7 @@ defmodule Display.Utils.TimeUtil do
     eta = get_eta_in_seconds(time)
 
     cond do
-      eta <= 59 ->
+      eta <= 120 ->
         "Arr"
 
       eta >= 3600 ->
@@ -159,7 +159,7 @@ defmodule Display.Utils.TimeUtil do
 
   def format_min_to_eta_mins(eta) do
     cond do
-      eta <= 0 ->
+      eta <= 2 ->
         "Arr"
 
       eta > 60 ->
