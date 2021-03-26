@@ -16,7 +16,7 @@ defmodule PredictionsRealtimePortrait do
       <span :if={{@is_bushub == true}} class="heading-info berthHead">BERTH</span>
       <span class="heading-info destination">Destination</span>
     </div>
-    <div :for={{ {stopPredictionsPage, index} <- Enum.with_index(@stopPredictionsSet) }} class={{"container", hidden: @activeIndex != index, "slide-in": @activeIndex == index}}>
+    <div :for={{ {stopPredictionsPage, index} <- Enum.with_index(@stopPredictionsSet) }} class={{"container", hidden: @activeIndex != index, "fade-in": @activeIndex == index}}>
       <div>
         <div class={{"flex", "mb-30", "row-odd": rem(service_index, 2) != 0, "row-even": rem(service_index, 2) == 0, hidden: Enum.member?(@suppressed_messages.hide_services, service["ServiceNo"]), bushub: @is_bushub == true}} :for={{ {service, service_index} <- Enum.with_index(stopPredictionsPage) }}>
           <div class="sc-bdnylx dciVXD bus-info">

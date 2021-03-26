@@ -38,7 +38,7 @@ defmodule PredictionsRealtimeLandscape do
           </div>
         </div>
       </div>
-      <div :for={{ {stopPredictionsPage, index} <- Enum.with_index(@stopPredictionsSet) }} class={{"container", hidden: @activeIndex != index, "slide-in": @activeIndex == index}}>
+      <div :for={{ {stopPredictionsPage, index} <- Enum.with_index(@stopPredictionsSet) }} class={{"container", hidden: @activeIndex != index, "fade-in": @activeIndex == index}}>
         <div class={{"grid-row-7": @twoColumn == true}}>
           <div class={{"flex", "mb-30", "mr-30": @twoColumn == true, "row-odd": rem(service_index, 2) != 0, "row-even": rem(service_index, 2) == 0, hidden: Enum.member?(@suppressed_messages.hide_services, service["ServiceNo"]), bushub: @is_bushub == true}} :for={{ {service, service_index} <- Enum.with_index(stopPredictionsPage) }}>
             <div class="sc-bdnylx dciVXD bus-info">
