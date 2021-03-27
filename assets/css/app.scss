@@ -78,6 +78,15 @@
   }
 }
 
+@keyframes ticker {
+  0% {
+    margin-left: 80%;
+  }
+  100% {
+      margin-left: -20%;
+  }
+}
+
 /* All types of layouts should be added here to get slide in animation */
 .slide-in {
   animation: 1s ease-out 0s 1 slideInFromLeft;
@@ -182,4 +191,20 @@ body {
     top: 3100px;
     width: 2048px;
   }
+}
+
+.advisories-container {
+  overflow: hidden;
+}
+
+.advisory-content {
+  display: inline-block;
+  white-space: nowrap;
+  animation-timing-function: linear;
+  animation-duration: 5s;
+  animation-iteration-count: infinite;
+  animation-name: ticker;
+  width: 100%;
+  margin-left: 80%;
+  animation-play-state: running;
 }

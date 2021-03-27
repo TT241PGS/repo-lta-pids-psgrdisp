@@ -23,7 +23,7 @@ defmodule AdvisoriesPortrait do
           <img class="tag" src="{{get_in(@message, [:line])}}" alt="">
         </div>
       </div>
-      <div class={{Utils.get_message_class_names(@panes, @current_pane, @message)}}>
+      <div id={{get_in(@message, [:text])}} style={{Utils.animation_duration(@message)}} class={{Utils.get_message_class_names(@panes, @current_pane, @message)}}>
         {{get_in(@message, [:text])}}
       </div>
     </div>

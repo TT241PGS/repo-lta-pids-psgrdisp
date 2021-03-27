@@ -71,4 +71,10 @@ defmodule DisplayWeb.DisplayLive.Utils do
   def pad_bus_stop_no(bus_stop_no) do
     bus_stop_no |> Integer.to_string() |> String.pad_leading(5, "0")
   end
+
+  def animation_duration(message) do
+    duration_per_char = 0.25
+    duration = String.length(get_in(message, [:text])) * duration_per_char
+    "animation-duration: #{duration}s;"
+  end
 end
