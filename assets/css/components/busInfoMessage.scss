@@ -7,6 +7,8 @@
   display: flex;
   align-items: center;
   padding: 0 45px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .dark {
@@ -18,10 +20,10 @@
 
 .portrait {
   .bus-info-message {
-    width: 812px;
-    height: 125px;
-    font-size: 30px;
-    border-radius: 0 25px 25px 0;
-    padding: 0 29px;
+    width: 1624px;
+    height: 250px;
+    font-size: 60px;
+    border-radius: 0 50px 50px 0;
+    padding: 0 58px;
   }
 }
