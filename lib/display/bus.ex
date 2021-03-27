@@ -3,7 +3,7 @@ defmodule Display.Buses do
 
   import Ecto.Query, warn: false
   use Timex
-  alias Display.{Buses, Repo}
+  alias Display.{Buses, Repo, Meta}
   alias Display.Utils.TimeUtil
   alias Ecto.Adapters.SQL
 
@@ -12,7 +12,9 @@ defmodule Display.Buses do
   def get_bus_stop_name_by_no(bus_stop_no) do
     result =
       from(bs in Buses.BusStop,
-        where: bs.point_no == ^bus_stop_no,
+        join: bv in Meta.BaseVersion,
+        on: bv.base_version == bs.base_version,
+        where: bv.status == "live" and bs.point_no == ^bus_stop_no and bs.point_type == 1,
         select: %{
           point_no: bs.point_no,
           point_desc: bs.point_desc
@@ -117,7 +119,9 @@ defmodule Display.Buses do
 
   def get_bus_stop_map_by_nos(bus_stop_nos) do
     from(bs in Buses.BusStop,
-      where: bs.point_no in ^bus_stop_nos,
+      join: bv in Meta.BaseVersion,
+      on: bv.base_version == bs.base_version,
+      where: bv.status == "live" and bs.point_no in ^bus_stop_nos and bs.point_type == 1,
       select: %{
         point_no: bs.point_no,
         point_desc: bs.point_desc
