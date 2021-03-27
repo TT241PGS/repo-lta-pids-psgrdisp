@@ -67,4 +67,8 @@ defmodule DisplayWeb.DisplayLive.Utils do
       _ -> nil
     end
   end
+
+  def pad_bus_stop_no(bus_stop_no) do
+    bus_stop_no |> Integer.to_string() |> String.pad_leading(5, "0")
+  end
 end
