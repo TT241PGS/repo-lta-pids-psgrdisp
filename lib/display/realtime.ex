@@ -12,7 +12,7 @@ defmodule Display.RealTime do
         {:error, :not_found}
 
       {:ok, [data]} ->
-        data = data |> Jason.decode!()
+        data = data |> Jason.decode!() |> split_by_visit_no()
         {:ok, data}
 
       {:error, error} ->
@@ -21,6 +21,63 @@ defmodule Display.RealTime do
       any ->
         {:error, any}
     end
+  end
+
+  defp split_by_visit_no(predictions) do
+    predictions
+    |> Enum.reduce([], fn service, acc ->
+      visit_no_map = %{}
+
+      visit_no_map =
+        if is_map(Access.get(service, "NextBus")),
+          do:
+            update_in(visit_no_map, [service["NextBus"]["VisitNumber"]], fn
+              _ ->
+                %{
+                  "ServiceNo" => service["ServiceNo"],
+                  "NextBus" => service["NextBus"]
+                }
+            end),
+          else: visit_no_map
+
+      visit_no_map =
+        if is_map(Access.get(service, "NextBus2")),
+          do:
+            update_in(visit_no_map, [service["NextBus2"]["VisitNumber"]], fn
+              nil ->
+                %{
+                  "ServiceNo" => service["ServiceNo"],
+                  "NextBus" => service["NextBus2"]
+                }
+
+              new_service ->
+                Map.put(new_service, "NextBus2", service["NextBus2"])
+            end),
+          else: visit_no_map
+
+      visit_no_map =
+        if is_map(Access.get(service, "NextBus3")),
+          do:
+            update_in(visit_no_map, [service["NextBus3"]["VisitNumber"]], fn
+              nil ->
+                %{
+                  "ServiceNo" => service["ServiceNo"],
+                  "NextBus" => service["NextBus3"]
+                }
+
+              %{"NextBus2" => _next_bus_2} = new_service ->
+                Map.put(new_service, "NextBus3", service["NextBus3"])
+
+              new_service ->
+                Map.put(new_service, "NextBus2", service["NextBus3"])
+            end),
+          else: visit_no_map
+
+      acc ++
+        Enum.map(visit_no_map, fn {_k, v} ->
+          v
+        end)
+    end)
   end
 
   @doc """

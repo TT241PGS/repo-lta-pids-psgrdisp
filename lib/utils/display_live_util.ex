@@ -40,6 +40,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     |> Enum.filter(&(&1["time"] > -1))
     |> Enum.filter(&(&1["service_no"] not in suppress_services))
     |> Enum.sort_by(&{&1["time"], &1["service_no"]})
+    |> Enum.uniq_by(fn service -> service["service_no"] end)
     |> Enum.take(5)
     |> Enum.map(fn service ->
       update_in(service, ["time"], &TimeUtil.format_min_to_eta_mins(&1))
