@@ -409,7 +409,8 @@ defmodule Display.Utils.DisplayLiveUtil do
         service,
         bus_stop_map,
         destination_pictogram_map,
-        bus_interchange_map
+        bus_interchange_map,
+        bus_hub_map
       ) do
     case Access.get(service, "NextBus") do
       nil ->
@@ -422,6 +423,7 @@ defmodule Display.Utils.DisplayLiveUtil do
           destination_pictogram_map
         )
         |> update_realtime_destination_bus_interchange(bus_interchange_map)
+        |> update_realtime_destination_bus_hub(bus_hub_map)
     end
   end
 
@@ -453,14 +455,6 @@ defmodule Display.Utils.DisplayLiveUtil do
          service,
          bus_interchange_map
        ) do
-    # direction = get_in(service, ["NextBus", "Direction"])
-
-    # visit_no =
-    #   case get_in(service, ["NextBus", "VisitNumber"]) do
-    #     nil -> nil
-    #     value -> String.to_integer(value)
-    #   end
-
     bus_interchange_key = service["ServiceNo"]
 
     case Map.get(
@@ -475,8 +469,6 @@ defmodule Display.Utils.DisplayLiveUtil do
         |> update_in(
           ["NextBus", "Destination"],
           fn prev ->
-            IO.inspect({:prev, prev})
-
             if is_nil(bus_interchange["destination"]),
               do: prev,
               else: bus_interchange["destination"]
@@ -496,6 +488,54 @@ defmodule Display.Utils.DisplayLiveUtil do
             if is_nil(bus_interchange["way_points"]),
               do: prev,
               else: bus_interchange["way_points"]
+          end
+        )
+    end
+  end
+
+  defp update_realtime_destination_bus_hub(
+         service,
+         bus_hub_map
+       ) do
+    direction = get_in(service, ["NextBus", "Direction"])
+
+    visit_no =
+      case get_in(service, ["NextBus", "VisitNumber"]) do
+        nil -> nil
+        value -> String.to_integer(value)
+      end
+
+    bus_hub =
+      Map.take(
+        bus_hub_map,
+        [
+          {service["ServiceNo"], direction, nil},
+          {service["ServiceNo"], direction, visit_no}
+        ]
+      )
+
+    cond do
+      bus_hub == %{} ->
+        service
+
+      true ->
+        bus_hub = Map.to_list(bus_hub) |> List.first() |> elem(1)
+
+        service
+        |> update_in(
+          ["NextBus", "Destination"],
+          fn prev ->
+            if is_nil(bus_hub["destination"]),
+              do: prev,
+              else: bus_hub["destination"]
+          end
+        )
+        |> update_in(
+          ["NextBus", "WayPoints"],
+          fn prev ->
+            if is_nil(bus_hub["way_points"]),
+              do: prev,
+              else: bus_hub["way_points"]
           end
         )
     end
@@ -571,6 +611,7 @@ defmodule Display.Utils.DisplayLiveUtil do
       |> Buses.get_bus_stop_map_by_nos()
 
     bus_interchange_map = Buses.get_bus_interchange_service_mapping_by_no(bus_stop_no)
+    bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
     # service_direction_map is needed as bushub_interchange table does not have destination code
     # Hence destination_code from realtime prediction is mapped with schedule table to get direction
     service_direction_map = Buses.get_service_direction_map(bus_stop_no)
@@ -587,7 +628,8 @@ defmodule Display.Utils.DisplayLiveUtil do
         |> update_realtime_destination(
           bus_stop_map,
           destination_pictogram_map,
-          bus_interchange_map
+          bus_interchange_map,
+          bus_hub_map
         )
       end)
 
