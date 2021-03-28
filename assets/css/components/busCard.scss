@@ -81,6 +81,7 @@
 
 .portrait {
   .bus-card {
+    position: relative;
     &.arriving {
       .status {
         border: 6px solid #eee;
@@ -103,10 +104,30 @@
       height: 120px;
       line-height: 120px;
       border-radius: 25px;
-      @extend .portrait-bg-green;
       font-size: 80px;
+      background-image: url('/images/landscape-incoming-bus.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: 1px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      height: 120px;
+      width: 100%;
+      background-image: url('/images/landscape-incoming-bus.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: right;
+      z-index: 0;
     }
   }
+  
 
   .incoming-bus-card {
     top: -70px;
