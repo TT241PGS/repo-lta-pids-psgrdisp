@@ -58,14 +58,16 @@ defmodule Display.Buses do
     end
   end
 
-  def get_bus_hub_service_mapping_by_no(bus_stop_no) do
+  # BusInterchange will always have berth_label
+  # Don't need to consider direction and visit no as it will be null
+  def get_bus_interchange_service_mapping_by_no(bus_stop_no) do
     result =
       from(bs in Buses.BushubInterchange,
-        where: bs.point_no == ^bus_stop_no,
+        where: bs.point_no == ^bus_stop_no and not is_nil(bs.berth_label),
         distinct: [
           bs.dpi_route_code,
-          bs.direction,
-          bs.visit_no,
+          # bs.direction,
+          # bs.visit_no,
           bs.berth_label,
           bs.destination,
           bs.way_points
@@ -77,7 +79,7 @@ defmodule Display.Buses do
       is_list(result) ->
         result
         |> Enum.reduce(%{}, fn service, acc ->
-          update_in(acc, [{service.dpi_route_code, service.direction, service.visit_no}], fn _ ->
+          update_in(acc, [service.dpi_route_code], fn _ ->
             %{
               "berth_label" => service.berth_label,
               "destination" => service.destination,

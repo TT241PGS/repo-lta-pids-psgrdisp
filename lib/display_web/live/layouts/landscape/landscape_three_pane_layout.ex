@@ -21,7 +21,7 @@ defmodule LandscapeThreePaneLayout do
           </div>
         </div>
         <div class="column right-column">
-          <PredictionsLandscape is_bushub={{@prop.is_bushub}} suppressed_messages={{@prop.suppressed_messages}} realtimeActiveIndex={{@prop.predictions_realtime_7_per_page_index}} scheduledActiveIndex={{@prop.predictions_scheduled_7_per_page_index}} stopPredictionsRealtimeSet={{@prop.predictions_realtime_7_per_page}} stopPredictionsScheduledSet={{@prop.predictions_scheduled_7_per_page}} :if={{get_in(@prop.current_layout_panes, ["pane3", "type", "value"]) == "predictions_by_service"}}/>
+          <PredictionsLandscape is_bus_interchange={{@prop.is_bus_interchange}} suppressed_messages={{@prop.suppressed_messages}} realtimeActiveIndex={{@prop.predictions_realtime_7_per_page_index}} scheduledActiveIndex={{@prop.predictions_scheduled_7_per_page_index}} stopPredictionsRealtimeSet={{@prop.predictions_realtime_7_per_page}} stopPredictionsScheduledSet={{@prop.predictions_scheduled_7_per_page}} :if={{get_in(@prop.current_layout_panes, ["pane3", "type", "value"]) == "predictions_by_service"}}/>
         </div>
       </div>
 

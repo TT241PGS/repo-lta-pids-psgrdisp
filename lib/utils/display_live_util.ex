@@ -79,7 +79,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
         cached_predictions = update_cached_predictions(cached_predictions, bus_stop_no)
 
-        is_bushub =
+        is_bus_interchange =
           Enum.reduce_while(cached_predictions, false, fn x, acc ->
             case get_in(x, ["NextBus", "BerthLabel"]) |> is_bitstring do
               true -> {:halt, true}
@@ -89,7 +89,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
         socket =
           socket
-          |> Phoenix.LiveView.assign(:is_bushub, is_bushub)
+          |> Phoenix.LiveView.assign(:is_bus_interchange, is_bus_interchange)
           |> Phoenix.LiveView.assign(:predictions_scheduled_set_1_column, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_set_2_column, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_set_1_column_index, nil)
@@ -208,7 +208,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
     scheduled_predictions = update_scheduled_predictions(scheduled_predictions)
 
-    is_bushub =
+    is_bus_interchange =
       Enum.reduce_while(scheduled_predictions, false, fn x, acc ->
         case get_in(x, ["NextBus", "BerthLabel"]) |> is_bitstring do
           true -> {:halt, true}
@@ -220,7 +220,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
     socket =
       socket
-      |> Phoenix.LiveView.assign(:is_bushub, is_bushub)
+      |> Phoenix.LiveView.assign(:is_bus_interchange, is_bus_interchange)
       |> Phoenix.LiveView.assign(:predictions_realtime_set_1_column, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_set_2_column, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_set_1_column_index, nil)
@@ -404,26 +404,30 @@ defmodule Display.Utils.DisplayLiveUtil do
     Map.replace!(prediction, "NextBuses", next_buses)
   end
 
-  def update_realtime_destination(service, bus_stop_map, destination_pictogram_map, bus_hub_map) do
+  def update_realtime_destination(
+        service,
+        bus_stop_map,
+        destination_pictogram_map,
+        bus_interchange_map
+      ) do
     case Access.get(service, "NextBus") do
       nil ->
         service
 
       _ ->
-        update_realtime_destination_hub_or_stop(
-          service,
+        service
+        |> update_realtime_destination_bus_stop(
           bus_stop_map,
-          destination_pictogram_map,
-          bus_hub_map
+          destination_pictogram_map
         )
+        |> update_realtime_destination_bus_interchange(bus_interchange_map)
     end
   end
 
-  defp update_realtime_destination_hub_or_stop(
+  defp update_realtime_destination_bus_stop(
          service,
          bus_stop_map,
-         destination_pictogram_map,
-         bus_hub_map
+         destination_pictogram_map
        ) do
     dest_code =
       case get_in(service, ["NextBus", "DestinationCode"]) do
@@ -431,51 +435,67 @@ defmodule Display.Utils.DisplayLiveUtil do
         value -> String.to_integer(value)
       end
 
-    direction = get_in(service, ["NextBus", "Direction"])
-
-    visit_no =
-      case get_in(service, ["NextBus", "VisitNumber"]) do
-        nil -> nil
-        value -> String.to_integer(value)
+    service
+    |> update_in(
+      ["NextBus", "DestinationPictograms"],
+      fn _ ->
+        get_in(destination_pictogram_map, [dest_code]) || []
       end
+    )
+    |> put_in(
+      ["NextBus", "Destination"],
+      Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, dest_code)
+    )
+  end
 
-    service =
-      service
-      |> update_in(
-        ["NextBus", "DestinationPictograms"],
-        fn _ ->
-          get_in(destination_pictogram_map, [dest_code]) || []
-        end
-      )
+  defp update_realtime_destination_bus_interchange(
+         service,
+         bus_interchange_map
+       ) do
+    # direction = get_in(service, ["NextBus", "Direction"])
 
-    bus_hub_key = {service["ServiceNo"], direction, visit_no}
+    # visit_no =
+    #   case get_in(service, ["NextBus", "VisitNumber"]) do
+    #     nil -> nil
+    #     value -> String.to_integer(value)
+    #   end
+
+    bus_interchange_key = service["ServiceNo"]
 
     case Map.get(
-           bus_hub_map,
-           bus_hub_key
+           bus_interchange_map,
+           bus_interchange_key
          ) do
       nil ->
         service
-        |> put_in(
-          ["NextBus", "Destination"],
-          Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, dest_code)
-        )
 
-      bus_hub ->
+      bus_interchange ->
         service
         |> update_in(
           ["NextBus", "Destination"],
-          fn _ ->
-            bus_hub["destination"]
+          fn prev ->
+            IO.inspect({:prev, prev})
+
+            if is_nil(bus_interchange["destination"]),
+              do: prev,
+              else: bus_interchange["destination"]
           end
         )
-        |> put_in(
+        |> update_in(
           ["NextBus", "BerthLabel"],
-          bus_hub["berth_label"]
+          fn prev ->
+            if is_nil(bus_interchange["berth_label"]),
+              do: prev,
+              else: bus_interchange["berth_label"]
+          end
         )
-        |> put_in(
+        |> update_in(
           ["NextBus", "WayPoints"],
-          bus_hub["way_points"]
+          fn prev ->
+            if is_nil(bus_interchange["way_points"]),
+              do: prev,
+              else: bus_interchange["way_points"]
+          end
         )
     end
   end
@@ -549,7 +569,7 @@ defmodule Display.Utils.DisplayLiveUtil do
       dest_codes
       |> Buses.get_bus_stop_map_by_nos()
 
-    bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
+    bus_interchange_map = Buses.get_bus_interchange_service_mapping_by_no(bus_stop_no)
     # service_direction_map is needed as bushub_interchange table does not have destination code
     # Hence destination_code from realtime prediction is mapped with schedule table to get direction
     service_direction_map = Buses.get_service_direction_map(bus_stop_no)
@@ -563,10 +583,10 @@ defmodule Display.Utils.DisplayLiveUtil do
       |> Enum.map(fn service ->
         service
         |> add_realtime_direction(service_direction_map)
-        |> update_realtime_destination_hub_or_stop(
+        |> update_realtime_destination(
           bus_stop_map,
           destination_pictogram_map,
-          bus_hub_map
+          bus_interchange_map
         )
       end)
 

@@ -10,7 +10,7 @@ defmodule PredictionsScheduledLandscape do
   def render(assigns) do
     ~H"""
     <div>
-      <div class={{"heading", bushub: @is_bushub == true}} :if={{@twoColumn == false}}>
+      <div class={{"heading", bushub: @is_bus_interchange == true}} :if={{@twoColumn == false}}>
         <div class="two-columns-no-sidebar">
           <span class="heading-info bus">Bus</span>
           <span class="heading-info arriving">ARRIVING</span>
@@ -19,27 +19,27 @@ defmodule PredictionsScheduledLandscape do
       </div>
       <div class="container two-columns" :if={{@twoColumn == true}}>
         <div class="column left-column">
-          <div class={{"heading", bushub: @is_bushub == true}}>
+          <div class={{"heading", bushub: @is_bus_interchange == true}}>
             <span class="heading-info service">Services</span>
             <span class="heading-info arriving">ARRIVING(mins)</span>
             <span class="heading-info nextBus">Next Bus(mins)</span>
-            <span :if={{@is_bushub == true}} class="heading-info berthHead">BERTH</span>
+            <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
             <span class="heading-info destination">Destination</span>
           </div>
         </div>
         <div class="column right-column">
-          <div class={{"heading", bushub: @is_bushub == true}}>
+          <div class={{"heading", bushub: @is_bus_interchange == true}}>
             <span class="heading-info service">Services</span>
             <span class="heading-info arriving">ARRIVING(mins)</span>
             <span class="heading-info nextBus">Next Bus(mins)</span>
-            <span :if={{@is_bushub == true}} class="heading-info berthHead">BERTH</span>
+            <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
             <span class="heading-info destination">Destination</span>
           </div>
         </div>
       </div>
       <div :for={{ {stopPredictionsPage, index} <- Enum.with_index(@stopPredictionsSet) }} class={{"container", hidden: @activeIndex != index, "fade-in": @activeIndex == index}}>
         <div class={{"grid-row-7": @twoColumn == true}}>
-          <div class={{"flex", "mb-30", "mr-30": @twoColumn == true, "row-odd": rem(service_index, 2) != 0, "row-even": rem(service_index, 2) == 0, hidden: Enum.member?(@suppressed_messages.hide_services, service["ServiceNo"]), bushub: @is_bushub == true}} :for={{ {service, service_index} <- Enum.with_index(stopPredictionsPage) }}>
+          <div class={{"flex", "mb-30", "mr-30": @twoColumn == true, "row-odd": rem(service_index, 2) != 0, "row-even": rem(service_index, 2) == 0, hidden: Enum.member?(@suppressed_messages.hide_services, service["ServiceNo"]), bushub: @is_bus_interchange == true}} :for={{ {service, service_index} <- Enum.with_index(stopPredictionsPage) }}>
             <div class="sc-bdnylx dciVXD bus-info">
               {{service["ServiceNo"]}}
             </div>
@@ -54,7 +54,7 @@ defmodule PredictionsScheduledLandscape do
               <div class="next-bus scheduled no-more" :if={{ length(service["NextBuses"]) == 1 }}>
                 <span class="label">No More Next Bus</span>
               </div>
-              <div :if={{@is_bushub == true}} class="berth">{{get_in(service, ["NextBus", "BerthLabel"])}}</div>
+              <div :if={{@is_bus_interchange == true}} class="berth">{{get_in(service, ["NextBus", "BerthLabel"])}}</div>
               <div class="destination-bus-stop">
                 <p>{{service["DestinationCode"]}}</p>
                 <div class="next-bus-station-with-tags">

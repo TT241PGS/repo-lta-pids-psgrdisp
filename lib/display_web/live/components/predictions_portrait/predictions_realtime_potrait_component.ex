@@ -5,20 +5,20 @@ defmodule PredictionsRealtimePortrait do
   property(stopPredictionsSet, :list, default: %{})
   property(activeIndex, :integer, default: 0)
   property(suppressed_messages, :map, default: %{})
-  property(is_bushub, :boolean, default: false)
+  property(is_bus_interchange, :boolean, default: false)
 
   def render(assigns) do
     ~H"""
-    <div class={{"heading", bushub: @is_bushub == true}}>
+    <div class={{"heading", bushub: @is_bus_interchange == true}}>
       <span class="heading-info service">Services</span>
       <span class="heading-info arriving">ARRIVING</span>
       <span class="heading-info nextBus">Next Bus</span>
-      <span :if={{@is_bushub == true}} class="heading-info berthHead">BERTH</span>
+      <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
       <span class="heading-info destination">Destination</span>
     </div>
     <div :for={{ {stopPredictionsPage, index} <- Enum.with_index(@stopPredictionsSet) }} class={{"container", hidden: @activeIndex != index, "fade-in": @activeIndex == index}}>
       <div>
-        <div class={{"flex", "mb-30", "row-odd": rem(service_index, 2) != 0, "row-even": rem(service_index, 2) == 0, hidden: Enum.member?(@suppressed_messages.hide_services, service["ServiceNo"]), bushub: @is_bushub == true}} :for={{ {service, service_index} <- Enum.with_index(stopPredictionsPage) }}>
+        <div class={{"flex", "mb-30", "row-odd": rem(service_index, 2) != 0, "row-even": rem(service_index, 2) == 0, hidden: Enum.member?(@suppressed_messages.hide_services, service["ServiceNo"]), bushub: @is_bus_interchange == true}} :for={{ {service, service_index} <- Enum.with_index(stopPredictionsPage) }}>
           <div class="sc-bdnylx dciVXD bus-info">
             {{service["ServiceNo"]}}
           </div>
@@ -39,7 +39,7 @@ defmodule PredictionsRealtimePortrait do
             <div class="next-bus no-more" :if={{ get_in(service, ["NextBus"]) != nil and  get_in(service, ["NextBus", "isLastBus"]) == true}}>
               <span class="label">No More Next Bus</span>
             </div>
-            <div :if={{@is_bushub == true}} class="berth">{{get_in(service, ["NextBus", "BerthLabel"])}}</div>
+            <div :if={{@is_bus_interchange == true}} class="berth">{{get_in(service, ["NextBus", "BerthLabel"])}}</div>
             <div class="destination-bus-stop">
               <p>{{service["NextBus"]["Destination"]}}</p>
               <div class="next-bus-station-with-tags">
