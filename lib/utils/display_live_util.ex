@@ -37,7 +37,6 @@ defmodule Display.Utils.DisplayLiveUtil do
 
     cached_predictions
     |> Enum.reduce([], &incoming_bus_reducer(&1, &2))
-    |> Enum.filter(&(&1["time"] > -1))
     |> Enum.filter(&(&1["service_no"] not in suppress_services))
     |> Enum.sort_by(&{&1["time"], &1["service_no"]})
     |> Enum.uniq_by(fn service -> service["service_no"] end)
