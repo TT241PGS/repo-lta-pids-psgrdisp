@@ -6,7 +6,7 @@ defmodule DisplayWeb.DisplayLive do
   alias Display.{Buses, Messages}
   alias Display.Utils.{DisplayLiveUtil, TimeUtil}
   # prediction page switching frequency in seconds
-  @slider_speed 5
+  @slider_speed 10
 
   def mount(
         %{"panel_id" => panel_id} = assigns,
