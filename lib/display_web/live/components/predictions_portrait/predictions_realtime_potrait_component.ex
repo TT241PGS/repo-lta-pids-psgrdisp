@@ -48,7 +48,7 @@ defmodule PredictionsRealtimePortrait do
                     <img :for={{ poi <- service["NextBus"]["DestinationPictograms"] }} src="{{poi}}" alt="">
                   </div>
                 </div>
-                <div :if={{not is_nil(service["NextBus"]["WayPoints"])}} class="text">{{service["NextBus"]["WayPoints"]}}</div>
+                <div :if={{not is_nil(service["NextBus"]["WayPoints"])}} class={{"text", ticker: String.length(service["NextBus"]["WayPoints"]) > 27}}>{{service["NextBus"]["WayPoints"]}}</div>
               </div>
             </div>
           </div>

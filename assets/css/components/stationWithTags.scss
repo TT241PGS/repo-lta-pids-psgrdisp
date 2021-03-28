@@ -2,10 +2,22 @@
   display: flex;
   justify-content: space-between;
   flex-direction: column;
+  overflow: hidden;
 
   .text {
     font-size: 52px;
     line-height: 63px;
+
+    &.ticker {
+      display: inline-block;
+      white-space: nowrap;
+      animation-timing-function: linear;
+      animation-duration: 3s;
+      animation-iteration-count: infinite;
+      animation-name: waypoint-ticker;
+      animation-play-state: running;
+      width: 100%;
+    }
   }
 }
 

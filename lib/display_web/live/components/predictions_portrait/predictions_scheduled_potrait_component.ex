@@ -42,7 +42,7 @@ defmodule PredictionsScheduledPortrait do
                     <img :for={{ poi <- service["DestinationPictograms"] }} src="{{poi}}" alt="">
                   </div>
                 </div>
-                <div :if={{not is_nil(service["WayPoints"])}} class="text">{{service["WayPoints"]}}</div>
+                <div :if={{not is_nil(service["WayPoints"])}} class={{"text", ticker: String.length(service["NextBus"]["WayPoints"]) > 27}}>{{service["WayPoints"]}}</div>
               </div>
             </div>
           </div>
