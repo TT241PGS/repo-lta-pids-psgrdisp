@@ -10,11 +10,11 @@ defmodule PredictionsScheduledPortrait do
   def render(assigns) do
     ~H"""
     <div class={{"heading", bushub: @is_bus_interchange == true}}>
-      <span class="heading-info service">Services</span>
-      <span class="heading-info arriving">ARRIVING</span>
-      <span class="heading-info nextBus">Next Bus</span>
+      <span class="heading-info service">SERVICE</span>
+      <span class="heading-info arriving">ARRIVING(min)</span>
+      <span class="heading-info nextBus">NEXT BUS(min)</span>
       <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
-      <span class="heading-info destination">Destination</span>
+      <span class="heading-info destination">DESTINATION</span>
     </div>
     <div :for={{ {stopPredictionsPage, index} <- Enum.with_index(@stopPredictionsSet) }} class={{"container", hidden: @activeIndex != index, "fade-in": @activeIndex == index}}>
       <div>

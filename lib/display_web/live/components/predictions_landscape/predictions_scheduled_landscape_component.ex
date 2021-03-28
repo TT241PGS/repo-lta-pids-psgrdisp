@@ -12,29 +12,29 @@ defmodule PredictionsScheduledLandscape do
     <div>
       <div class={{"heading", bushub: @is_bus_interchange == true}} :if={{@twoColumn == false}}>
         <div class="two-columns-no-sidebar">
-          <span class="heading-info bus">Bus</span>
-          <span class="heading-info arriving">ARRIVING</span>
-          <span class="heading-info next">Next</span>
+          <span class="heading-info bus">BUS</span>
+          <span class="heading-info arriving">ARRIVING(min)</span>
+          <span class="heading-info next">NEXT(min)</span>
         </div>
       </div>
       <div class="container two-columns" :if={{@twoColumn == true}}>
         <div class="column left-column">
           <div class={{"heading", bushub: @is_bus_interchange == true}}>
-            <span class="heading-info service">Services</span>
-            <span class="heading-info arriving">ARRIVING(mins)</span>
-            <span class="heading-info nextBus">Next Bus(mins)</span>
+            <span class="heading-info service">SERVICE</span>
+            <span class="heading-info arriving">ARRIVING(min)</span>
+            <span class="heading-info nextBus">NEXT BUS(min)</span>
             <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
-            <span class="heading-info destination">Destination</span>
+            <span class="heading-info destination">DESTINATION</span>
           </div>
         </div>
         <div class="column right-column">
           <div class={{"heading", bushub: @is_bus_interchange == true}}>
-            <span class="heading-info service">Services</span>
-            <span class="heading-info arriving">ARRIVING(mins)</span>
-            <span class="heading-info nextBus">Next Bus(mins)</span>
-            <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
-            <span class="heading-info destination">Destination</span>
-          </div>
+          <span class="heading-info service">SERVICE</span>
+          <span class="heading-info arriving">ARRIVING(min)</span>
+          <span class="heading-info nextBus">NEXT BUS(min)</span>
+          <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
+          <span class="heading-info destination">DESTINATION</span>
+        </div>
         </div>
       </div>
       <div :for={{ {stopPredictionsPage, index} <- Enum.with_index(@stopPredictionsSet) }} class={{"container", hidden: @activeIndex != index, "fade-in": @activeIndex == index}}>
