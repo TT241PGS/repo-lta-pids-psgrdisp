@@ -4,7 +4,7 @@ defmodule Display.Poi do
   import Ecto.Query, warn: false
   use Timex
   alias Display.Repo
-  alias Display.Poi.{Poi, PoiStopsMapping}
+  alias Display.Poi.{Poi, PoiStopsMapping, Waypoint}
 
   def get_many_destinations_pictogram(dest_codes) when not is_list(dest_codes), do: nil
 
@@ -63,5 +63,38 @@ defmodule Display.Poi do
         "pictograms" => pictograms
       })
     end)
+  end
+
+  def get_waypoints_map(bus_stop_no) do
+    from(w in Waypoint,
+      where: w.cur_stop_no == ^bus_stop_no,
+      select: %{
+        text: w.poi_comnt_txt,
+        dpi_route_code: w.dpi_route_code,
+        direction: w.direction
+      }
+    )
+    |> Repo.all()
+    |> Enum.group_by(
+      fn waypoint -> {waypoint.dpi_route_code, waypoint.direction} end,
+      fn waypoint -> waypoint.text end
+    )
+  end
+
+  def get_waypoint_from_waypoint_map(waypoints_map, service_no, direction) do
+    case get_in(waypoints_map, [{service_no, direction}]) do
+      nil ->
+        nil
+
+      waypoints ->
+        waypoints
+        |> Enum.with_index()
+        |> Enum.reduce("", fn {waypoint, index}, acc ->
+          case index == length(waypoints) - 1 do
+            true -> acc <> waypoint
+            false -> acc <> waypoint <> ", "
+          end
+        end)
+    end
   end
 end

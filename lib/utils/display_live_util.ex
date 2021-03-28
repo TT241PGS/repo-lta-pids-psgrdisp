@@ -410,7 +410,8 @@ defmodule Display.Utils.DisplayLiveUtil do
         bus_stop_map,
         destination_pictogram_map,
         bus_interchange_map,
-        bus_hub_map
+        bus_hub_map,
+        waypoints_map
       ) do
     case Access.get(service, "NextBus") do
       nil ->
@@ -420,7 +421,8 @@ defmodule Display.Utils.DisplayLiveUtil do
         service
         |> update_realtime_destination_bus_stop(
           bus_stop_map,
-          destination_pictogram_map
+          destination_pictogram_map,
+          waypoints_map
         )
         |> update_realtime_destination_bus_interchange(bus_interchange_map)
         |> update_realtime_destination_bus_hub(bus_hub_map)
@@ -430,13 +432,16 @@ defmodule Display.Utils.DisplayLiveUtil do
   defp update_realtime_destination_bus_stop(
          service,
          bus_stop_map,
-         destination_pictogram_map
+         destination_pictogram_map,
+         waypoints_map
        ) do
     dest_code =
       case get_in(service, ["NextBus", "DestinationCode"]) do
         nil -> nil
         value -> String.to_integer(value)
       end
+
+    direction = get_in(service, ["NextBus", "Direction"])
 
     service
     |> update_in(
@@ -448,6 +453,14 @@ defmodule Display.Utils.DisplayLiveUtil do
     |> put_in(
       ["NextBus", "Destination"],
       Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, dest_code)
+    )
+    |> put_in(
+      ["NextBus", "WayPoints"],
+      Poi.get_waypoint_from_waypoint_map(
+        waypoints_map,
+        service["ServiceNo"],
+        direction
+      )
     )
   end
 
@@ -612,6 +625,8 @@ defmodule Display.Utils.DisplayLiveUtil do
 
     bus_interchange_map = Buses.get_bus_interchange_service_mapping_by_no(bus_stop_no)
     bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
+    waypoints_map = Poi.get_waypoints_map(bus_stop_no)
+
     # service_direction_map is needed as bushub_interchange table does not have destination code
     # Hence destination_code from realtime prediction is mapped with schedule table to get direction
     service_direction_map = Buses.get_service_direction_map(bus_stop_no)
@@ -629,7 +644,8 @@ defmodule Display.Utils.DisplayLiveUtil do
           bus_stop_map,
           destination_pictogram_map,
           bus_interchange_map,
-          bus_hub_map
+          bus_hub_map,
+          waypoints_map
         )
       end)
 
