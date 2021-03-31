@@ -7,7 +7,7 @@ defmodule MultimediaPortrait do
 
   def render(assigns) do
     ~H"""
-    <div class="image-wrapper">
+    <div class="multimedia-wrapper">
       <img :if={{@multimedia.type == "IMAGE"}} src="{{@multimedia.content}}" alt="">
       <video width="100%" :if={{@multimedia.type == "VIDEO"}} autoplay loop>
         <source src="{{@multimedia.content}}" type="video/mp4" />
