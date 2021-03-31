@@ -4,7 +4,7 @@ defmodule Display.Utils.DisplayLiveUtil do
   require Logger
 
   alias Display.{Buses, Messages, Poi, RealTime, Scheduled, Templates}
-  alias Display.Utils.{TimeUtil}
+  alias Display.Utils.{TimeUtil, NaturalSort}
 
   def incoming_bus_reducer(service, acc) do
     next_bus_time =
@@ -77,7 +77,9 @@ defmodule Display.Utils.DisplayLiveUtil do
 
         incoming_buses = get_incoming_buses(cached_predictions, suppressed_messages)
 
-        cached_predictions = update_cached_predictions(cached_predictions, bus_stop_no)
+        cached_predictions =
+          update_cached_predictions(cached_predictions, bus_stop_no)
+          |> sort_predictions_by_service_no_asc
 
         is_bus_interchange =
           Enum.reduce_while(cached_predictions, false, fn x, acc ->
@@ -206,7 +208,9 @@ defmodule Display.Utils.DisplayLiveUtil do
       |> Enum.map(fn prediction -> prediction["ServiceNo"] end)
       |> Scheduled.get_incoming_buses(bus_stop_no, suppressed_messages)
 
-    scheduled_predictions = update_scheduled_predictions(scheduled_predictions)
+    scheduled_predictions =
+      update_scheduled_predictions(scheduled_predictions)
+      |> sort_predictions_by_service_no_asc
 
     is_bus_interchange =
       Enum.reduce_while(scheduled_predictions, false, fn x, acc ->
@@ -934,5 +938,15 @@ defmodule Display.Utils.DisplayLiveUtil do
           true
       end
     end)
+  end
+
+  defp sort_predictions_by_service_no_asc(predictions) do
+    predictions
+    |> Enum.sort_by(
+      fn p ->
+        NaturalSort.format_item(p["ServiceNo"], false)
+      end,
+      NaturalSort.sort_direction(:asc)
+    )
   end
 end
