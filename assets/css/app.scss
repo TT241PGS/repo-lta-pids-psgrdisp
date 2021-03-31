@@ -166,6 +166,25 @@ body {
   }
 }
 
+.waypoint-wrapper {
+  display: flex;
+
+  .waypoint {
+    display: flex;
+    padding: 0 20px;
+
+    &:first-child {
+      padding: 0px;
+    }
+
+    img {
+      margin-top: 10px;
+      padding: 0 10px;
+      height: 30px;
+    }
+  }
+}
+
 .landscape {
 
   .incoming-buses {

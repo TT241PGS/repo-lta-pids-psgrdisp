@@ -444,6 +444,12 @@ defmodule Display.Utils.DisplayLiveUtil do
         value -> String.to_integer(value)
       end
 
+    origin_code =
+      case get_in(service, ["NextBus", "OriginCode"]) do
+        nil -> nil
+        value -> String.to_integer(value)
+      end
+
     direction = get_in(service, ["NextBus", "Direction"])
 
     service
@@ -462,7 +468,9 @@ defmodule Display.Utils.DisplayLiveUtil do
       Poi.get_waypoint_from_waypoint_map(
         waypoints_map,
         service["ServiceNo"],
-        direction
+        direction,
+        origin_code,
+        dest_code
       )
     )
   end

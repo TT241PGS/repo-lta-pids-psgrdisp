@@ -23,6 +23,91 @@ defmodule Display.RealTime do
     end
   end
 
+  def get_predictions_cached_mock(_bus_stop_id) do
+    # This data is for bus stop 66271
+    {:ok,
+     [
+       %{
+         "NextBus" => %{
+           "DestinationCode" => "66009",
+           "EstimatedArrival" => "2021-04-01T00:49:44+08:00",
+           "Feature" => "WAB",
+           "Latitude" => "1.3499598333333334",
+           "Load" => "SEA",
+           "Longitude" => "103.87156483333334",
+           "OriginCode" => "66009",
+           "Type" => "SD",
+           "VisitNumber" => "1"
+         },
+         "NextBus2" => %{
+           "DestinationCode" => "66009",
+           "EstimatedArrival" => "2021-04-01T00:58:56+08:00",
+           "Feature" => "WAB",
+           "Latitude" => "0.0",
+           "Load" => "SEA",
+           "Longitude" => "0.0",
+           "OriginCode" => "66009",
+           "Type" => "SD",
+           "VisitNumber" => "1"
+         },
+         "ServiceNo" => "315"
+       },
+       %{
+         "NextBus" => %{
+           "DestinationCode" => "66009",
+           "EstimatedArrival" => "2021-04-01T00:46:12+08:00",
+           "Feature" => "WAB",
+           "Latitude" => "1.3654725",
+           "Load" => "SEA",
+           "Longitude" => "103.8723365",
+           "OriginCode" => "66009",
+           "Type" => "SD",
+           "VisitNumber" => "2"
+         },
+         "ServiceNo" => "315"
+       },
+       %{
+         "NextBus" => %{
+           "DestinationCode" => "66009",
+           "EstimatedArrival" => "2021-04-01T00:47:27+08:00",
+           "Feature" => "WAB",
+           "Latitude" => "1.3511186666666666",
+           "Load" => "SEA",
+           "Longitude" => "103.87495683333331",
+           "OriginCode" => "66009",
+           "Type" => "SD",
+           "VisitNumber" => "1"
+         },
+         "ServiceNo" => "317"
+       },
+       %{
+         "NextBus" => %{
+           "DestinationCode" => "66009",
+           "EstimatedArrival" => "2021-04-01T00:45:04+08:00",
+           "Feature" => "WAB",
+           "Latitude" => "1.3642665",
+           "Load" => "SEA",
+           "Longitude" => "103.86118516666669",
+           "OriginCode" => "66009",
+           "Type" => "SD",
+           "VisitNumber" => "2"
+         },
+         "NextBus2" => %{
+           "DestinationCode" => "66009",
+           "EstimatedArrival" => "2021-04-01T00:56:04+08:00",
+           "Feature" => "WAB",
+           "Latitude" => "1.3511186666666666",
+           "Load" => "SEA",
+           "Longitude" => "103.87495683333331",
+           "OriginCode" => "66009",
+           "Type" => "SD",
+           "VisitNumber" => "2"
+         },
+         "ServiceNo" => "317"
+       }
+     ]}
+  end
+
   defp split_by_visit_no(predictions) do
     predictions
     |> Enum.reduce([], fn service, acc ->

@@ -77,4 +77,15 @@ defmodule DisplayWeb.DisplayLive.Utils do
     duration = String.length(get_in(message, [:text])) * duration_per_char
     "animation-duration: #{duration}s;"
   end
+
+  def get_waypoints_length(waypoints) do
+    icon_length = 4
+
+    waypoints
+    |> Enum.reduce(0, fn waypoint, acc ->
+      no_of_pictograms = length(waypoint["pictograms"])
+      pictograms_length = no_of_pictograms * icon_length
+      acc + String.length(waypoint["text"]) + pictograms_length
+    end)
+  end
 end
