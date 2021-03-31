@@ -19,6 +19,10 @@ defmodule PredictionsRealtimeLandscape do
         <span class="heading-info nextBus">NEXT BUS(min)</span>
         <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
         <span class="heading-info destination">DESTINATION</span>
+        <span class="page-count" :if={{length(@stopPredictionsSet) > 1}}>
+          <b :if={{not is_nil(@activeIndex)}}>{{@activeIndex + 1}}</b>
+          &nbsp;/&nbsp;{{length(@stopPredictionsSet)}}
+        </span>
       </div>
       <div class="container two-columns" :if={{@twoColumn == true}}>
         <div class="column left-column">
@@ -28,6 +32,10 @@ defmodule PredictionsRealtimeLandscape do
             <span class="heading-info nextBus">NEXT BUS(min)</span>
             <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
             <span class="heading-info destination">DESTINATION</span>
+            <span class="page-count" :if={{length(@stopPredictionsSet) > 1}}>
+              <b :if={{not is_nil(@activeIndex)}}>{{@activeIndex + 1}}</b>
+              &nbsp;/&nbsp;{{length(@stopPredictionsSet)}}
+            </span>
           </div>
         </div>
         <div class="column right-column">
@@ -37,6 +45,10 @@ defmodule PredictionsRealtimeLandscape do
             <span class="heading-info nextBus">NEXT BUS(min)</span>
             <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
             <span class="heading-info destination">DESTINATION</span>
+            <span class="page-count" :if={{length(@stopPredictionsSet) > 1}}>
+              <b :if={{not is_nil(@activeIndex)}}>{{@activeIndex + 1}}</b>
+              &nbsp;/&nbsp;{{length(@stopPredictionsSet)}}
+            </span>
           </div>
         </div>
       </div>
