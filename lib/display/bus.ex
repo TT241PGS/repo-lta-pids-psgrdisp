@@ -80,10 +80,27 @@ defmodule Display.Buses do
         result
         |> Enum.reduce(%{}, fn service, acc ->
           update_in(acc, [service.dpi_route_code], fn _ ->
+            waypoints =
+              case is_bitstring(service.way_points) do
+                true ->
+                  service.way_points
+                  |> String.split(",")
+                  |> Enum.map(fn waypoint ->
+                    %{
+                      "text" => waypoint |> String.trim(),
+                      "pictograms" => [],
+                      "poi_stop_no" => nil
+                    }
+                  end)
+
+                false ->
+                  nil
+              end
+
             %{
               "berth_label" => service.berth_label,
               "destination" => service.destination,
-              "way_points" => service.way_points
+              "way_points" => waypoints
             }
           end)
         end)
@@ -114,9 +131,26 @@ defmodule Display.Buses do
         result
         |> Enum.reduce(%{}, fn service, acc ->
           update_in(acc, [{service.dpi_route_code, service.direction, service.visit_no}], fn _ ->
+            waypoints =
+              case is_bitstring(service.way_points) do
+                true ->
+                  service.way_points
+                  |> String.split(",")
+                  |> Enum.map(fn waypoint ->
+                    %{
+                      "text" => waypoint |> String.trim(),
+                      "pictograms" => [],
+                      "poi_stop_no" => nil
+                    }
+                  end)
+
+                false ->
+                  nil
+              end
+
             %{
               "destination" => service.destination,
-              "way_points" => service.way_points
+              "way_points" => waypoints
             }
           end)
         end)

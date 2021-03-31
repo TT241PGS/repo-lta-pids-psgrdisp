@@ -74,30 +74,51 @@ defmodule Display.Poi do
         text: p.name,
         dpi_route_code: w.dpi_route_code,
         direction: w.direction,
-        pictogram: p.pictogram_url
+        pictograms: p.pictogram_url,
+        poi_stop_no: w.poi_stop_no
       },
       order_by: w.sequence_no
     )
     |> Repo.all()
     |> Enum.group_by(
       fn waypoint -> {waypoint.dpi_route_code, waypoint.direction} end,
-      fn waypoint -> waypoint.text end
+      fn waypoint ->
+        %{
+          "text" => waypoint.text,
+          "pictograms" => waypoint.pictograms,
+          "poi_stop_no" => waypoint.poi_stop_no
+        }
+      end
     )
   end
 
-  def get_waypoint_from_waypoint_map(waypoints_map, service_no, direction) do
+  def get_waypoint_from_waypoint_map(waypoints_map, service_no, direction, origin_code, dest_code) do
     case get_in(waypoints_map, [{service_no, direction}]) do
       nil ->
         nil
 
       waypoints ->
         waypoints
-        |> Enum.with_index()
-        |> Enum.reduce("", fn {waypoint, index}, acc ->
-          case index == length(waypoints) - 1 do
-            true -> acc <> waypoint
-            false -> acc <> waypoint <> ", "
-          end
+        |> Enum.filter(fn waypoint -> waypoint["poi_stop_no"] not in [dest_code, origin_code] end)
+        |> Enum.map(fn waypoint ->
+          pictograms = waypoint["pictograms"]
+
+          pictograms =
+            case is_nil(pictograms) do
+              true ->
+                []
+
+              false ->
+                pictograms
+                |> String.split(",")
+                |> Enum.map(fn url ->
+                  Application.get_env(:display, :multimedia_base_url) <> String.trim(url)
+                end)
+            end
+
+          update_in(waypoint, ["pictograms"], fn _ ->
+            pictograms
+          end)
         end)
     end
   end

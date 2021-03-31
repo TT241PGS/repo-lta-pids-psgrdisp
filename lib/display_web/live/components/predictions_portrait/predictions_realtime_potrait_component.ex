@@ -2,6 +2,8 @@ defmodule PredictionsRealtimePortrait do
   @moduledoc false
   use Surface.LiveComponent
 
+  alias DisplayWeb.DisplayLive.Utils
+
   property(stopPredictionsSet, :list, default: %{})
   property(activeIndex, :integer, default: 0)
   property(suppressed_messages, :map, default: %{})
@@ -48,7 +50,18 @@ defmodule PredictionsRealtimePortrait do
                     <img :for={{ poi <- service["NextBus"]["DestinationPictograms"] }} src="{{poi}}" alt="">
                   </div>
                 </div>
-                <div :if={{not is_nil(service["NextBus"]["WayPoints"])}} class={{"text", ticker: String.length(service["NextBus"]["WayPoints"]) > 27}}>{{service["NextBus"]["WayPoints"]}}</div>
+                <div :if={{not is_nil(service["NextBus"]["WayPoints"])}} class={{"text", "waypoint-wrapper", ticker: Utils.get_waypoints_length(service["NextBus"]["WayPoints"]) > 27}}>
+                  <div class="waypoint" :for={{waypoint <- service["NextBus"]["WayPoints"]}}>
+                    <span class="waypoint-text">
+                      {{waypoint["text"]}}
+                    </span>
+                    <div class="tags">
+                      <div class="poi-wrapper" :if={{is_list(waypoint["pictograms"])}}>
+                        <img :for={{ poi <- waypoint["pictograms"] }} src="{{poi}}" alt="">
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
