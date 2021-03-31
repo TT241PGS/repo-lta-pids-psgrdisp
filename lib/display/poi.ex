@@ -67,12 +67,16 @@ defmodule Display.Poi do
 
   def get_waypoints_map(bus_stop_no) do
     from(w in Waypoint,
+      join: p in Poi,
+      on: w.poi_stop_txt == p.code,
       where: w.cur_stop_no == ^bus_stop_no,
       select: %{
-        text: w.poi_comnt_txt,
+        text: p.name,
         dpi_route_code: w.dpi_route_code,
-        direction: w.direction
-      }
+        direction: w.direction,
+        pictogram: p.pictogram_url
+      },
+      order_by: w.sequence_no
     )
     |> Repo.all()
     |> Enum.group_by(
