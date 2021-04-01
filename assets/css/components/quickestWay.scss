@@ -112,6 +112,7 @@
               @include letter-spacing(50);
               padding: 0 10px 0 40px;
               overflow: hidden;
+              text-align: center;
             }
           }
         }
@@ -257,6 +258,7 @@
               padding: 0 10px 0 40px;
               overflow: hidden;
               @include letter-spacing(50);
+              text-align: center;
             }
           }
         }
