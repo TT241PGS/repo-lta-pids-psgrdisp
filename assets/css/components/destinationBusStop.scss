@@ -13,6 +13,9 @@
       margin-top: 0;
       margin-bottom: 10px;
       font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .tags {
@@ -55,6 +58,9 @@
       margin-top: 0;
       margin-bottom: 11px;
       font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .tags {
