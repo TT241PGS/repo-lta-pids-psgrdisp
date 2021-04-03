@@ -298,17 +298,10 @@ defmodule Display.Buses do
   # TODO: Query with BaseVersion, OperatingDay
   def get_last_bus_by_service_by_bus_stop(bus_stop_no) do
     query = "
-    select distinct bs_outer.dpi_route_code, bs_outer.dest_code, bs_top.arriving_time from pids_schedule bs_outer
-    join lateral (
-        select * from pids_schedule bs_inner
-        where bs_inner.dpi_route_code = bs_outer.dpi_route_code
-        and bs_inner.point_no = #{bus_stop_no}
-        order by bs_inner.arriving_time desc
-        limit 1
-    ) bs_top on true
-    where bs_outer.point_no = #{bus_stop_no}
-    order by bs_outer.dpi_route_code
-    limit 5;
+    select distinct on (dpi_route_code) dpi_route_code, dest_code, arriving_time
+      from pids_schedule
+      where point_no = #{bus_stop_no}
+      order by dpi_route_code, arriving_time desc;
     "
     SQL.query!(Repo, query, [])
   end
@@ -332,19 +325,18 @@ defmodule Display.Buses do
   # TODO: Query with BaseVersion, OperatingDay
   def get_scheduled_quickest_way_to_by_bus_stop(bus_stop_no) do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
+    next_hour_in_seconds_past_today = now_in_seconds_past_today * 60
     query = "
-    select distinct t_top.svc_txt, t_outer.poi_stop_num, t_top.tm_prd_num, t_top.tm_taken_num from pids_quickest_way_to_poi t_outer
-    join lateral (
-        select * from pids_quickest_way_to_poi t_inner
-        where t_inner.depart_stop_num = t_outer.depart_stop_num
-        and t_inner.poi_stop_num = t_outer.poi_stop_num
-        and t_inner.tm_prd_num > #{now_in_seconds_past_today}
-        order by t_inner.tm_prd_num asc
-        limit 2
-    ) t_top on true
-    where t_outer.depart_stop_num=#{bus_stop_no}
-    order by t_top.tm_prd_num,t_outer.poi_stop_num
-    limit 4;
+    select distinct ranked_qwt_poi.svc_txt, ranked_qwt_poi.visit_no_num, ranked_qwt_poi.poi_stop_num, ranked_qwt_poi.tm_prd_num, ranked_qwt_poi.tm_taken_num from
+    (SELECT qwt_poi.*,
+      dense_rank() OVER (PARTITION BY poi_stop_num ORDER BY tm_prd_num ASC)
+      FROM pids_quickest_way_to_poi qwt_poi
+      WHERE depart_stop_num=#{bus_stop_no}
+      and tm_prd_num > #{now_in_seconds_past_today}
+      and tm_prd_num <= #{next_hour_in_seconds_past_today}
+    ) ranked_qwt_poi
+    where dense_rank <=5
+    order by tm_prd_num, poi_stop_num
     "
     SQL.query!(Repo, query, [])
   end
@@ -355,18 +347,16 @@ defmodule Display.Buses do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
     next_hour_in_seconds_past_today = now_in_seconds_past_today * 60
     query = "
-    select distinct t_outer.poi_stop_num, t_top.svc_txt, t_top.tm_taken_num from pids_quickest_way_to_poi t_outer
-    join lateral (
-        select * from pids_quickest_way_to_poi t_inner
-        where t_inner.depart_stop_num = t_outer.depart_stop_num
-        and t_inner.poi_stop_num = t_outer.poi_stop_num
-        and t_inner.tm_prd_num > #{now_in_seconds_past_today}
-        and t_inner.tm_prd_num <= #{next_hour_in_seconds_past_today}
-        order by t_inner.tm_prd_num
-        limit 5
-    ) t_top on true
-    where t_outer.depart_stop_num=#{bus_stop_no}
-    group by t_outer.poi_stop_num,t_top.svc_txt,t_top.tm_taken_num
+    select distinct ranked_qwt_poi.poi_stop_num, ranked_qwt_poi.svc_txt, ranked_qwt_poi.visit_no_num, ranked_qwt_poi.tm_taken_num from
+    (SELECT qwt_poi.*,
+      dense_rank() OVER (PARTITION BY poi_stop_num ORDER BY tm_prd_num ASC)
+      FROM pids_quickest_way_to_poi qwt_poi
+      WHERE depart_stop_num=#{bus_stop_no}
+      and tm_prd_num > #{now_in_seconds_past_today}
+      and tm_prd_num <= #{next_hour_in_seconds_past_today}
+    ) ranked_qwt_poi
+    where dense_rank <=5
+    order by poi_stop_num, tm_taken_num
     "
     SQL.query!(Repo, query, [])
   end

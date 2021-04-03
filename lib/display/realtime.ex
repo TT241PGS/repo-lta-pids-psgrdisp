@@ -192,8 +192,8 @@ defmodule Display.RealTime do
     suppress_services = Map.keys(service_message_map) ++ hide_services
 
     rows
-    |> Enum.filter(fn [_, dpi_route_code, _] -> dpi_route_code not in suppress_services end)
-    |> Enum.reduce(%{}, fn [poi_stop_code, dpi_route_code, travel_time], acc ->
+    |> Enum.filter(fn [_, dpi_route_code, _, _] -> dpi_route_code not in suppress_services end)
+    |> Enum.reduce(%{}, fn [poi_stop_code, dpi_route_code, visit_no, travel_time], acc ->
       key = poi_stop_code
 
       service_arrival_time =
@@ -206,6 +206,7 @@ defmodule Display.RealTime do
         "arriving_time_at_origin" => service_arrival_time,
         "arriving_time_at_destination" => travel_time + service_arrival_time,
         "service_no" => dpi_route_code,
+        "visit_no" => visit_no,
         "type" => "main"
       }
 
