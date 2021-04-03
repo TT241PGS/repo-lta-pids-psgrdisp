@@ -34,6 +34,7 @@ defmodule PortraitThreePaneALayout do
         current_pane="pane3"
         panes={{@prop.current_layout_panes}}
       />
+      <LegendPortrait />
     </div>
     """
   end

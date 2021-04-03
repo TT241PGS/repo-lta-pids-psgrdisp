@@ -30,6 +30,7 @@ defmodule PortraitThreePaneBLayout do
         image_sequence_url={{@prop.multimedia_image_sequence_current_url}}
         :if={{get_in(@prop.current_layout_panes, ["pane3", "type", "value"]) == "multimedia"}}
       />
+      <LegendPortrait />
     </div>
     """
   end

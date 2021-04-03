@@ -1,0 +1,63 @@
+.portrait {
+  .buses + .legend {
+    margin-top: 145px;
+  }
+
+  .advisories-container + .legend {
+    margin-top: 55px;
+  }
+
+  .image-wrapper + .legend {
+    margin-top: 50px;
+  }
+
+  .legend {
+    display: flex;
+    align-items: center;
+    border: 6px #565656 solid;
+    border-radius: 25px;
+    padding: 40px 80px;
+
+    p {
+      margin: 0 0 0 40px;
+      color: white;
+      font-size: 46px;
+    }
+
+    .no-wheelchair {
+      display: flex;
+      align-items: center;
+      width: 736px;
+    }
+
+    .seats {
+      display: flex;
+      align-items: center;
+      width: 408px;
+
+      .indicator {
+        position: relative;
+        height: 144px;
+        width: 22px;
+      }
+
+      &.seat-available {
+        .indicator {
+          background-color: #81c784;
+        }
+      }
+
+      &.standing-available {
+        .indicator {
+          background-color: #ffd54f;
+        }
+      }
+
+      &.limited-standing {
+        .indicator {
+          background-color: #ef5350;
+        }
+      }
+    }
+  }
+}

@@ -29,6 +29,7 @@
 @import 'components/destinationBusStop.scss';
 @import 'components/image.scss';
 @import 'components/quickestWay.scss';
+@import 'components/legend.scss';
 
 @import "../node_modules/nprogress/nprogress.css";
 
@@ -216,7 +217,13 @@ body {
 
   .advisories-container {
     position: absolute;
-    top: 3400px;
+    top: 3100px;
+    width: 2048px;
+  }
+
+  .legend {
+    position: absolute;
+    top: 3500px;
     width: 2048px;
   }
 }
