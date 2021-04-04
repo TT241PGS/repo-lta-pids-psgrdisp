@@ -1,13 +1,5 @@
 .portrait {
 
-  .advisories-container + .legend {
-    margin-top: 55px;
-  }
-
-  .image-wrapper + .legend {
-    margin-top: 50px;
-  }
-
   .legend {
     display: flex;
     align-items: center;
@@ -60,17 +52,6 @@
 }
 
 .landscape {
-  .buses + .legend {
-    margin-top: 75px;
-  }
-
-  .advisories-container + .legend {
-    margin-top: 27.5px;
-  }
-
-  .image-wrapper + .legend {
-    margin-top: 25px;
-  }
 
   .legend {
     display: flex;
