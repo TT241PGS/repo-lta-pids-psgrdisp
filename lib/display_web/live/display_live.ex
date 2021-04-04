@@ -879,7 +879,7 @@ defmodule DisplayWeb.DisplayLive do
       "portrait_two_pane" ->
         ~H"""
         <div class={{"content-wrapper portrait #{theme}"}}>
-          <PortraitTwoPaneLayout prop={{assigns}} service_per_page="10"/>
+          <PortraitTwoPaneLayout prop={{assigns}} service_per_page="9"/>
         </div>
         """
 

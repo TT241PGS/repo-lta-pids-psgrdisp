@@ -5,7 +5,7 @@ defmodule PortraitTwoPaneLayout do
   alias DisplayWeb.DisplayLive.Utils
 
   property(prop, :map, default: %{})
-  property(service_per_page, :string, default: "10")
+  property(service_per_page, :string, default: "9")
 
   def render(assigns) do
     ~H"""
@@ -25,6 +25,7 @@ defmodule PortraitTwoPaneLayout do
         stopPredictionsScheduledSet={{Utils.get_stop_predictions_scheduled_set(@prop, @service_per_page)}}
         :if={{get_in(@prop.current_layout_panes, ["pane2", "type", "value"]) == "predictions_by_service"}}
       />
+      <Legend />
     </div>
     """
   end
