@@ -191,6 +191,10 @@ body {
   .incoming-buses {
     justify-content: flex-start;
 
+    .incoming-bus-header {
+      display: flex;
+    }
+
     .bus-card:not(:last-child) {
       margin-right: 30px;
     }
