@@ -31,8 +31,11 @@ defmodule DisplayWeb.DisplayLive.Utils do
   def get_stop_predictions_realtime_set(prop, service_per_page) do
     case service_per_page do
       "5" -> prop.predictions_realtime_5_per_page
+      "6" -> prop.predictions_realtime_6_per_page
       "7" -> prop.predictions_realtime_7_per_page
+      "9" -> prop.predictions_realtime_9_per_page
       "10" -> prop.predictions_realtime_10_per_page
+      "12" -> prop.predictions_realtime_12_per_page
       "14" -> prop.predictions_realtime_14_per_page
       _ -> []
     end
@@ -41,8 +44,11 @@ defmodule DisplayWeb.DisplayLive.Utils do
   def get_stop_predictions_scheduled_set(prop, service_per_page) do
     case service_per_page do
       "5" -> prop.predictions_scheduled_5_per_page
+      "6" -> prop.predictions_scheduled_6_per_page
       "7" -> prop.predictions_scheduled_7_per_page
+      "9" -> prop.predictions_scheduled_9_per_page
       "10" -> prop.predictions_scheduled_10_per_page
+      "12" -> prop.predictions_scheduled_12_per_page
       "14" -> prop.predictions_scheduled_14_per_page
       _ -> []
     end
@@ -51,8 +57,11 @@ defmodule DisplayWeb.DisplayLive.Utils do
   def get_realtime_active_index(prop, service_per_page) do
     case service_per_page do
       "5" -> prop.predictions_realtime_5_per_page_index
+      "6" -> prop.predictions_realtime_6_per_page_index
       "7" -> prop.predictions_realtime_7_per_page_index
+      "9" -> prop.predictions_realtime_9_per_page_index
       "10" -> prop.predictions_realtime_10_per_page_index
+      "12" -> prop.predictions_realtime_12_per_page_index
       "14" -> prop.predictions_realtime_14_per_page_index
       _ -> nil
     end
@@ -61,8 +70,11 @@ defmodule DisplayWeb.DisplayLive.Utils do
   def get_scheduled_active_index(prop, service_per_page) do
     case service_per_page do
       "5" -> prop.predictions_scheduled_5_per_page_index
+      "6" -> prop.predictions_scheduled_6_per_page_index
       "7" -> prop.predictions_scheduled_7_per_page_index
+      "9" -> prop.predictions_scheduled_9_per_page_index
       "10" -> prop.predictions_scheduled_10_per_page_index
+      "12" -> prop.predictions_scheduled_12_per_page_index
       "14" -> prop.predictions_scheduled_14_per_page_index
       _ -> nil
     end

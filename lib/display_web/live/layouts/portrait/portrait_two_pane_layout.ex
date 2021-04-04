@@ -15,7 +15,7 @@ defmodule PortraitTwoPaneLayout do
         <DateTimePortrait day={{@prop.date_time.day}} date_short={{@prop.date_time.date_short}} time={{@prop.date_time.time}}/>
       </div>
       <IncomingBusPortrait incoming_buses={{@prop.incoming_buses}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "next_buses_arriving_at_stop" and length(@prop.incoming_buses) > 0}} />
-      <QuickestWayToPortrait services={{@prop.quickest_way_to}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "quickest_way_to" and length(@prop.quickest_way_to) > 0}} />
+      <QuickestWayToPortrait qwts={{@prop.quickest_way_to}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "quickest_way_to" and length(@prop.quickest_way_to) > 0}} />
       <PredictionsPortrait
         is_bus_interchange={{@prop.is_bus_interchange}}
         suppressed_messages={{@prop.suppressed_messages}}

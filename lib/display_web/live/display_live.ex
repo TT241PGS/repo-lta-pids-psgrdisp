@@ -44,20 +44,32 @@ defmodule DisplayWeb.DisplayLive do
         predictions_scheduled_set_1_column_index: nil,
         predictions_scheduled_set_2_column_index: nil,
         predictions_realtime_5_per_page: [],
+        predictions_realtime_6_per_page: [],
         predictions_realtime_7_per_page: [],
+        predictions_realtime_9_per_page: [],
         predictions_realtime_10_per_page: [],
+        predictions_realtime_12_per_page: [],
         predictions_realtime_14_per_page: [],
         predictions_realtime_5_per_page_index: nil,
+        predictions_realtime_6_per_page_index: nil,
         predictions_realtime_7_per_page_index: nil,
+        predictions_realtime_9_per_page_index: nil,
         predictions_realtime_10_per_page_index: nil,
+        predictions_realtime_12_per_page_index: nil,
         predictions_realtime_14_per_page_index: nil,
         predictions_scheduled_5_per_page: [],
+        predictions_scheduled_6_per_page: [],
         predictions_scheduled_7_per_page: [],
+        predictions_scheduled_9_per_page: [],
         predictions_scheduled_10_per_page: [],
+        predictions_scheduled_12_per_page: [],
         predictions_scheduled_14_per_page: [],
         predictions_scheduled_5_per_page_index: nil,
+        predictions_scheduled_6_per_page_index: nil,
         predictions_scheduled_7_per_page_index: nil,
+        predictions_scheduled_9_per_page_index: nil,
         predictions_scheduled_10_per_page_index: nil,
+        predictions_scheduled_12_per_page_index: nil,
         predictions_scheduled_14_per_page_index: nil,
         is_prediction_next_slide_scheduled: false,
         messages: %{message_map: nil, timeline: nil},
@@ -211,20 +223,32 @@ defmodule DisplayWeb.DisplayLive do
       predictions_scheduled_set_1_column_index: predictions_scheduled_set_1_column_index,
       predictions_scheduled_set_2_column_index: predictions_scheduled_set_2_column_index,
       predictions_realtime_5_per_page: predictions_realtime_5_per_page,
+      predictions_realtime_6_per_page: predictions_realtime_6_per_page,
       predictions_realtime_7_per_page: predictions_realtime_7_per_page,
+      predictions_realtime_9_per_page: predictions_realtime_9_per_page,
       predictions_realtime_10_per_page: predictions_realtime_10_per_page,
+      predictions_realtime_12_per_page: predictions_realtime_12_per_page,
       predictions_realtime_14_per_page: predictions_realtime_14_per_page,
       predictions_realtime_5_per_page_index: predictions_realtime_5_per_page_index,
+      predictions_realtime_6_per_page_index: predictions_realtime_6_per_page_index,
       predictions_realtime_7_per_page_index: predictions_realtime_7_per_page_index,
+      predictions_realtime_9_per_page_index: predictions_realtime_9_per_page_index,
       predictions_realtime_10_per_page_index: predictions_realtime_10_per_page_index,
+      predictions_realtime_12_per_page_index: predictions_realtime_12_per_page_index,
       predictions_realtime_14_per_page_index: predictions_realtime_14_per_page_index,
       predictions_scheduled_5_per_page: predictions_scheduled_5_per_page,
+      predictions_scheduled_6_per_page: predictions_scheduled_6_per_page,
       predictions_scheduled_7_per_page: predictions_scheduled_7_per_page,
+      predictions_scheduled_9_per_page: predictions_scheduled_9_per_page,
       predictions_scheduled_10_per_page: predictions_scheduled_10_per_page,
+      predictions_scheduled_12_per_page: predictions_scheduled_12_per_page,
       predictions_scheduled_14_per_page: predictions_scheduled_14_per_page,
       predictions_scheduled_5_per_page_index: predictions_scheduled_5_per_page_index,
+      predictions_scheduled_6_per_page_index: predictions_scheduled_6_per_page_index,
       predictions_scheduled_7_per_page_index: predictions_scheduled_7_per_page_index,
+      predictions_scheduled_9_per_page_index: predictions_scheduled_9_per_page_index,
       predictions_scheduled_10_per_page_index: predictions_scheduled_10_per_page_index,
+      predictions_scheduled_12_per_page_index: predictions_scheduled_12_per_page_index,
       predictions_scheduled_14_per_page_index: predictions_scheduled_14_per_page_index
     } = socket.assigns
 
@@ -245,10 +269,19 @@ defmodule DisplayWeb.DisplayLive do
         length(predictions_realtime_5_per_page) > 0 ->
           @slider_speed
 
+        length(predictions_realtime_6_per_page) > 0 ->
+          @slider_speed
+
         length(predictions_realtime_7_per_page) > 0 ->
           @slider_speed
 
+        length(predictions_realtime_9_per_page) > 0 ->
+          @slider_speed
+
         length(predictions_realtime_10_per_page) > 0 ->
+          @slider_speed
+
+        length(predictions_realtime_12_per_page) > 0 ->
           @slider_speed
 
         length(predictions_realtime_14_per_page) > 0 ->
@@ -257,10 +290,19 @@ defmodule DisplayWeb.DisplayLive do
         length(predictions_scheduled_5_per_page) > 0 ->
           @slider_speed
 
+        length(predictions_scheduled_6_per_page) > 0 ->
+          @slider_speed
+
         length(predictions_scheduled_7_per_page) > 0 ->
           @slider_speed
 
+        length(predictions_scheduled_9_per_page) > 0 ->
+          @slider_speed
+
         length(predictions_scheduled_10_per_page) > 0 ->
+          @slider_speed
+
+        length(predictions_scheduled_12_per_page) > 0 ->
           @slider_speed
 
         length(predictions_scheduled_14_per_page) > 0 ->
@@ -319,6 +361,13 @@ defmodule DisplayWeb.DisplayLive do
         )
       )
       |> assign(
+        :predictions_realtime_6_per_page_index,
+        determine_prediction_next_index(
+          predictions_realtime_6_per_page,
+          predictions_realtime_6_per_page_index
+        )
+      )
+      |> assign(
         :predictions_realtime_7_per_page_index,
         determine_prediction_next_index(
           predictions_realtime_7_per_page,
@@ -326,10 +375,24 @@ defmodule DisplayWeb.DisplayLive do
         )
       )
       |> assign(
+        :predictions_realtime_9_per_page_index,
+        determine_prediction_next_index(
+          predictions_realtime_9_per_page,
+          predictions_realtime_9_per_page_index
+        )
+      )
+      |> assign(
         :predictions_realtime_10_per_page_index,
         determine_prediction_next_index(
           predictions_realtime_10_per_page,
           predictions_realtime_10_per_page_index
+        )
+      )
+      |> assign(
+        :predictions_realtime_12_per_page_index,
+        determine_prediction_next_index(
+          predictions_realtime_12_per_page,
+          predictions_realtime_12_per_page_index
         )
       )
       |> assign(
@@ -347,6 +410,13 @@ defmodule DisplayWeb.DisplayLive do
         )
       )
       |> assign(
+        :predictions_scheduled_6_per_page_index,
+        determine_prediction_next_index(
+          predictions_scheduled_6_per_page,
+          predictions_scheduled_6_per_page_index
+        )
+      )
+      |> assign(
         :predictions_scheduled_7_per_page_index,
         determine_prediction_next_index(
           predictions_scheduled_7_per_page,
@@ -354,10 +424,24 @@ defmodule DisplayWeb.DisplayLive do
         )
       )
       |> assign(
+        :predictions_scheduled_9_per_page_index,
+        determine_prediction_next_index(
+          predictions_scheduled_9_per_page,
+          predictions_scheduled_9_per_page_index
+        )
+      )
+      |> assign(
         :predictions_scheduled_10_per_page_index,
         determine_prediction_next_index(
           predictions_scheduled_10_per_page,
           predictions_scheduled_10_per_page_index
+        )
+      )
+      |> assign(
+        :predictions_scheduled_12_per_page_index,
+        determine_prediction_next_index(
+          predictions_scheduled_12_per_page,
+          predictions_scheduled_12_per_page_index
         )
       )
       |> assign(

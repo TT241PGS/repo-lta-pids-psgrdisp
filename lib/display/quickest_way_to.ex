@@ -50,7 +50,8 @@ defmodule Display.QuickestWayTo do
               "poi_name" => qwt.alternative_poi_display_name,
               "poi_message" => qwt.alternative_text
             },
-            "type" => "alternate"
+            "type" => "alternate",
+            "services" => []
           }
       end
     end)

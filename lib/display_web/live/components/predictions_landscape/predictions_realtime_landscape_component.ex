@@ -61,7 +61,7 @@ defmodule PredictionsRealtimeLandscape do
             <div class="bus-info-message" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) != nil}}>{{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]])}}</div>
             <div class="next-buses flex" :if={{get_in(@suppressed_messages, [:service_message_map, service["ServiceNo"]]) == nil}}>
               <div class="next-bus" :if={{ Access.get(service, next_bus) != nil }} :for={{ next_bus <- ["NextBus", "NextBus2"] }}>
-                <span class={{"indicator", "bg-yellow-1": service[next_bus]["Load"] in ["LSD", "SDA"], "bg-green-1": service[next_bus]["Load"] == "SEA"}}></span>
+                <span class={{"indicator", "bg-red": service[next_bus]["Load"] == "LSD", "bg-yellow-1": service[next_bus]["Load"] == "SDA", "bg-green-1": service[next_bus]["Load"] == "SEA"}}></span>
                 <span class="badge" :if={{get_in(service, [next_bus, "isLastBus"]) == true}}>Last Bus</span>
                 <span class="label">{{service[next_bus]["EstimatedArrival"] |> String.replace_suffix(" min", "")}}</span>
                 <div class="bus-info-landscape">

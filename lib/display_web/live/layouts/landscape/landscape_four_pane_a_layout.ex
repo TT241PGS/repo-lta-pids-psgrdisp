@@ -17,7 +17,7 @@ defmodule LandscapeFourPaneALayout do
         <div class="column left-column">
           <div>
             <IncomingBusLandscape incoming_buses={{@prop.incoming_buses}} :if={{length(@prop.incoming_buses) > 0}} />
-            <QuickestWayToLandscape maxLength=4 services={{@prop.quickest_way_to}} :if={{length(@prop.quickest_way_to) > 0}} />
+            <QuickestWayToLandscape maxLength=4 qwts={{@prop.quickest_way_to}} :if={{length(@prop.quickest_way_to) > 0}} />
             <AdvisoriesLandscape
               message={{@prop.message}}
               :if={{
@@ -31,7 +31,8 @@ defmodule LandscapeFourPaneALayout do
           </div>
         </div>
         <div class="column right-column">
-          <PredictionsLandscape is_bus_interchange={{@prop.is_bus_interchange}} suppressed_messages={{@prop.suppressed_messages}} realtimeActiveIndex={{@prop.predictions_realtime_7_per_page_index}} scheduledActiveIndex={{@prop.predictions_scheduled_7_per_page_index}} stopPredictionsRealtimeSet={{@prop.predictions_realtime_7_per_page}} stopPredictionsScheduledSet={{@prop.predictions_scheduled_7_per_page}} :if={{get_in(@prop.current_layout_panes, ["pane4", "type", "value"]) == "predictions_by_service"}}/>
+          <PredictionsLandscape is_bus_interchange={{@prop.is_bus_interchange}} suppressed_messages={{@prop.suppressed_messages}} realtimeActiveIndex={{@prop.predictions_realtime_6_per_page_index}} scheduledActiveIndex={{@prop.predictions_scheduled_6_per_page_index}} stopPredictionsRealtimeSet={{@prop.predictions_realtime_6_per_page}} stopPredictionsScheduledSet={{@prop.predictions_scheduled_6_per_page}} :if={{get_in(@prop.current_layout_panes, ["pane4", "type", "value"]) == "predictions_by_service"}}/>
+          <Legend />
         </div>
       </div>
 

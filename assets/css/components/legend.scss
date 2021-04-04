@@ -61,3 +61,73 @@
     }
   }
 }
+
+.landscape {
+  .buses + .legend {
+    margin-top: 75px;
+  }
+
+  .advisories-container + .legend {
+    margin-top: 27.5px;
+  }
+
+  .image-wrapper + .legend {
+    margin-top: 25px;
+  }
+
+  .legend {
+    display: flex;
+    align-items: center;
+    border: 6px #565656 solid;
+    border-radius: 25px;
+    padding: 20px 38px;
+
+    p {
+      margin: 0 0 0 20px;
+      color: white;
+      font-size: 46px;
+      line-height: 60px;
+    }
+
+    .no-wheelchair {
+      display: flex;
+      align-items: center;
+      width: 561px;
+
+      svg {
+        height: 86.29px;
+        width: 86.29px;
+      }
+    }
+
+    .seats {
+      display: flex;
+      align-items: center;
+      width: 408px;
+
+      .indicator {
+        position: relative;
+        height: 144px;
+        width: 22px;
+      }
+
+      &.seat-available {
+        .indicator {
+          background-color: #81c784;
+        }
+      }
+
+      &.standing-available {
+        .indicator {
+          background-color: #ffd54f;
+        }
+      }
+
+      &.limited-standing {
+        .indicator {
+          background-color: #ef5350;
+        }
+      }
+    }
+  }
+}

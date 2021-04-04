@@ -2,29 +2,32 @@ defmodule QuickestWayToPortrait do
   @moduledoc false
   use Surface.LiveComponent
 
-  property(services, :string, default: "")
+  property(qwts, :string, default: "")
 
   def render(assigns) do
     ~H"""
     <div class="quickest-way">
       <div class="floating-heading">quickest way to</div>
       <div class="row">
-        <div class={{"row", "row-odd": index in [0,2], "row-even": index in [1,3]}} :for={{ {service, index} <- Enum.with_index(@services) |> Enum.take(4) }}>
+        <div class={{"row", "row-odd": index in [0,2], "row-even": index in [1,3]}} :for={{ {qwt, index} <- Enum.with_index(@qwts) |> Enum.take(2) }}>
           <div class="group-info">
             <div class="left-info">
-              <p>{{get_in(service, ["poi","poi_name"])}}</p>
+              <p>{{get_in(qwt, ["poi","poi_name"])}}</p>
               <div class="tags">
-                <div class="poi-wrapper" :if={{is_list(get_in(service, ["poi", "pictograms"]))}}>
-                  <img :for={{ poi <- get_in(service, ["poi", "pictograms"]) }} class="tag" src="{{poi}}" alt="">
+                <div class="poi-wrapper" :if={{is_list(get_in(qwt, ["poi", "pictograms"]))}}>
+                  <img :for={{ poi <- get_in(qwt, ["poi", "pictograms"]) }} class="tag" src="{{poi}}" alt="">
                 </div>
               </div>
             </div>
             <div class="flex items-center justify-between">
-              <div class={{"right-info", "bus", alternate: get_in(service, ["type"]) == "alternate", main: get_in(service, ["type"]) == "main"}}>
+              <div :if={{get_in(qwt, ["type"]) == "alternate"}} class={{"right-info", "bus", "alternate"}}>
                 <div class="floating-arrow"><i class="fas fa-arrow-right"></i></div>
-                <span :if={{get_in(service, ["type"]) == "main"}} class="number">{{service["service_no"]}}</span>
-                <span :if={{get_in(service, ["type"]) == "main"}} class="status">{{service["arriving_time_at_origin"]}}</span>
-                <span :if={{get_in(service, ["type"]) == "alternate"}} class="text">{{service["poi"]["poi_message"]}}</span>
+                <span class="text">{{qwt["poi"]["poi_message"]}}</span>
+              </div>
+              <div :if={{get_in(qwt, ["type"]) != "alternate"}} class={{"right-info", "bus", "main"}} :for={{ service <- qwt["services"] }}>
+                <div class="floating-arrow"><i class="fas fa-arrow-right"></i></div>
+                <span class="number">{{service["service_no"]}}</span>
+                <span class="status">{{service["arriving_time_at_origin"] |> String.split(" ") |> List.first}}</span>
               </div>
             </div>
           </div>

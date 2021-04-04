@@ -193,6 +193,9 @@ defmodule Display.RealTime do
 
     rows
     |> Enum.filter(fn [_, dpi_route_code, _, _] -> dpi_route_code not in suppress_services end)
+    |> Enum.uniq_by(fn [poi_stop_code, dpi_route_code, visit_no, _] ->
+      {poi_stop_code, dpi_route_code, visit_no}
+    end)
     |> Enum.reduce(%{}, fn [poi_stop_code, dpi_route_code, visit_no, travel_time], acc ->
       key = poi_stop_code
 
@@ -226,13 +229,14 @@ defmodule Display.RealTime do
   defp determine_quickest_way_to(quickest_way_to_map) do
     quickest_way_to_map
     |> Enum.reduce(%{}, fn {k, v}, acc ->
-      value =
+      services =
         Enum.sort(
           v,
           &(&1["arriving_time_at_destination"] - &2["arriving_time_at_destination"] < 240)
         )
-        |> List.first()
+        |> Enum.take(2)
 
+      value = %{"services" => services}
       Map.put(acc, k, value)
     end)
   end
@@ -243,9 +247,19 @@ defmodule Display.RealTime do
       |> Poi.get_poi_metadata_map()
 
     Enum.map(quickest_way_to_map, fn {k, v} ->
-      v
-      |> Map.put("poi", Map.get(poi_metadata_map, k))
-      |> update_in(["arriving_time_at_origin"], &TimeUtil.get_eta_from_seconds_past_today/1)
+      v = put_in(v, ["poi"], Map.get(poi_metadata_map, k))
+
+      services =
+        v["services"]
+        |> Enum.map(fn service ->
+          update_in(
+            service,
+            ["arriving_time_at_origin"],
+            &TimeUtil.get_eta_from_seconds_past_today/1
+          )
+        end)
+
+      update_in(v, ["services"], fn _ -> services end)
     end)
   end
 

@@ -204,6 +204,12 @@ body {
     text-overflow: ellipsis;
     white-space: normal;
   }
+
+  .legend {
+    position: absolute;
+    top: 1850px;
+    width: 1850px;
+  }
 }
 
 .portrait {

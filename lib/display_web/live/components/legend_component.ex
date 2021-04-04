@@ -1,4 +1,4 @@
-defmodule LegendPortrait do
+defmodule Legend do
   @moduledoc false
   use Surface.LiveComponent
 

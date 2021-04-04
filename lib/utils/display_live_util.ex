@@ -105,24 +105,42 @@ defmodule Display.Utils.DisplayLiveUtil do
             create_predictions_set_2_column(cached_predictions)
           )
           |> Phoenix.LiveView.assign(:predictions_scheduled_5_per_page, [])
+          |> Phoenix.LiveView.assign(:predictions_scheduled_6_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_7_per_page, [])
+          |> Phoenix.LiveView.assign(:predictions_scheduled_9_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_10_per_page, [])
+          |> Phoenix.LiveView.assign(:predictions_scheduled_12_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_14_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_5_per_page_index, nil)
+          |> Phoenix.LiveView.assign(:predictions_scheduled_6_per_page_index, nil)
           |> Phoenix.LiveView.assign(:predictions_scheduled_7_per_page_index, nil)
+          |> Phoenix.LiveView.assign(:predictions_scheduled_9_per_page_index, nil)
           |> Phoenix.LiveView.assign(:predictions_scheduled_10_per_page_index, nil)
+          |> Phoenix.LiveView.assign(:predictions_scheduled_12_per_page_index, nil)
           |> Phoenix.LiveView.assign(:predictions_scheduled_14_per_page_index, nil)
           |> Phoenix.LiveView.assign(
             :predictions_realtime_5_per_page,
             create_predictions_5_per_page(cached_predictions)
           )
           |> Phoenix.LiveView.assign(
+            :predictions_realtime_6_per_page,
+            create_predictions_6_per_page(cached_predictions)
+          )
+          |> Phoenix.LiveView.assign(
             :predictions_realtime_7_per_page,
             create_predictions_7_per_page(cached_predictions)
           )
           |> Phoenix.LiveView.assign(
+            :predictions_realtime_9_per_page,
+            create_predictions_9_per_page(cached_predictions)
+          )
+          |> Phoenix.LiveView.assign(
             :predictions_realtime_10_per_page,
             create_predictions_10_per_page(cached_predictions)
+          )
+          |> Phoenix.LiveView.assign(
+            :predictions_realtime_12_per_page,
+            create_predictions_12_per_page(cached_predictions)
           )
           |> Phoenix.LiveView.assign(
             :predictions_realtime_14_per_page,
@@ -238,24 +256,42 @@ defmodule Display.Utils.DisplayLiveUtil do
         create_predictions_set_2_column(scheduled_predictions)
       )
       |> Phoenix.LiveView.assign(:predictions_realtime_5_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_6_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_7_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_9_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_10_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_12_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_14_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_5_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_realtime_6_per_page_index, nil)
       |> Phoenix.LiveView.assign(:predictions_realtime_7_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_realtime_9_per_page_index, nil)
       |> Phoenix.LiveView.assign(:predictions_realtime_10_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_realtime_12_per_page_index, nil)
       |> Phoenix.LiveView.assign(:predictions_realtime_14_per_page_index, nil)
       |> Phoenix.LiveView.assign(
         :predictions_scheduled_5_per_page,
         create_predictions_5_per_page(scheduled_predictions)
       )
       |> Phoenix.LiveView.assign(
+        :predictions_scheduled_6_per_page,
+        create_predictions_6_per_page(scheduled_predictions)
+      )
+      |> Phoenix.LiveView.assign(
         :predictions_scheduled_7_per_page,
         create_predictions_7_per_page(scheduled_predictions)
       )
       |> Phoenix.LiveView.assign(
+        :predictions_scheduled_9_per_page,
+        create_predictions_9_per_page(scheduled_predictions)
+      )
+      |> Phoenix.LiveView.assign(
         :predictions_scheduled_10_per_page,
         create_predictions_10_per_page(scheduled_predictions)
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_scheduled_12_per_page,
+        create_predictions_12_per_page(scheduled_predictions)
       )
       |> Phoenix.LiveView.assign(
         :predictions_scheduled_14_per_page,
@@ -360,12 +396,24 @@ defmodule Display.Utils.DisplayLiveUtil do
     create_predictions_rowwise(cached_predictions, 5)
   end
 
+  def create_predictions_6_per_page(cached_predictions) do
+    create_predictions_rowwise(cached_predictions, 6)
+  end
+
   def create_predictions_7_per_page(cached_predictions) do
     create_predictions_rowwise(cached_predictions, 7)
   end
 
+  def create_predictions_9_per_page(cached_predictions) do
+    create_predictions_rowwise(cached_predictions, 9)
+  end
+
   def create_predictions_10_per_page(cached_predictions) do
     create_predictions_rowwise(cached_predictions, 10)
+  end
+
+  def create_predictions_12_per_page(cached_predictions) do
+    create_predictions_rowwise(cached_predictions, 12)
   end
 
   def create_predictions_14_per_page(cached_predictions) do
