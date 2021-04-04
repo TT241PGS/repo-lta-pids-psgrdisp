@@ -77,21 +77,23 @@ defmodule PredictionsRealtimeLandscape do
               </div>
               <div :if={{@is_bus_interchange == true}} class="berth">{{get_in(service, ["NextBus", "BerthLabel"])}}</div>
               <div class="destination-bus-stop">
-                <p>{{service["NextBus"]["Destination"]}}</p>
                 <div class="next-bus-station-with-tags">
-                  <div class="tags">
-                    <div class="poi-wrapper" :if={{is_list(service["NextBus"]["DestinationPictograms"])}}>
-                      <img :for={{ poi <- service["NextBus"]["DestinationPictograms"] }} src="{{poi}}" height="30px" alt="">
+                  <div class="destination-wrapper">
+                    <p>{{service["NextBus"]["Destination"]}}</p>
+                    <div class="tags">
+                      <div class="poi-wrapper" :if={{is_list(service["NextBus"]["DestinationPictograms"])}}>
+                        <img :for={{ poi <- service["NextBus"]["DestinationPictograms"] |> Enum.take(3) }} src="{{poi}}" height="30px" alt="">
+                      </div>
                     </div>
                   </div>
-                  <div :if={{not is_nil(service["NextBus"]["WayPoints"])}} class={{"text", "waypoint-wrapper", ticker: Utils.get_waypoints_length(service["NextBus"]["WayPoints"]) > 27}}>
-                    <div class="waypoint" :for={{waypoint <- service["NextBus"]["WayPoints"]}}>
+                  <div :if={{not is_nil(service["NextBus"]["WayPoints"])}} class={{"text", "waypoint-wrapper"}}>
+                    <div class="waypoint" :for={{waypoint <- service["NextBus"]["WayPoints"] |> Enum.take(2)}}>
                       <span class="waypoint-text">
                         {{waypoint["text"]}}
                       </span>
                       <div class="tags">
                         <div class="poi-wrapper" :if={{is_list(waypoint["pictograms"])}}>
-                          <img :for={{ poi <- waypoint["pictograms"] }} src="{{poi}}" alt="">
+                          <img :for={{ poi <- waypoint["pictograms"] |> Enum.take(3) }} src="{{poi}}" alt="">
                         </div>
                       </div>
                     </div>
