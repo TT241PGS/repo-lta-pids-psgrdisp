@@ -159,7 +159,7 @@ defmodule Display.Utils.TimeUtil do
 
   def format_min_to_eta_mins(eta) do
     cond do
-      eta <= 1 ->
+      eta < 1 ->
         "Arr"
 
       eta > 60 ->
