@@ -203,7 +203,7 @@ defmodule Display.RealTime do
       key = poi_code
 
       service_arrival_time =
-        case Map.get(service_arrival_map, dpi_route_code) do
+        case get_in(service_arrival_map, [{dpi_route_code, visit_no}]) do
           nil -> 100_000
           arrival_time -> TimeUtil.get_seconds_past_today_from_iso_date(arrival_time)
         end

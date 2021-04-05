@@ -65,7 +65,17 @@ defmodule Display.Utils.DisplayLiveUtil do
         service_arrival_map =
           cached_predictions
           |> Enum.reduce(%{}, fn service, acc ->
-            Map.put(acc, service["ServiceNo"], service["NextBus"]["EstimatedArrival"])
+            visit_no =
+              case get_in(service, ["NextBus", "VisitNumber"]) do
+                nil -> nil
+                value -> String.to_integer(value)
+              end
+
+            Map.put(
+              acc,
+              {service["ServiceNo"], visit_no},
+              service["NextBus"]["EstimatedArrival"]
+            )
           end)
 
         %{predictions_current: predictions_previous} = socket.assigns
