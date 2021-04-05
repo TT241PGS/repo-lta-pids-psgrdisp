@@ -195,8 +195,8 @@ defmodule Display.RealTime do
     |> Enum.filter(fn [_poi_code, _, dpi_route_code, _, _] ->
       dpi_route_code not in suppress_services
     end)
-    |> Enum.uniq_by(fn [_poi_code, poi_stop_code, dpi_route_code, _visit_no, _] ->
-      {poi_stop_code, dpi_route_code}
+    |> Enum.uniq_by(fn [poi_code, _poi_stop_code, dpi_route_code, _visit_no, _] ->
+      {poi_code, dpi_route_code}
     end)
     |> Enum.reduce(%{}, fn [poi_code, _poi_stop_code, dpi_route_code, visit_no, travel_time],
                            acc ->
