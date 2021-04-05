@@ -65,6 +65,41 @@ defmodule Display.Poi do
     end)
   end
 
+  def get_poi_metadata_map_from_poi_code(poi_list) do
+    from(p in Poi,
+      join: psm in PoiStopsMapping,
+      on: p.code == psm.poi_code,
+      where: psm.poi_code in ^poi_list,
+      select: %{
+        stop_code: psm.point_no,
+        poi_name: p.name,
+        poi_code: p.code,
+        pictograms: p.pictogram_url
+      }
+    )
+    |> Repo.all()
+    |> Enum.reduce(%{}, fn poi, acc ->
+      pictograms =
+        case is_bitstring(poi.pictograms) do
+          true ->
+            poi.pictograms
+            |> String.split(",")
+            |> Enum.map(fn url ->
+              Application.get_env(:display, :multimedia_base_url) <> String.trim(url)
+            end)
+
+          false ->
+            []
+        end
+
+      Map.put(acc, poi.poi_code, %{
+        "poi_name" => poi.poi_name,
+        "poi_code" => poi.poi_code,
+        "pictograms" => pictograms
+      })
+    end)
+  end
+
   def get_waypoints_map(bus_stop_no) do
     from(w in Waypoint,
       join: p in Poi,

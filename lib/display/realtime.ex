@@ -192,12 +192,15 @@ defmodule Display.RealTime do
     suppress_services = Map.keys(service_message_map) ++ hide_services
 
     rows
-    |> Enum.filter(fn [_, dpi_route_code, _, _] -> dpi_route_code not in suppress_services end)
-    |> Enum.uniq_by(fn [poi_stop_code, dpi_route_code, visit_no, _] ->
+    |> Enum.filter(fn [_poi_code, _, dpi_route_code, _, _] ->
+      dpi_route_code not in suppress_services
+    end)
+    |> Enum.uniq_by(fn [_poi_code, poi_stop_code, dpi_route_code, visit_no, _] ->
       {poi_stop_code, dpi_route_code, visit_no}
     end)
-    |> Enum.reduce(%{}, fn [poi_stop_code, dpi_route_code, visit_no, travel_time], acc ->
-      key = poi_stop_code
+    |> Enum.reduce(%{}, fn [poi_code, _poi_stop_code, dpi_route_code, visit_no, travel_time],
+                           acc ->
+      key = poi_code
 
       service_arrival_time =
         case Map.get(service_arrival_map, dpi_route_code) do
@@ -244,7 +247,7 @@ defmodule Display.RealTime do
   defp add_poi_metadata(quickest_way_to_map) do
     poi_metadata_map =
       Enum.map(quickest_way_to_map, fn {k, _v} -> k end)
-      |> Poi.get_poi_metadata_map()
+      |> Poi.get_poi_metadata_map_from_poi_code()
 
     Enum.map(quickest_way_to_map, fn {k, v} ->
       v = put_in(v, ["poi"], Map.get(poi_metadata_map, k))
