@@ -63,7 +63,7 @@
 
       .right-info {
         width: 454px;
-        height: 162px;
+        height: 180px;
         border-radius: 25px;
 
         &.text-only {
@@ -90,8 +90,8 @@
               color: #303030;
               background-color: #99db53;
               border-radius: 35px 0 0 35px;
+              width: 270px;
               margin-right: 10px;
-              width: 230px;
             }
   
             .status {
@@ -99,14 +99,14 @@
               background-color: #565656;
               text-align: center;
               color: #fff;
-              width: 214px;
+              width: 210px;
             }
 
             .number, .status {
-              font-size: 71px;
+              font-size: 65px;
               font-weight: bold;
-              height: 165px;
-              line-height: 165px;
+              height: 180px;
+              line-height: 180px;
               text-align: center;
             }
           }
@@ -132,16 +132,16 @@
 
       .floating-arrow {
         background-color: #303030;
-        border: 5px solid #3d3d3d;
+        border: 10px solid #3d3d3d;
         border-radius: 50%;
-        width: 75px;
-        height: 75px;
+        width: 60px;
+        height: 60px;
         text-align: center;
-        line-height: 75px;
+        line-height: 50px;
         position: absolute;
-        left: -90px;
+        left: -75px;
         top: 50%;
-        transform: translate(calc(50% + 5px), -50%);
+        transform: translate(calc(50% + 10px), -50%); 
 
         i {
           font-size: 35px;
@@ -220,7 +220,7 @@
       }
 
       .right-info {
-        width: 497px;
+        width: 490px;
         height: 162px;
         border-radius: 25px;
 
@@ -248,7 +248,7 @@
               color: #303030;
               background-color: #99db53;
               border-radius: 35px 0 0 35px;
-              margin-right: 10px;
+              width: 270px;
             }
   
             .status {
@@ -256,12 +256,12 @@
               background-color: #565656;
               text-align: center;
               color: #fff;
+              width: 210px;
             }
 
             .number, .status {
               font-size: 71px;
               font-weight: bold;
-              width: 240px;
               height: 165px;
               line-height: 165px;
               text-align: center;
@@ -291,12 +291,12 @@
         background-color: #303030;
         border: 10px solid #3d3d3d;
         border-radius: 50%;
-        width: 75px;
-        height: 65px;
+        width: 60px;
+        height: 60px;
         text-align: center;
-        line-height: 55px;
+        line-height: 50px;
         position: absolute;
-        left: -90px;
+        left: -75px;
         top: 50%;
         transform: translate(calc(50% + 10px), -50%);
 
