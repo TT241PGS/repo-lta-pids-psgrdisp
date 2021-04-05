@@ -58,9 +58,16 @@ defmodule Display.Utils.DisplayLiveUtil do
       {:ok, cached_predictions} ->
         last_bus_map = Buses.get_last_buses_map(bus_stop_no)
 
+        # Used to determine direction from destination code
+        service_direction_map = Buses.get_service_direction_map(bus_stop_no)
+
         cached_predictions =
           filter_panel_groups(cached_predictions, socket.assigns.panel_id)
           |> RealTime.set_last_bus(last_bus_map)
+          |> Enum.map(fn service ->
+            service
+            |> add_realtime_direction(service_direction_map)
+          end)
 
         service_arrival_map =
           cached_predictions
@@ -71,9 +78,11 @@ defmodule Display.Utils.DisplayLiveUtil do
                 value -> String.to_integer(value)
               end
 
+            direction = get_in(service, ["NextBus", "Direction"])
+
             Map.put(
               acc,
-              {service["ServiceNo"], visit_no},
+              {service["ServiceNo"], direction, visit_no},
               service["NextBus"]["EstimatedArrival"]
             )
           end)
@@ -696,10 +705,6 @@ defmodule Display.Utils.DisplayLiveUtil do
     bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
     waypoints_map = Poi.get_waypoints_map(bus_stop_no)
 
-    # service_direction_map is needed as bushub_interchange table does not have destination code
-    # Hence destination_code from realtime prediction is mapped with schedule table to get direction
-    service_direction_map = Buses.get_service_direction_map(bus_stop_no)
-
     destination_pictogram_map =
       dest_codes
       |> Poi.get_many_destinations_pictogram()
@@ -708,7 +713,6 @@ defmodule Display.Utils.DisplayLiveUtil do
       cached_predictions
       |> Enum.map(fn service ->
         service
-        |> add_realtime_direction(service_direction_map)
         |> update_realtime_destination(
           bus_stop_map,
           destination_pictogram_map,

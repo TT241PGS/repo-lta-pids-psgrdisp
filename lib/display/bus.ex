@@ -350,7 +350,7 @@ defmodule Display.Buses do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
     next_hour_in_seconds_past_today = now_in_seconds_past_today + 3600
     query = "
-    select distinct ranked_qwt_poi.poi_cd_txt, ranked_qwt_poi.poi_stop_num, ranked_qwt_poi.svc_txt, ranked_qwt_poi.visit_no_num, ranked_qwt_poi.tm_taken_num from
+    select distinct ranked_qwt_poi.poi_cd_txt, ranked_qwt_poi.poi_stop_num, ranked_qwt_poi.svc_txt, ranked_qwt_poi.direction_num, ranked_qwt_poi.visit_no_num, ranked_qwt_poi.tm_taken_num from
     (SELECT distinct qwt_poi.*, psm.poi_cd_txt,
       dense_rank() OVER (PARTITION BY poi_stop_num ORDER BY tm_prd_num ASC)
       FROM pids_quickest_way_to_poi qwt_poi

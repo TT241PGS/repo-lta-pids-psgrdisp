@@ -192,18 +192,25 @@ defmodule Display.RealTime do
     suppress_services = Map.keys(service_message_map) ++ hide_services
 
     rows
-    |> Enum.filter(fn [_poi_code, _, dpi_route_code, _, _] ->
+    |> Enum.filter(fn [_poi_code, _, dpi_route_code, _, _, _] ->
       dpi_route_code not in suppress_services
     end)
-    |> Enum.uniq_by(fn [poi_code, _poi_stop_code, dpi_route_code, _visit_no, _] ->
+    |> Enum.uniq_by(fn [poi_code, _poi_stop_code, dpi_route_code, _, _visit_no, _] ->
       {poi_code, dpi_route_code}
     end)
-    |> Enum.reduce(%{}, fn [poi_code, _poi_stop_code, dpi_route_code, visit_no, travel_time],
+    |> Enum.reduce(%{}, fn [
+                             poi_code,
+                             _poi_stop_code,
+                             dpi_route_code,
+                             direction,
+                             visit_no,
+                             travel_time
+                           ],
                            acc ->
       key = poi_code
 
       service_arrival_time =
-        case get_in(service_arrival_map, [{dpi_route_code, visit_no}]) do
+        case get_in(service_arrival_map, [{dpi_route_code, direction, visit_no}]) do
           nil -> 100_000
           arrival_time -> TimeUtil.get_seconds_past_today_from_iso_date(arrival_time)
         end
