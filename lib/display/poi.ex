@@ -106,13 +106,15 @@ defmodule Display.Poi do
       on: w.poi_stop_txt == p.code,
       where: w.cur_stop_no == ^bus_stop_no,
       select: %{
-        text: p.name,
         dpi_route_code: w.dpi_route_code,
         direction: w.direction,
+        poi_stop_no: w.poi_stop_no,
+        sequence_no: w.sequence_no,
         pictograms: p.pictogram_url,
-        poi_stop_no: w.poi_stop_no
+        text: p.name
       },
-      order_by: w.sequence_no
+      distinct: true,
+      order_by: [w.dpi_route_code, w.direction, w.poi_stop_no, w.sequence_no, p.pictogram_url]
     )
     |> Repo.all()
     |> Enum.group_by(
@@ -135,6 +137,7 @@ defmodule Display.Poi do
       waypoints ->
         waypoints
         |> Enum.filter(fn waypoint -> waypoint["poi_stop_no"] not in [dest_code, origin_code] end)
+        |> duplicates()
         |> Enum.map(fn waypoint ->
           pictograms = waypoint["pictograms"]
 
@@ -156,5 +159,16 @@ defmodule Display.Poi do
           end)
         end)
     end
+  end
+
+  def duplicates(list) do
+    acc_dupes = fn x, {elems, dupes} ->
+      case Map.has_key?(elems, x) do
+        true -> {elems, Map.put(dupes, x, nil)}
+        false -> {Map.put(elems, x, nil), dupes}
+      end
+    end
+
+    list |> Enum.reduce({%{}, %{}}, acc_dupes) |> elem(0) |> Map.keys()
   end
 end

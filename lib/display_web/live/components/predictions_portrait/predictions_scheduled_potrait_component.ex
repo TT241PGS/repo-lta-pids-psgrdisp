@@ -13,10 +13,10 @@ defmodule PredictionsScheduledPortrait do
     ~H"""
     <div class={{"heading", bushub: @is_bus_interchange == true}}>
       <span class="heading-info service">SERVICE</span>
-      <span class="heading-info arriving">ARRIVING(min)</span>
-      <span class="heading-info nextBus">NEXT BUS(min)</span>
+      <span class="heading-info arriving">ARRIVING (min)</span>
+      <span class="heading-info nextBus">NEXT (min)</span>
       <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
-      <span class="heading-info destination">DESTINATION</span>
+      <span class="heading-info destination">DESTINATION / WAYPOINTS</span>
       <span class="page-count" :if={{length(@stopPredictionsSet) > 1}}>
         <b :if={{not is_nil(@activeIndex)}}>{{@activeIndex + 1}}</b>
         &nbsp;/&nbsp;{{length(@stopPredictionsSet)}}
