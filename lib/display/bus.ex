@@ -326,8 +326,9 @@ defmodule Display.Buses do
 
   # TODO: Query with BaseVersion, OperatingDay
   def get_scheduled_quickest_way_to_by_bus_stop(bus_stop_no) do
-    now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
-    next_hour_in_seconds_past_today = now_in_seconds_past_today + 3600
+    now_in_seconds_past_today = TimeUtil.now_in_seconds()
+    next_hour_in_seconds_past_today = TimeUtil.next_hour_in_seconds()
+
     query = "
     select distinct ranked_qwt_poi.poi_cd_txt, ranked_qwt_poi.svc_txt, ranked_qwt_poi.visit_no_num, ranked_qwt_poi.poi_stop_num, ranked_qwt_poi.tm_prd_num, ranked_qwt_poi.tm_taken_num from
     (SELECT distinct qwt_poi.*, psm.poi_cd_txt,
@@ -349,8 +350,9 @@ defmodule Display.Buses do
   # TODO: Query with BaseVersion, OperatingDay
   # Get next 5 services each going to every POI stop from a bus stop
   def get_realtime_quickest_way_to_by_bus_stop(bus_stop_no) do
-    now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
-    next_hour_in_seconds_past_today = now_in_seconds_past_today + 3600
+    now_in_seconds_past_today = TimeUtil.now_in_seconds()
+    next_hour_in_seconds_past_today = TimeUtil.next_hour_in_seconds()
+
     query = "
     select distinct ranked_qwt_poi.poi_cd_txt, ranked_qwt_poi.poi_stop_num, ranked_qwt_poi.svc_txt, ranked_qwt_poi.direction_num, ranked_qwt_poi.visit_no_num, ranked_qwt_poi.tm_taken_num from
     (SELECT distinct qwt_poi.*, psm.poi_cd_txt,

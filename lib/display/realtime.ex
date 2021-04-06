@@ -188,7 +188,6 @@ defmodule Display.RealTime do
         hide_services: hide_services
       }) do
     %Postgrex.Result{rows: rows} = Buses.get_realtime_quickest_way_to_by_bus_stop(bus_stop_no)
-
     suppress_services = Map.keys(service_message_map) ++ hide_services
 
     rows
@@ -211,24 +210,26 @@ defmodule Display.RealTime do
 
       service_arrival_time =
         case get_in(service_arrival_map, [{dpi_route_code, direction, visit_no}]) do
-          nil -> 100_000
+          nil -> nil
           arrival_time -> TimeUtil.get_seconds_past_today_from_iso_date(arrival_time)
         end
 
-      value = %{
-        "arriving_time_at_origin" => service_arrival_time,
-        "arriving_time_at_destination" => travel_time + service_arrival_time,
-        "service_no" => dpi_route_code,
-        "visit_no" => visit_no,
-        "type" => "main"
-      }
-
-      case Map.get(acc, key) do
+      case service_arrival_time do
         nil ->
-          Map.put(acc, key, [value])
+          acc
 
-        _ ->
-          update_in(acc, [key], &(&1 ++ [value]))
+        service_arrival_time ->
+          value = %{
+            "arriving_time_at_origin" => service_arrival_time,
+            "arriving_time_at_destination" => travel_time + service_arrival_time,
+            "service_no" => dpi_route_code,
+            "visit_no" => visit_no,
+            "type" => "main"
+          }
+
+          if Map.get(acc, key) == nil,
+            do: Map.put(acc, key, [value]),
+            else: update_in(acc, [key], &(&1 ++ [value]))
       end
     end)
     |> determine_quickest_way_to
@@ -242,7 +243,7 @@ defmodule Display.RealTime do
       services =
         Enum.sort(
           v,
-          &(&1["arriving_time_at_destination"] - &2["arriving_time_at_destination"] < 240)
+          &(&1["arriving_time_at_destination"] - &2["arriving_time_at_destination"])
         )
         |> Enum.take(2)
 
