@@ -201,8 +201,10 @@ defmodule Display.Buses do
   end
 
   def get_bus_stop_name_from_bus_stop_map(bus_stop_map, bus_stop_no) do
-    Map.get(bus_stop_map, bus_stop_no)
-    |> Map.get(:point_desc)
+    case Map.get(bus_stop_map, bus_stop_no) do
+      nil -> bus_stop_no
+      point -> Map.get(point, :point_desc)
+    end
   end
 
   def get_no_of_stops_map_by_bus_stop(bus_stop) do
