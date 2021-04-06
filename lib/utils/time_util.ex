@@ -4,6 +4,10 @@ defmodule Display.Utils.TimeUtil do
   use Timex
   require Logger
 
+  @one_day_in_seconds 86400
+  @two_hours_in_seconds 7200
+  @one_hour_in_seconds 3600
+
   def get_timezone do
     Timezone.get("Asia/Singapore")
   end
@@ -189,5 +193,23 @@ defmodule Display.Utils.TimeUtil do
   def is_day_now() do
     elapsed_seconds = get_seconds_past_today()
     elapsed_seconds >= 21600 and elapsed_seconds < 64800
+  end
+
+  def now_in_seconds() do
+    now_in_seconds_past_today = get_seconds_past_today()
+
+    if now_in_seconds_past_today <= @two_hours_in_seconds,
+      # Covers 12am to 2am on next day but same operating day
+      do: now_in_seconds_past_today + @one_day_in_seconds,
+      else: now_in_seconds_past_today
+  end
+
+  def next_hour_in_seconds() do
+    next_hour_in_seconds_past_today = get_seconds_past_today() + @one_hour_in_seconds
+
+    if next_hour_in_seconds_past_today <= @two_hours_in_seconds,
+      # Covers 12am to 2am on next day but same operating day
+      do: next_hour_in_seconds_past_today + @one_day_in_seconds,
+      else: next_hour_in_seconds_past_today
   end
 end
