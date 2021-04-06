@@ -1019,5 +1019,4 @@ defmodule Display.Utils.DisplayLiveUtil do
       NaturalSort.sort_direction(:asc)
     )
   end
-
 end

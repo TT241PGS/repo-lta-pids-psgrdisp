@@ -136,8 +136,10 @@ defmodule Display.Poi do
 
       waypoints ->
         waypoints
-        |> Enum.filter(fn waypoint -> waypoint["poi_stop_no"] not in [dest_code, origin_code] end)
-        |> remove_duplicates()
+        |> Enum.filter(fn waypoint ->
+          waypoint["poi_stop_no"] not in [dest_code, origin_code]
+        end)
+        |> Enum.uniq_by(fn e -> if is_nil(e["text"]), do: e, else: e["text"] end)
         |> Enum.map(fn waypoint ->
           pictograms = waypoint["pictograms"]
 
@@ -161,14 +163,4 @@ defmodule Display.Poi do
     end
   end
 
-  def remove_duplicates(list) do
-    acc_dupes = fn x, {elems, dupes} ->
-      case Map.has_key?(elems, x) do
-        true -> {elems, Map.put(dupes, x, nil)}
-        false -> {Map.put(elems, x, nil), dupes}
-      end
-    end
-
-    list |> Enum.reduce({%{}, %{}}, acc_dupes) |> elem(0) |> Map.keys()
-  end
 end
