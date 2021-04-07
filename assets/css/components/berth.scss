@@ -2,10 +2,10 @@
   .berth {
     width: 182px;
     height: 250px;
-    border: 8px #99db53 solid;
-    background-color: #303030;
+    background-color: #9ABEAA;
     margin-right: 20px;
-    color: #fff;
+    color: #303030;
+    font-weight: bold !important;
     line-height: 234px;
     font-size: 72px;
     @include letter-spacing(20);
@@ -17,10 +17,10 @@
   .berth {
     width: 163px;
     height: 225px;
-    border: 8px #99db53 solid;
-    background-color: #303030;
+    background-color: #9ABEAA;
     margin-right: 10px;
-    color: #fff;
+    color: #303030;
+    font-weight: bold !important;
     line-height: 209px;
     font-size: 72px;
     @include letter-spacing(10);
