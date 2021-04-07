@@ -243,7 +243,7 @@ defmodule Display.RealTime do
       services =
         Enum.sort(
           v,
-          &(&1["arriving_time_at_destination"] - &2["arriving_time_at_destination"])
+          &(&1["arriving_time_at_destination"] - &2["arriving_time_at_destination"] < 0)
         )
         |> Enum.take(2)
 
