@@ -9,7 +9,7 @@ defmodule QuickestWayToPortrait do
     <div class="quickest-way">
       <div class="floating-heading">quickest way to</div>
       <div class="heading-2">Option 1</div>
-      <div class="heading-3">Option 1</div>
+      <div class="heading-3">Option 2</div>
       <div class="row">
         <div class={{"row", "row-odd": index in [0,2], "row-even": index in [1,3]}} :for={{ {qwt, index} <- Enum.with_index(@qwts) |> Enum.take(2) }}>
           <div class="group-info">
