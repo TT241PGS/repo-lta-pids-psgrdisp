@@ -566,6 +566,14 @@ defmodule Display.Utils.DisplayLiveUtil do
           end
         )
         |> update_in(
+          ["NextBus", "DestinationPictograms"],
+          fn prev ->
+            if is_nil(bus_interchange["destination"]),
+              do: prev,
+              else: []
+          end
+        )
+        |> update_in(
           ["NextBus", "BerthLabel"],
           fn prev ->
             if is_nil(bus_interchange["berth_label"]),
@@ -619,6 +627,14 @@ defmodule Display.Utils.DisplayLiveUtil do
             if is_nil(bus_hub["destination"]),
               do: prev,
               else: bus_hub["destination"]
+          end
+        )
+        |> update_in(
+          ["NextBus", "DestinationPictograms"],
+          fn prev ->
+            if is_nil(bus_hub["destination"]),
+              do: prev,
+              else: []
           end
         )
         |> update_in(
