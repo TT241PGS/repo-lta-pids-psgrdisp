@@ -15,7 +15,7 @@ defmodule PredictionsRealtimeLandscape do
     <div>
       <div class={{"heading", bushub: @is_bus_interchange == true}} :if={{@twoColumn == false}}>
         <span class="heading-info service">SERVICE</span>
-        <span class="heading-info arriving">ARRIVING(mins)</span>
+        <span class="heading-info arriving">ARRIVING (min)</span>
         <span class="heading-info nextBus">NEXT (min)</span>
         <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
         <span class="heading-info destination">DESTINATION / WAYPOINTS</span>
@@ -41,7 +41,7 @@ defmodule PredictionsRealtimeLandscape do
         <div class="column right-column">
           <div class={{"heading", bushub: @is_bus_interchange == true}}>
             <span class="heading-info service">SERVICE</span>
-            <span class="heading-info arriving">ARRIVING(mins)</span>
+            <span class="heading-info arriving">ARRIVING (min)</span>
             <span class="heading-info nextBus">NEXT (min)</span>
             <span :if={{@is_bus_interchange == true}} class="heading-info berthHead">BERTH</span>
             <span class="heading-info destination">DESTINATION / WAYPOINTS</span>
