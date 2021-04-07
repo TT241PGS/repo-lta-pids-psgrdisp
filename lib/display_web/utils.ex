@@ -84,10 +84,17 @@ defmodule DisplayWeb.DisplayLive.Utils do
     bus_stop_no |> Integer.to_string() |> String.pad_leading(5, "0")
   end
 
-  def animation_duration(message) do
-    duration_per_char = 0.25
+  def advisories_animation_duration(message) do
+    duration_per_char = 0.05
+    min_duration = duration_per_char * 90
     duration = String.length(get_in(message, [:text])) * duration_per_char
-    "animation-duration: #{duration}s;"
+    "animation-duration: #{max(min_duration, duration)}s;"
+  end
+
+  def advisories_animation_end_margin(message) do
+    margin_per_char = 1
+    margin = String.length(get_in(message, [:text])) * margin_per_char
+    "-#{ceil(margin)}%"
   end
 
   def get_waypoints_length(waypoints) do

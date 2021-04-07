@@ -4,13 +4,23 @@ defmodule AdvisoriesPortrait do
 
   alias DisplayWeb.DisplayLive.Utils
 
-  property message, :map, default: %{}
-  property panes, :map, default: %{}
-  property current_pane, :string, default: "pane2"
+  property(message, :map, default: %{})
+  property(panes, :map, default: %{})
+  property(current_pane, :string, default: "pane2")
 
   def render(assigns) do
     ~H"""
     <div class="advisories-container">
+      <style>
+        @keyframes ticker {
+          0% {
+            margin-left: 100%;
+          }
+          100% {
+              margin-left: {{Utils.advisories_animation_end_margin(@message)}};
+          }
+        }
+      </style>
       <div class="heading-wrapper">
         <div class="heading">
           <svg :if={{get_in(@message, [:type]) == "MRT"}} width="38.077" height="45" viewBox="0 0 38.077 45">
@@ -23,7 +33,7 @@ defmodule AdvisoriesPortrait do
           <img class="tag" src="{{get_in(@message, [:line])}}" alt="">
         </div>
       </div>
-      <div id={{get_in(@message, [:text])}} style={{Utils.animation_duration(@message)}} class={{Utils.get_message_class_names(@panes, @current_pane, @message)}}>
+      <div id={{get_in(@message, [:text])}} style={{Utils.advisories_animation_duration(@message)}} class={{Utils.get_message_class_names(@panes, @current_pane, @message)}}>
         {{get_in(@message, [:text])}}
       </div>
     </div>
