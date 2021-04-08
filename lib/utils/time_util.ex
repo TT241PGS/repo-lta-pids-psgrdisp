@@ -148,7 +148,7 @@ defmodule Display.Utils.TimeUtil do
     eta = get_eta_in_seconds(time)
 
     cond do
-      eta <= 120 ->
+      eta < 120 ->
         "Arr"
 
       eta >= 3600 ->
