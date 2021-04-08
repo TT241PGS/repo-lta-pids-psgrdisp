@@ -108,13 +108,13 @@ defmodule Display.Poi do
       select: %{
         dpi_route_code: w.dpi_route_code,
         direction: w.direction,
-        poi_stop_no: w.poi_stop_no,
         sequence_no: w.sequence_no,
+        poi_stop_no: w.poi_stop_no,
         pictograms: p.pictogram_url,
         text: p.name
       },
       distinct: true,
-      order_by: [w.dpi_route_code, w.direction, w.poi_stop_no, w.sequence_no, p.pictogram_url]
+      order_by: [w.dpi_route_code, w.direction, w.sequence_no, w.poi_stop_no, p.pictogram_url]
     )
     |> Repo.all()
     |> Enum.group_by(
@@ -162,5 +162,4 @@ defmodule Display.Poi do
         end)
     end
   end
-
 end
