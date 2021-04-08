@@ -80,10 +80,19 @@ defmodule Display.Utils.DisplayLiveUtil do
 
             direction = get_in(service, ["NextBus", "Direction"])
 
+            next_bus_1_eta = service["NextBus"]["EstimatedArrival"]
+
+            next_bus_2_eta = get_in(service, ["NextBus2", "EstimatedArrival"])
+
+            value =
+              if is_bitstring(next_bus_2_eta) && String.length(next_bus_2_eta) > 0,
+                do: [next_bus_1_eta, next_bus_2_eta],
+                else: [next_bus_1_eta]
+
             Map.put(
               acc,
               {service["ServiceNo"], direction, visit_no},
-              service["NextBus"]["EstimatedArrival"]
+              value
             )
           end)
 

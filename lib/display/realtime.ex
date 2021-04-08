@@ -208,28 +208,30 @@ defmodule Display.RealTime do
                            acc ->
       key = poi_code
 
-      service_arrival_time =
-        case get_in(service_arrival_map, [{dpi_route_code, direction, visit_no}]) do
-          nil -> nil
-          arrival_time -> TimeUtil.get_seconds_past_today_from_iso_date(arrival_time)
-        end
-
-      case service_arrival_time do
+      case get_in(service_arrival_map, [{dpi_route_code, direction, visit_no}]) do
         nil ->
           acc
 
-        service_arrival_time ->
-          value = %{
-            "arriving_time_at_origin" => service_arrival_time,
-            "arriving_time_at_destination" => travel_time + service_arrival_time,
-            "service_no" => dpi_route_code,
-            "visit_no" => visit_no,
-            "type" => "main"
-          }
+        service_arrival_times ->
+          value =
+            service_arrival_times
+            |> Enum.map(fn service_arrival_time ->
+              service_arrival_time =
+                TimeUtil.get_seconds_past_today_from_iso_date(service_arrival_time)
+
+              %{
+                "arriving_time_at_origin" => service_arrival_time,
+                "arriving_time_at_destination" => travel_time + service_arrival_time,
+                "service_no" => dpi_route_code,
+                "visit_no" => visit_no,
+                "direction" => direction,
+                "type" => "main"
+              }
+            end)
 
           if Map.get(acc, key) == nil,
-            do: Map.put(acc, key, [value]),
-            else: update_in(acc, [key], &(&1 ++ [value]))
+            do: Map.put(acc, key, value),
+            else: update_in(acc, [key], &(&1 ++ value))
       end
     end)
     |> determine_quickest_way_to
