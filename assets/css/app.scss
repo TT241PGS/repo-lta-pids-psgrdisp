@@ -226,8 +226,17 @@ body {
 
   .advisories-container {
     position: absolute;
-    top: 3100px;
+    top: 3170px;
     width: 2048px;
+
+    .advisory-content {
+      -webkit-box-orient: vertical;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: normal;
+    }
   }
 
   .legend {
@@ -237,18 +246,17 @@ body {
   }
 }
 
-.advisories-container {
-  overflow: hidden;
-}
-
 .advisory-content {
   display: inline-block;
   white-space: nowrap;
-  animation-timing-function: linear;
-  animation-duration: 5s;
-  animation-iteration-count: infinite;
-  animation-name: ticker;
-  animation-play-state: running;
   width: 100%;
-  margin-left: 100%;
+  font-size: 50px;
+  line-height: 75px;
+  padding: 40px 30px 12px 40px;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+  }
 }

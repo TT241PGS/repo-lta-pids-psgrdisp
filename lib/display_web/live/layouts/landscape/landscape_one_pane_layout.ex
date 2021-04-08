@@ -4,7 +4,7 @@ defmodule LandscapeOnePaneLayout do
 
   alias DisplayWeb.DisplayLive.Utils
 
-  property prop, :map, default: %{}
+  property(prop, :map, default: %{})
 
   def render(assigns) do
     ~H"""
@@ -15,7 +15,7 @@ defmodule LandscapeOnePaneLayout do
       </header>
       <div class="container two-columns">
         <PredictionsLandscape is_bus_interchange={{@prop.is_bus_interchange}} suppressed_messages={{@prop.suppressed_messages}} realtimeActiveIndex={{@prop.predictions_realtime_12_per_page_index}} scheduledActiveIndex={{@prop.predictions_scheduled_12_per_page_index}} stopPredictionsRealtimeSet={{@prop.predictions_realtime_12_per_page}} stopPredictionsScheduledSet={{@prop.predictions_scheduled_12_per_page}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}} twoColumn=true/>
-        <Legend />
+        <Legend :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) != "multimedia"}}/>
       </div>
       <MultimediaLandscape multimedia={{@prop.multimedia}} image_sequence_url={{@prop.multimedia_image_sequence_current_url}} onePane=true :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "multimedia"}}/>
     </div>
