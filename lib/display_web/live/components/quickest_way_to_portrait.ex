@@ -14,11 +14,11 @@ defmodule QuickestWayToPortrait do
         <div class={{"row", "row-odd": index in [0,2], "row-even": index in [1,3]}} :for={{ {qwt, index} <- Enum.with_index(@qwts) |> Enum.take(2) }}>
           <div class="group-info">
             <div class="left-info">
-              <p>{{get_in(qwt, ["poi","poi_name"])}}</p>
-              <div class="tags">
-                <div class="poi-wrapper" :if={{is_list(get_in(qwt, ["poi", "pictograms"]))}}>
+              <div>
+                {{get_in(qwt, ["poi","poi_name"])}}
+                <span :if={{is_list(get_in(qwt, ["poi", "pictograms"]))}}>
                   <img :for={{ poi <- get_in(qwt, ["poi", "pictograms"]) }} class="tag" src="{{poi}}" alt="">
-                </div>
+                </span>
               </div>
             </div>
             <div class="flex items-center justify-between">
