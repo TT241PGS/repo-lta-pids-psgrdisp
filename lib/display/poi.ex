@@ -162,5 +162,4 @@ defmodule Display.Poi do
         end)
     end
   end
-
 end
