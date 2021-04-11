@@ -57,22 +57,25 @@
 }
 
 .landscape {
-
   .bushub {
-
     .heading-info {
-      &.nextBus {
-        left: 702px;
+      &.arriving {
+        width: 314px;
       }
-    
+
+      &.nextBus {
+        left: 732px;
+        width: 314px;
+      }
+
       &.destination {
-        left: 1130px;
+        left: 1230px;
       }
     }
-    
   }
 
   .heading-info {
+    font-size: 29px;
     &.services {
       left: 0;
       width: 294px;
@@ -114,17 +117,15 @@
   }
 
   .bushub {
-
     .heading-info {
       &.nextBus {
         left: 782px;
       }
-    
+
       &.destination {
         left: 1330px;
       }
     }
-    
   }
 
   .heading-info {
