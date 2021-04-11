@@ -8,7 +8,7 @@ defmodule LandscapeOnePaneLayout do
 
   def render(assigns) do
     ~H"""
-    <div>
+    <div :if={{is_list(@prop.predictions_realtime_12_per_page) and length(@prop.predictions_realtime_12_per_page) > 0}}>
       <header class="busStopInfo-time">
         <BusStopInfo busStopName={{@prop.bus_stop_name}} busStopNo={{@prop.bus_stop_no |> Utils.pad_bus_stop_no}} />
         <DateTimeHorizontal day={{@prop.date_time.day}} date={{@prop.date_time.date}} time={{@prop.date_time.time}}/>

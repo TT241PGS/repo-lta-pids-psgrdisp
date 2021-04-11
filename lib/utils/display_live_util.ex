@@ -212,13 +212,12 @@ defmodule Display.Utils.DisplayLiveUtil do
           "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
         )
 
-        show_scheduled_predictions(
-          socket,
-          bus_stop_no,
-          start_time,
-          is_trigger_next,
-          is_prediction_next_slide_scheduled
-        )
+        socket = show_blank_screen(socket)
+
+        trigger_next_update_stops(is_trigger_next)
+        elapsed_time = TimeUtil.get_elapsed_time(start_time)
+        Logger.info(":update_stops ended (#{elapsed_time})")
+        {:noreply, socket}
 
       {:error, error} ->
         Logger.error(
@@ -234,6 +233,89 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
+  def show_blank_screen(socket) do
+    socket =
+      socket
+      |> Phoenix.LiveView.assign(:is_bus_interchange, false)
+      |> Phoenix.LiveView.assign(:predictions_scheduled_set_1_column, [])
+      |> Phoenix.LiveView.assign(:predictions_scheduled_set_2_column, [])
+      |> Phoenix.LiveView.assign(:predictions_scheduled_set_1_column_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_scheduled_set_2_column_index, nil)
+      |> Phoenix.LiveView.assign(
+        :predictions_realtime_set_1_column,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_realtime_set_2_column,
+        []
+      )
+      |> Phoenix.LiveView.assign(:predictions_scheduled_5_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_scheduled_6_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_scheduled_7_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_scheduled_9_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_scheduled_10_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_scheduled_12_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_scheduled_14_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_scheduled_5_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_scheduled_6_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_scheduled_7_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_scheduled_9_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_scheduled_10_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_scheduled_12_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_scheduled_14_per_page_index, nil)
+      |> Phoenix.LiveView.assign(
+        :predictions_realtime_5_per_page,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_realtime_6_per_page,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_realtime_7_per_page,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_realtime_9_per_page,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_realtime_10_per_page,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_realtime_12_per_page,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_realtime_14_per_page,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :incoming_buses,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_previous,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :predictions_current,
+        []
+      )
+      |> Phoenix.LiveView.assign(
+        :suppressed_messages,
+        %{}
+      )
+      |> Phoenix.LiveView.assign(
+        :quickest_way_to,
+        []
+      )
+
+    socket
+  end
+
+  # This is not used as sheduled predictions are not shown
   def show_scheduled_predictions(
         socket,
         bus_stop_no,
@@ -343,7 +425,7 @@ defmodule Display.Utils.DisplayLiveUtil do
       )
       |> Phoenix.LiveView.assign(
         :quickest_way_to,
-        quickest_way_to
+        []
       )
 
     trigger_next_update_stops(is_trigger_next)
