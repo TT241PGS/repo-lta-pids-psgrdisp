@@ -12,6 +12,24 @@ defmodule Display.Messages do
 
   @high_priority_min_value 100
 
+  def get_all_messages(nil), do: nil
+
+  def get_all_messages(panel_id) do
+    mrt_messages =
+      case get_mrt_alert_messages() do
+        {:ok, data} -> data
+        {:error, _} -> []
+      end
+
+    schedule_adhoc_messages =
+      get_messages(panel_id)
+      |> Enum.map(fn %{message_content: text, priority: pm, type: type} ->
+        %{text: text, pm: pm, type: type}
+      end)
+
+    merge_all_messages(mrt_messages, schedule_adhoc_messages)
+  end
+
   def get_messages(nil), do: nil
 
   def get_messages(panel_id) do

@@ -18,9 +18,10 @@ defmodule Display.Application do
       # Start cachex
       {Cachex, name: :display},
       # Start the Endpoint (http/https)
-      DisplayWeb.Endpoint
+      DisplayWeb.Endpoint,
       # Start a worker by calling: Display.Worker.start_link(arg)
       # {Display.Worker, arg}
+      {Registry, keys: :unique, name: AdvisoryRegistry}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
