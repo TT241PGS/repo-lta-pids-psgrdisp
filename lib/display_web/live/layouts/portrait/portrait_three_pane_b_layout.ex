@@ -9,7 +9,7 @@ defmodule PortraitThreePaneBLayout do
 
   def render(assigns) do
     ~H"""
-    <div style="flex-direction: column; height: 100%; display: flex">
+    <div style="flex-direction: column; height: 100%; display: flex" :if={{Utils.get_stop_predictions_realtime_set(@prop, @service_per_page) |> is_list and length(Utils.get_stop_predictions_realtime_set(@prop, @service_per_page)) > 0 }}>
       <div class="flex items-center justify-between">
         <BusStopInfo busStopName={{@prop.bus_stop_name}} busStopNo={{@prop.bus_stop_no |> Utils.pad_bus_stop_no}} />
         <DateTimePortrait day={{@prop.date_time.day}} date_short={{@prop.date_time.date_short}} time={{@prop.date_time.time}}/>

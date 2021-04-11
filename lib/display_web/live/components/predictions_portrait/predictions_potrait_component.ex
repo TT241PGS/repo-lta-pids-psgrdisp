@@ -2,23 +2,24 @@ defmodule PredictionsPortrait do
   @moduledoc false
   use Surface.LiveComponent
 
-  property stopPredictionsRealtimeSet, :list, default: %{}
-  property stopPredictionsScheduledSet, :list, default: %{}
-  property realtimeActiveIndex, :integer, default: 0
-  property scheduledActiveIndex, :integer, default: 0
+  property(stopPredictionsRealtimeSet, :list, default: %{})
+  property(stopPredictionsScheduledSet, :list, default: %{})
+  property(realtimeActiveIndex, :integer, default: 0)
+  property(scheduledActiveIndex, :integer, default: 0)
 
-  property suppressed_messages, :map,
+  property(suppressed_messages, :map,
     default: %{global_message: nil, service_message_map: nil, hide_services: []}
+  )
 
-  property is_bus_interchange, :boolean, default: false
+  property(is_bus_interchange, :boolean, default: false)
 
   def render(assigns) do
     ~H"""
     <div class="buses">
-      <PredictionsRealtimePortrait :if={{ length(@stopPredictionsRealtimeSet) > 0 and is_nil(@suppressed_messages.global_message) }} stopPredictionsSet={{@stopPredictionsRealtimeSet}} activeIndex={{@realtimeActiveIndex}} suppressed_messages={{@suppressed_messages}} is_bus_interchange={{@is_bus_interchange}}/>
-      <PredictionsScheduledPortrait :if={{ length(@stopPredictionsRealtimeSet) <= 0 and is_nil(@suppressed_messages.global_message) }} stopPredictionsSet={{@stopPredictionsScheduledSet}} activeIndex={{@scheduledActiveIndex}} suppressed_messages={{@suppressed_messages}} is_bus_interchange={{@is_bus_interchange}}/>
-      <div style="font-size: 200%; min-height: 1460px; color: white; display: flex; align-items: center; justify-content: center" :if={{ @suppressed_messages.global_message != nil }}>
-        <h1>{{@suppressed_messages.global_message}}</h1>
+      <PredictionsRealtimePortrait :if={{ length(@stopPredictionsRealtimeSet) > 0 and is_nil(get_in(@suppressed_messages, [:global_message])) }} stopPredictionsSet={{@stopPredictionsRealtimeSet}} activeIndex={{@realtimeActiveIndex}} suppressed_messages={{@suppressed_messages}} is_bus_interchange={{@is_bus_interchange}}/>
+      <PredictionsScheduledPortrait :if={{ length(@stopPredictionsRealtimeSet) <= 0 and is_nil(get_in(@suppressed_messages, [:global_message])) }} stopPredictionsSet={{@stopPredictionsScheduledSet}} activeIndex={{@scheduledActiveIndex}} suppressed_messages={{@suppressed_messages}} is_bus_interchange={{@is_bus_interchange}}/>
+      <div style="font-size: 200%; min-height: 1460px; color: white; display: flex; align-items: center; justify-content: center" :if={{ get_in(@suppressed_messages, [:global_message]) != nil }}>
+        <h1>{{get_in(@suppressed_messages, [:global_message])}}</h1>
       </div>
     </div>
     """
