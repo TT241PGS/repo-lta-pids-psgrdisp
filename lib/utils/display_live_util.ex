@@ -979,6 +979,33 @@ defmodule Display.Utils.DisplayLiveUtil do
     end)
   end
 
+  def get_cycle_time_from_templates(nil), do: nil
+  def get_cycle_time_from_templates([]), do: nil
+
+  def get_cycle_time_from_templates(templates) do
+    case Enum.at(templates, 1) do
+      nil ->
+        nil
+
+      %{"layouts" => message_layouts} ->
+        message_layouts
+        |> Enum.reduce_while(nil, fn
+          layout, acc ->
+            cycle_time =
+              get_in(layout, ["panes", "pane1", "config", "cycle_time"]) ||
+                get_in(layout, ["panes", "pane2", "config", "cycle_time"]) ||
+                get_in(layout, ["panes", "pane3", "config", "cycle_time"])
+
+            if is_nil(cycle_time),
+              do: {:cont, acc},
+              else: {:halt, String.to_integer(cycle_time)}
+        end)
+
+      _ ->
+        nil
+    end
+  end
+
   def get_multimedia(nil) do
     nil
   end

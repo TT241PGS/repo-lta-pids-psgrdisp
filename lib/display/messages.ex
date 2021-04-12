@@ -179,14 +179,24 @@ defmodule Display.Messages do
   def get_message_timings([], _cycle_time) do
     %{
       message_map: nil,
-      timeline: nil
+      timeline: nil,
+      cycle_time: nil
+    }
+  end
+
+  def get_message_timings(nil, _cycle_time) do
+    %{
+      message_map: nil,
+      timeline: nil,
+      cycle_time: nil
     }
   end
 
   def get_message_timings(_messages, nil) do
     %{
       message_map: nil,
-      timeline: nil
+      timeline: nil,
+      cycle_time: nil
     }
   end
 
@@ -220,7 +230,8 @@ defmodule Display.Messages do
   #     {186, 2},
   #     {216, 2},
   #     {246 => nil}
-  #   ]
+  #   ],
+  #   cycle_time: 300
   # }
   def get_message_timings(messages, cycle_time) do
     # messages = @messages
@@ -256,7 +267,7 @@ defmodule Display.Messages do
     |> determine_sequence_of_messages(messages)
     |> create_timeline_from_sequence(minimum_message_display_time)
     |> add_empty_slot_in_timeline_maybe(sum_of_pms)
-    |> create_timeline_message_map(message_map)
+    |> create_timeline_message_map(message_map, cycle_time)
   end
 
   defp discard_standard_priority_messages_maybe(messages) do
@@ -412,9 +423,10 @@ defmodule Display.Messages do
   #     %{246 => nil}
   #   ]
   # }
-  defp create_timeline_message_map(timeline, message_map) do
+  defp create_timeline_message_map(timeline, message_map, cycle_time) do
     timeline
     |> put_in([:message_map], message_map)
+    |> put_in([:cycle_time], cycle_time)
     |> pop_in([:time_elapsed])
     |> elem(1)
   end

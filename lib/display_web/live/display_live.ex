@@ -94,10 +94,16 @@ defmodule DisplayWeb.DisplayLive do
       callers -> Cachex.put(:display, List.last(callers), assigns["scheduled_date_time"])
     end
 
-    if connected?(socket), do: DisplayWeb.Endpoint.subscribe("poller")
+    if connected?(socket) do
+      DisplayWeb.Endpoint.subscribe("poller")
+      DisplayWeb.Endpoint.subscribe("message:#{panel_id}")
+
+      # Only one instance of each children is created, even if same panel is opened in multiple tabs
+      AdvisorySupervisor.start_link(panel_id)
+      AdvisorySupervisor.start(panel_id)
+    end
 
     Process.send_after(self(), :update_stops_repeatedly, 0)
-    Process.send_after(self(), :update_messages_repeatedly, 0)
     Process.send_after(self(), :update_layout_repeatedly, 0)
     Process.send_after(self(), :update_time_repeatedly, 0)
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
@@ -471,183 +477,6 @@ defmodule DisplayWeb.DisplayLive do
     end
   end
 
-  @doc """
-    This calls itself after certain period of time to update messages/advisories every n seconds
-  """
-  def handle_info(:update_messages_repeatedly, socket) do
-    start_time = Timex.now()
-    Logger.info(":update_messages_repeatedly started")
-    previous_messages = socket.assigns.messages
-    cycle_time = socket.assigns.cycle_time
-    new_messages = Messages.get_messages(socket.assigns.panel_id)
-
-    new_messages =
-      new_messages
-      |> Enum.map(fn %{message_content: text, priority: pm, type: type} ->
-        %{text: text, pm: pm, type: type}
-      end)
-
-    new_messages =
-      case Messages.get_mrt_alert_messages() do
-        {:ok, data} -> data
-        {:error, _} -> []
-      end
-      |> Messages.merge_all_messages(new_messages)
-
-    cycle_time = if cycle_time == nil, do: 300, else: cycle_time
-
-    start_time1 = Timex.now()
-    new_messages = Messages.get_message_timings(new_messages, cycle_time)
-    elapsed_time1 = TimeUtil.get_elapsed_time(start_time1)
-    Logger.info(":get_message_timings ended successfully (#{elapsed_time1})")
-
-    socket =
-      socket
-      |> assign(:previous_messages, previous_messages)
-      |> assign(:messages, new_messages)
-      |> assign(:cycle_time, cycle_time)
-
-    unless new_messages.timeline == nil or previous_messages == new_messages do
-      Process.send_after(self(), :update_messages_timeline, 100)
-    end
-
-    Process.send_after(self(), :update_messages_repeatedly, 10_000)
-    elapsed_time = TimeUtil.get_elapsed_time(start_time)
-    Logger.info(":update_messages_repeatedly ended successfully (#{elapsed_time})")
-    {:noreply, socket}
-  end
-
-  @doc """
-    This is called only when there are messages for a panel in order to cycle through messages
-  """
-  # messages: [],
-  # previous_messages: [],
-  # message_list_index: nil,
-  # message_timeline_index: nil,
-  def handle_info(:update_messages_timeline, socket) do
-    start_time = Timex.now()
-    Logger.info(":update_messages_timeline started")
-
-    %{
-      messages: %{timeline: timeline, message_map: message_map},
-      message_timeline_index: message_timeline_index,
-      update_messages_timeline_timer: update_messages_timeline_timer
-    } = socket.assigns
-
-    timeline_length = length(timeline)
-    timeline_last_index = timeline_length - 1
-
-    new_message_timeline_index =
-      cond do
-        timeline_length == 0 ->
-          nil
-
-        message_timeline_index == nil ->
-          0
-
-        message_timeline_index == timeline_last_index ->
-          0
-
-        true ->
-          message_timeline_index + 1
-      end
-
-    next_message_timeline_index =
-      cond do
-        timeline_length == 0 ->
-          nil
-
-        new_message_timeline_index == nil ->
-          nil
-
-        new_message_timeline_index == timeline_last_index ->
-          0
-
-        true ->
-          new_message_timeline_index + 1
-      end
-
-    next_trigger_at =
-      cond do
-        is_nil(next_message_timeline_index) ->
-          nil
-
-        message_timeline_index == timeline_last_index and next_message_timeline_index == 1 ->
-          socket.assigns.cycle_time
-
-        true ->
-          Enum.at(timeline, next_message_timeline_index) |> elem(0)
-      end
-
-    next_trigger_after =
-      cond do
-        length(timeline) > 0 and is_nil(message_timeline_index) ->
-          next_trigger_at
-
-        next_trigger_at == 0 ->
-          previous_timeline = Enum.at(timeline, new_message_timeline_index) |> elem(0)
-          (socket.assigns.cycle_time - previous_timeline) |> abs
-
-        next_trigger_at == socket.assigns.cycle_time ->
-          1
-
-        message_timeline_index >= 0 ->
-          previous_timeline = Enum.at(timeline, new_message_timeline_index) |> elem(0)
-          (next_trigger_at - previous_timeline) |> abs
-
-        true ->
-          next_trigger_at
-      end
-
-    message_list_index =
-      if new_message_timeline_index >= 0,
-        do: Enum.at(timeline, new_message_timeline_index) |> elem(1),
-        else: nil
-
-    message =
-      if message_list_index >= 0,
-        do: message_map[message_list_index],
-        else: ""
-
-    if not is_nil(next_trigger_at) and not is_nil(update_messages_timeline_timer) do
-      Process.cancel_timer(update_messages_timeline_timer)
-    end
-
-    update_messages_timeline_timer =
-      unless is_nil(next_trigger_at) do
-        Process.send_after(self(), :update_messages_timeline, next_trigger_after * 1000)
-      end
-
-    socket =
-      if new_message_timeline_index == timeline_last_index and message_list_index == nil do
-        socket = socket |> assign(:is_show_non_message_template, true)
-
-        %{templates: templates, current_layout_index: current_layout_index} = socket.assigns
-        layouts = templates |> Enum.at(0) |> Map.get("layouts")
-
-        DisplayLiveUtil.update_layout(socket, layouts, current_layout_index) |> elem(1)
-      else
-        socket |> assign(:is_show_non_message_template, false)
-
-        %{templates: templates, current_layout_index: current_layout_index} = socket.assigns
-        layouts = templates |> Enum.at(1) |> Map.get("layouts")
-
-        DisplayLiveUtil.update_layout(socket, layouts, current_layout_index) |> elem(1)
-      end
-
-    socket =
-      socket
-      |> assign(:message_list_index, message_list_index)
-      |> assign(:message_timeline_index, new_message_timeline_index)
-      |> assign(:message, message)
-      |> assign(:update_messages_timeline_timer, update_messages_timeline_timer)
-
-    elapsed_time = TimeUtil.get_elapsed_time(start_time)
-    Logger.info(":update_messages_timeline ended successfully (#{elapsed_time})")
-
-    {:noreply, socket}
-  end
-
   def handle_info(
         :show_next_image_sequence,
         %{
@@ -714,8 +543,15 @@ defmodule DisplayWeb.DisplayLive do
 
     Logger.info(":update_layout_repeatedly started")
 
+    %{
+      panel_id: panel_id,
+      messages: messages,
+      current_layout_index: current_layout_index,
+      is_show_non_message_template: is_show_non_message_template
+    } = socket.assigns
+
     templates =
-      DisplayLiveUtil.get_template_details_from_cms(socket.assigns.panel_id)
+      DisplayLiveUtil.get_template_details_from_cms(panel_id)
       |> DisplayLiveUtil.discard_inactive_multimedia_layouts()
 
     socket = socket |> assign(:templates, templates)
@@ -725,12 +561,6 @@ defmodule DisplayWeb.DisplayLive do
         true -> List.first(templates) |> get_in(["orientation", "value"])
         _ -> nil
       end
-
-    %{
-      messages: messages,
-      current_layout_index: current_layout_index,
-      is_show_non_message_template: is_show_non_message_template
-    } = socket.assigns
 
     template_index =
       cond do
@@ -754,6 +584,11 @@ defmodule DisplayWeb.DisplayLive do
     message_layouts = templates |> Enum.at(1) |> Map.get("layouts")
 
     cycle_time = DisplayLiveUtil.get_cycle_time_from_layouts(message_layouts)
+
+    GenServer.cast(
+      {:via, Registry, {AdvisoryRegistry, "advisory_timeline_generator_#{panel_id}"}},
+      {:cycle_time, cycle_time}
+    )
 
     socket =
       socket
@@ -834,6 +669,43 @@ defmodule DisplayWeb.DisplayLive do
       ) do
     Process.send_after(self(), :update_stops_once, 0)
     {:noreply, socket}
+  end
+
+  def handle_info(
+        %Phoenix.Socket.Broadcast{
+          event: "show_message",
+          payload: %{message: message},
+          topic: "message:" <> panel_id
+        },
+        %{assigns: %{panel_id: socket_panel_id}} = socket
+      )
+      when panel_id == socket_panel_id do
+    socket =
+      socket
+      |> assign(:message, message)
+
+    %{templates: templates, current_layout_index: current_layout_index} = socket.assigns
+    layouts = templates |> Enum.at(1) |> Map.get("layouts")
+
+    socket
+    |> assign(:is_show_non_message_template, false)
+    |> DisplayLiveUtil.update_layout(layouts, current_layout_index)
+  end
+
+  def handle_info(
+        %Phoenix.Socket.Broadcast{
+          event: "show_non_message_template",
+          topic: "message:" <> panel_id
+        },
+        %{assigns: %{panel_id: socket_panel_id}} = socket
+      )
+      when panel_id == socket_panel_id do
+    %{templates: templates, current_layout_index: current_layout_index} = socket.assigns
+    layouts = templates |> Enum.at(0) |> Map.get("layouts")
+
+    socket
+    |> assign(:is_show_non_message_template, true)
+    |> DisplayLiveUtil.update_layout(layouts, current_layout_index)
   end
 
   def render(assigns = %{debug: "true"}) do

@@ -1,8 +1,11 @@
 defmodule AdvisoryPoller do
   @doc """
   Polls messages of a particular panel_id every minute
+  Sends messages to timeline_generator
   """
   use GenServer, restart: :transient
+
+  alias Display.Utils.{DisplayLiveUtil}
 
   @minute 60_000
 
@@ -47,16 +50,10 @@ defmodule AdvisoryPoller do
 
   defp get_messages(panel_id) do
     messages = Display.Messages.get_all_messages(panel_id)
-    # Inform advisory_timeline_generator that you have received new messages
 
     GenServer.cast(
       {:via, Registry, {AdvisoryRegistry, "advisory_timeline_generator_#{panel_id}"}},
       {:messages, messages}
-    )
-
-    GenServer.cast(
-      {:via, Registry, {AdvisoryRegistry, "advisory_timeline_generator_#{panel_id}"}},
-      {:cycle_time, 10}
     )
   end
 end

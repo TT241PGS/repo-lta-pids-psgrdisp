@@ -1,15 +1,13 @@
 defmodule AdvisoryTimelinePlayer do
   @doc """
-    1. Determines next message to be displayed
-    2. Publish message to message:panel_id topic based on timeline schedule - To update message
-    2. Publish message to templates:panel_id topic based on timeline schedule - To update template to set A
+    1. Determines next message to be displayed and triggers at appropriate time
+    2. Publish "show_message" event to message:PANEL_ID topic based on timeline schedule - To display message
+    2. Publish "show_non_message_template" event to message:PANEL_ID topic based on timeline schedule - To display non message template
 
   """
   use GenServer, restart: :transient
 
   require Logger
-
-  @minute 60_000
 
   def start_link(panel_id),
     do: GenServer.start_link(__MODULE__, panel_id, name: process_name(panel_id))
@@ -37,11 +35,20 @@ defmodule AdvisoryTimelinePlayer do
     {:noreply, state}
   end
 
+  # When there are no more messages, reset everything
   def handle_cast(
         {:new_timeline, new_timeline, _new_message_map, _cycle_time},
-        state
+        %{timer_ref: timer_ref, panel_id: panel_id} = state
       )
       when new_timeline == [] or new_timeline == nil do
+    # Broadcast Layout Switch message
+    DisplayWeb.Endpoint.broadcast!(
+      "message:" <> panel_id,
+      "show_non_message_template",
+      %{}
+    )
+
+    reset_timer(timer_ref)
     state = reset(state)
     {:noreply, reset(state)}
   end
@@ -74,22 +81,35 @@ defmodule AdvisoryTimelinePlayer do
           timer_ref: timer_ref,
           timeline: timeline,
           message_map: message_map,
-          cycle_time: cycle_time
+          cycle_time: cycle_time,
+          panel_id: panel_id
         } = state
       ) do
     {next_message_index, next_trigger_after} =
       get_next_message_tuple(timeline, current_message_index, message_map, cycle_time)
 
-    IO.inspect({next_message_index, next_trigger_after})
-
     cond do
-      next_message_index == nil and is_list(timeline) and length(timeline) > 0 ->
-        # Broadcast Layout Switch message
-        ""
-
       next_message_index != nil and is_list(timeline) and length(timeline) > 0 ->
-        # Broadcast message
-        ""
+        message_map_index = Enum.at(timeline, next_message_index) |> elem(1)
+        message = get_in(message_map, [message_map_index])
+
+        case message do
+          nil ->
+            # Broadcast template switch message
+            DisplayWeb.Endpoint.broadcast!(
+              "message:" <> panel_id,
+              "show_non_message_template",
+              %{}
+            )
+
+          _ ->
+            # Broadcast new message
+            DisplayWeb.Endpoint.broadcast!(
+              "message:" <> panel_id,
+              "show_message",
+              %{message: message}
+            )
+        end
 
       true ->
         nil
