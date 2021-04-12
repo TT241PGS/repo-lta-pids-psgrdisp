@@ -3,7 +3,7 @@ defmodule Display.Buses do
 
   import Ecto.Query, warn: false
   use Timex
-  alias Display.{Buses, Repo, Meta}
+  alias Display.{Buses, Repo, Meta, Poi}
   alias Display.Utils.TimeUtil
   alias Ecto.Adapters.SQL
 
@@ -96,22 +96,7 @@ defmodule Display.Buses do
         result
         |> Enum.reduce(%{}, fn service, acc ->
           update_in(acc, [service.dpi_route_code], fn _ ->
-            waypoints =
-              case is_bitstring(service.way_points) do
-                true ->
-                  service.way_points
-                  |> String.split(",")
-                  |> Enum.map(fn waypoint ->
-                    %{
-                      "text" => waypoint |> String.trim(),
-                      "pictograms" => [],
-                      "poi_stop_no" => nil
-                    }
-                  end)
-
-                false ->
-                  nil
-              end
+            waypoints = Poi.format_bushub_interchange_waypoints(service.way_points)
 
             %{
               "berth_label" => service.berth_label,
@@ -147,22 +132,7 @@ defmodule Display.Buses do
         result
         |> Enum.reduce(%{}, fn service, acc ->
           update_in(acc, [{service.dpi_route_code, service.direction, service.visit_no}], fn _ ->
-            waypoints =
-              case is_bitstring(service.way_points) do
-                true ->
-                  service.way_points
-                  |> String.split(",")
-                  |> Enum.map(fn waypoint ->
-                    %{
-                      "text" => waypoint |> String.trim(),
-                      "pictograms" => [],
-                      "poi_stop_no" => nil
-                    }
-                  end)
-
-                false ->
-                  nil
-              end
+            waypoints = Poi.format_bushub_interchange_waypoints(service.way_points)
 
             %{
               "destination" => service.destination,

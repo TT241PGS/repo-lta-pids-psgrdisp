@@ -56,10 +56,14 @@ defmodule Display.Utils.DisplayLiveUtil do
       ) do
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
-        last_bus_map = Buses.get_last_buses_map(bus_stop_no)
-
-        # Used to determine direction from destination code
-        service_direction_map = Buses.get_service_direction_map(bus_stop_no)
+        [last_bus_map, service_direction_map, suppressed_messages] =
+          [
+            Task.async(fn -> Buses.get_last_buses_map(bus_stop_no) end),
+            # Used to determine direction from destination code
+            Task.async(fn -> Buses.get_service_direction_map(bus_stop_no) end),
+            Task.async(fn -> Messages.get_suppressed_messages(bus_stop_no) end)
+          ]
+          |> Task.await_many()
 
         cached_predictions =
           filter_panel_groups(cached_predictions, socket.assigns.panel_id)
@@ -97,8 +101,6 @@ defmodule Display.Utils.DisplayLiveUtil do
           end)
 
         %{predictions_current: predictions_previous} = socket.assigns
-
-        suppressed_messages = Messages.get_suppressed_messages(bus_stop_no)
 
         quickest_way_to =
           RealTime.get_quickest_way_to(bus_stop_no, service_arrival_map, suppressed_messages)
@@ -818,6 +820,15 @@ defmodule Display.Utils.DisplayLiveUtil do
     bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
     waypoints_map = Poi.get_waypoints_map(bus_stop_no)
     sequence_no_map = Buses.get_sequence_no_map(bus_stop_no)
+
+    [bus_interchange_map, bus_hub_map, waypoints_map, sequence_no_map] =
+      [
+        Task.async(fn -> Buses.get_bus_interchange_service_mapping_by_no(bus_stop_no) end),
+        Task.async(fn -> Buses.get_bus_hub_service_mapping_by_no(bus_stop_no) end),
+        Task.async(fn -> Poi.get_waypoints_map(bus_stop_no) end),
+        Task.async(fn -> Buses.get_sequence_no_map(bus_stop_no) end)
+      ]
+      |> Task.await_many()
 
     destination_pictogram_map =
       dest_codes

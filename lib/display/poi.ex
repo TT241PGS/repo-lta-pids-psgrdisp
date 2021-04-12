@@ -176,4 +176,29 @@ defmodule Display.Poi do
         end)
     end
   end
+
+  def format_bushub_interchange_waypoints(waypoints) when not is_bitstring(waypoints) do
+    nil
+  end
+
+  def format_bushub_interchange_waypoints(waypoints) do
+    waypoints = String.trim(waypoints)
+
+    case waypoints do
+      # "." is added in import file to hide waypoints
+      "." ->
+        []
+
+      _ ->
+        waypoints
+        |> String.split(",")
+        |> Enum.map(fn waypoint ->
+          %{
+            "text" => waypoint |> String.trim(),
+            "pictograms" => [],
+            "poi_stop_no" => nil
+          }
+        end)
+    end
+  end
 end
