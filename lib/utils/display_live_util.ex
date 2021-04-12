@@ -572,7 +572,8 @@ defmodule Display.Utils.DisplayLiveUtil do
         destination_pictogram_map,
         bus_interchange_map,
         bus_hub_map,
-        waypoints_map
+        waypoints_map,
+        sequence_no_map
       ) do
     case Access.get(service, "NextBus") do
       nil ->
@@ -583,7 +584,8 @@ defmodule Display.Utils.DisplayLiveUtil do
         |> update_realtime_destination_bus_stop(
           bus_stop_map,
           destination_pictogram_map,
-          waypoints_map
+          waypoints_map,
+          sequence_no_map
         )
         |> update_realtime_destination_bus_interchange(bus_interchange_map)
         |> update_realtime_destination_bus_hub(bus_hub_map)
@@ -594,7 +596,8 @@ defmodule Display.Utils.DisplayLiveUtil do
          service,
          bus_stop_map,
          destination_pictogram_map,
-         waypoints_map
+         waypoints_map,
+         sequence_no_map
        ) do
     dest_code =
       case get_in(service, ["NextBus", "DestinationCode"]) do
@@ -609,6 +612,7 @@ defmodule Display.Utils.DisplayLiveUtil do
       end
 
     direction = get_in(service, ["NextBus", "Direction"])
+    visit_no = get_in(service, ["NextBus", "VisitNumber"])
 
     service
     |> update_in(
@@ -625,8 +629,10 @@ defmodule Display.Utils.DisplayLiveUtil do
       ["NextBus", "WayPoints"],
       Poi.get_waypoint_from_waypoint_map(
         waypoints_map,
+        sequence_no_map,
         service["ServiceNo"],
         direction,
+        visit_no,
         origin_code,
         dest_code
       )
@@ -811,6 +817,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     bus_interchange_map = Buses.get_bus_interchange_service_mapping_by_no(bus_stop_no)
     bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
     waypoints_map = Poi.get_waypoints_map(bus_stop_no)
+    sequence_no_map = Buses.get_sequence_no_map(bus_stop_no)
 
     destination_pictogram_map =
       dest_codes
@@ -825,7 +832,8 @@ defmodule Display.Utils.DisplayLiveUtil do
           destination_pictogram_map,
           bus_interchange_map,
           bus_hub_map,
-          waypoints_map
+          waypoints_map,
+          sequence_no_map
         )
       end)
 

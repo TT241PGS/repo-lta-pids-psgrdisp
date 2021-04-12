@@ -123,19 +123,33 @@ defmodule Display.Poi do
         %{
           "text" => waypoint.text,
           "pictograms" => waypoint.pictograms,
-          "poi_stop_no" => waypoint.poi_stop_no
+          "poi_stop_no" => waypoint.poi_stop_no,
+          "sequence_no" => waypoint.sequence_no
         }
       end
     )
   end
 
-  def get_waypoint_from_waypoint_map(waypoints_map, service_no, direction, origin_code, dest_code) do
+  def get_waypoint_from_waypoint_map(
+        waypoints_map,
+        sequence_no_map,
+        service_no,
+        direction,
+        visit_no,
+        origin_code,
+        dest_code
+      ) do
     case get_in(waypoints_map, [{service_no, direction}]) do
       nil ->
         nil
 
       waypoints ->
+        origin_stop_sequence_no = get_in(sequence_no_map, [{service_no, direction, visit_no}])
+
         waypoints
+        |> Enum.filter(fn waypoint ->
+          waypoint["sequence_no"] > origin_stop_sequence_no
+        end)
         |> Enum.filter(fn waypoint ->
           waypoint["poi_stop_no"] not in [dest_code, origin_code]
         end)

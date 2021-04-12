@@ -276,6 +276,18 @@ defmodule Display.Buses do
     end)
   end
 
+  def get_sequence_no_map(bus_stop_no) do
+    %Postgrex.Result{rows: rows} = Buses.get_sequence_no_by_service_by_stop(bus_stop_no)
+
+    rows
+    |> Enum.reduce(%{}, fn [dpi_route_code, direction, visit_no, sequence_no], acc ->
+      visit_no = Integer.to_string(visit_no)
+      key = {dpi_route_code, direction, visit_no}
+
+      value = Map.put(acc, key, sequence_no)
+    end)
+  end
+
   # TODO: Query with BaseVersion, OperatingDay
   def get_bus_schedule_by_bus_stop(bus_stop_no) do
     now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
@@ -324,6 +336,17 @@ defmodule Display.Buses do
       from pids_schedule
       where point_no = #{bus_stop_no}
       order by dpi_route_code, arriving_time desc;
+    "
+    SQL.query!(Repo, query, [])
+  end
+
+  def get_sequence_no_by_service_by_stop(bus_stop_no) do
+    query = "
+    select distinct on (dpi_route_code, direction, visit_no) dpi_route_code, direction, visit_no, sequence_no
+    from pids_schedule s
+    inner join pids_base_version b on s.base_version = b.base_version
+    where s.point_no=66271 and b.status = 'live'
+    order by dpi_route_code desc
     "
     SQL.query!(Repo, query, [])
   end
