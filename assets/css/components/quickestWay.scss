@@ -261,7 +261,6 @@
       align-items: center;
 
       .left-info {
-        overflow: hidden;
         width: 969px;
         height: 162px;
         border-radius: 25px;
@@ -270,7 +269,6 @@
         position: relative;
 
         div {
-          overflow: hidden;
           font-size: 54px;
           line-height: 53px;
           color: #fff;
@@ -294,7 +292,6 @@
       .right-info {
         width: 490px;
         height: 162px;
-        overflow: hidden;
         border-radius: 25px;
 
         &.text-only {
