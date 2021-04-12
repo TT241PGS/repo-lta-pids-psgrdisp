@@ -7,6 +7,22 @@ defmodule Display.Buses do
   alias Display.Utils.TimeUtil
   alias Ecto.Adapters.SQL
 
+  @dest_code_map %{
+    02089 => 02099,
+    03218 => 03239,
+    11389 => 11379,
+    22008 => 22009,
+    22199 => 22609,
+    46008 => 46009,
+    46101 => 46069,
+    52008 => 52009,
+    55231 => 55009,
+    59008 => 59009,
+    75008 => 75009,
+    77008 => 77009,
+    84439 => 84299
+  }
+
   def get_bus_stop_name_by_no(nil), do: nil
 
   def get_bus_stop_name_by_no(bus_stop_no) do
@@ -169,7 +185,11 @@ defmodule Display.Buses do
     )
     |> Repo.all()
     |> Enum.reduce(%{}, fn service, acc ->
-      Map.put(acc, {service.dpi_route_code, service.dest_code}, service.direction)
+      Map.put(
+        acc,
+        {service.dpi_route_code, swapping_dest_code(service.dest_code)},
+        service.direction
+      )
     end)
   end
 
@@ -369,5 +389,14 @@ defmodule Display.Buses do
     limit 10
     "
     SQL.query!(Repo, query, [])
+  end
+
+  defp swapping_dest_code(dest_code) do
+    swapped_map = @dest_code_map[dest_code]
+
+    case is_nil(swapped_map) do
+      true -> dest_code
+      false -> swapped_map
+    end
   end
 end
