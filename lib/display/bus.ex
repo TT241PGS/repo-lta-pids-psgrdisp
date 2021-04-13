@@ -315,7 +315,7 @@ defmodule Display.Buses do
     select distinct on (dpi_route_code, direction, visit_no) dpi_route_code, direction, visit_no, sequence_no
     from pids_schedule s
     inner join pids_base_version b on s.base_version = b.base_version
-    where s.point_no=66271 and b.status = 'live'
+    where s.point_no=#{bus_stop_no} and b.status = 'live'
     order by dpi_route_code desc
     "
     SQL.query!(Repo, query, [])
