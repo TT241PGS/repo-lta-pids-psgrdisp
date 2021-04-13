@@ -6,13 +6,6 @@ defmodule DisplayWeb.DisplayLive.Utils do
         current_pane,
         "config",
         "#{get_in(message, [:type]) |> String.downcase()}_messages_font",
-        "color",
-        "label"
-      ]),
-      get_in(panes, [
-        current_pane,
-        "config",
-        "#{get_in(message, [:type]) |> String.downcase()}_messages_font",
         "style",
         "label"
       ])
@@ -26,6 +19,21 @@ defmodule DisplayWeb.DisplayLive.Utils do
       |> String.downcase()
     end)
     |> Enum.join(" ")
+  end
+
+  def get_message_style(panes, current_pane, message) do
+    color =
+      get_in(panes, [
+        current_pane,
+        "config",
+        "#{get_in(message, [:type]) |> String.downcase()}_messages_font",
+        "color"
+      ])
+
+    case is_bitstring(color) do
+      true -> "color: #{color} !important"
+      false -> ""
+    end
   end
 
   def get_stop_predictions_realtime_set(prop, service_per_page) do
