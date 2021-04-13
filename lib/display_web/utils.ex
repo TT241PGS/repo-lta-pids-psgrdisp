@@ -1,4 +1,33 @@
 defmodule DisplayWeb.DisplayLive.Utils do
+  @dest_code_map %{
+    02089 => 02099,
+    03218 => 03239,
+    11389 => 11379,
+    22008 => 22009,
+    22199 => 22609,
+    46008 => 46009,
+    46101 => 46069,
+    52008 => 52009,
+    55231 => 55009,
+    59008 => 59009,
+    75008 => 75009,
+    77008 => 77009,
+    84439 => 84299,
+    02099 => 02089,
+    03239 => 03218,
+    11379 => 11389,
+    22009 => 22008,
+    22609 => 22199,
+    46009 => 46008,
+    46069 => 46101,
+    52009 => 52008,
+    55009 => 55231,
+    59009 => 59008,
+    75009 => 75008,
+    77009 => 77008,
+    84299 => 84439
+  }
+
   def get_message_class_names(panes, current_pane, message) do
     [
       "advisory-content",
@@ -114,5 +143,24 @@ defmodule DisplayWeb.DisplayLive.Utils do
       pictograms_length = no_of_pictograms * icon_length
       acc + String.length(waypoint["text"]) + pictograms_length
     end)
+  end
+
+  def swap_dest_code_list(bus_stop_nos) do
+    bus_stop_nos
+    |> Enum.map(fn bus_stop_no ->
+      case Map.get(@dest_code_map, String.to_integer(bus_stop_no)) do
+        nil -> bus_stop_no
+        new_no -> new_no
+      end
+    end)
+  end
+
+  def swap_dest_code(dest_code) do
+    swapped_map = @dest_code_map[dest_code]
+
+    case is_nil(swapped_map) do
+      true -> dest_code
+      false -> swapped_map
+    end
   end
 end

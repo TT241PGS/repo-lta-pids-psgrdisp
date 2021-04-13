@@ -5,6 +5,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   alias Display.{Buses, Messages, Poi, RealTime, Scheduled, Templates}
   alias Display.Utils.{TimeUtil, NaturalSort}
+  alias DisplayWeb.DisplayLive.Utils
 
   def incoming_bus_reducer(service, acc) do
     next_bus_time =
@@ -625,7 +626,10 @@ defmodule Display.Utils.DisplayLiveUtil do
     )
     |> put_in(
       ["NextBus", "Destination"],
-      Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, dest_code)
+      Buses.get_bus_stop_name_from_bus_stop_map(
+        bus_stop_map,
+        Utils.swap_dest_code(dest_code)
+      )
     )
     |> put_in(
       ["NextBus", "WayPoints"],
@@ -789,7 +793,10 @@ defmodule Display.Utils.DisplayLiveUtil do
         )
         |> update_in(
           ["DestinationCode"],
-          &Buses.get_bus_stop_name_from_bus_stop_map(bus_stop_map, &1)
+          &Buses.get_bus_stop_name_from_bus_stop_map(
+            bus_stop_map,
+            Utils.swap_dest_code(&1)
+          )
         )
     end
   end
