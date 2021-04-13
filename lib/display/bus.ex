@@ -142,7 +142,7 @@ defmodule Display.Buses do
     |> Enum.reduce(%{}, fn service, acc ->
       Map.put(
         acc,
-        {service.dpi_route_code, Utils.swap_dest_code(service.dest_code)},
+        {service.dpi_route_code, service.dest_code},
         service.direction
       )
     end)

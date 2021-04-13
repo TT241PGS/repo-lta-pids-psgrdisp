@@ -628,7 +628,7 @@ defmodule Display.Utils.DisplayLiveUtil do
       ["NextBus", "Destination"],
       Buses.get_bus_stop_name_from_bus_stop_map(
         bus_stop_map,
-        Utils.swap_dest_code(dest_code)
+        Utils.swap_dest_code_dest_name(dest_code)
       )
     )
     |> put_in(
@@ -795,7 +795,7 @@ defmodule Display.Utils.DisplayLiveUtil do
           ["DestinationCode"],
           &Buses.get_bus_stop_name_from_bus_stop_map(
             bus_stop_map,
-            Utils.swap_dest_code(&1)
+            Utils.swap_dest_code_dest_name(&1)
           )
         )
     end
