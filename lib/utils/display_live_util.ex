@@ -760,14 +760,29 @@ defmodule Display.Utils.DisplayLiveUtil do
         dest_code =
           dest_code
           |> String.to_integer()
-          |> Utils.swap_dest_code_dest_name()
 
-        key = {service["ServiceNo"], dest_code}
+        value =
+          Map.take(
+            service_direction_map,
+            [
+              {service["ServiceNo"], dest_code},
+              {service["ServiceNo"], Utils.swap_dest_code_direction(dest_code)}
+            ]
+          )
+
+        direction =
+          cond do
+            value == %{} ->
+              nil
+
+            true ->
+              Map.to_list(value) |> List.first() |> elem(1)
+          end
 
         service
         |> put_in(
           ["NextBus", "Direction"],
-          get_in(service_direction_map, [key])
+          direction
         )
     end
   end

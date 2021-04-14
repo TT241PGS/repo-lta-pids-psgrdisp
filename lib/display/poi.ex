@@ -139,6 +139,13 @@ defmodule Display.Poi do
         origin_code,
         dest_code
       ) do
+    # if service_no == "67" do
+    #   IO.inspect(
+    #     {service_no, direction, get_in(sequence_no_map, [{service_no, direction, visit_no}]),
+    #      waypoints_map, {service_no, direction, visit_no}, sequence_no_map}
+    #   )
+    # end
+
     case get_in(waypoints_map, [{service_no, direction}]) do
       nil ->
         nil

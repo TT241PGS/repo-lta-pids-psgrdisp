@@ -136,13 +136,19 @@ defmodule Display.Buses do
   def get_service_direction_map(bus_stop_no) do
     from(s in Buses.Schedule,
       where: s.point_no == ^bus_stop_no,
-      distinct: [s.dpi_route_code, s.dest_code, s.direction]
+      distinct: [s.dpi_route_code, s.line_no, s.dest_code, s.direction]
     )
     |> Repo.all()
     |> Enum.reduce(%{}, fn service, acc ->
+      service_no =
+        case is_nil(service.dpi_route_code) do
+          true -> service.line_no |> Integer.to_string()
+          _ -> service.dpi_route_code
+        end
+
       Map.put(
         acc,
-        {service.dpi_route_code, service.dest_code},
+        {service_no, service.dest_code},
         service.direction
       )
     end)
