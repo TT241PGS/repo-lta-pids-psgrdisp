@@ -757,7 +757,12 @@ defmodule Display.Utils.DisplayLiveUtil do
         nil
 
       dest_code ->
-        key = {service["ServiceNo"], String.to_integer(dest_code)}
+        dest_code =
+          dest_code
+          |> String.to_integer()
+          |> Utils.swap_dest_code_dest_name()
+
+        key = {service["ServiceNo"], dest_code}
 
         service
         |> put_in(
