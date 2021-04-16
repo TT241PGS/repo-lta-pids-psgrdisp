@@ -103,8 +103,16 @@ defmodule Display.Utils.DisplayLiveUtil do
 
         %{predictions_current: predictions_previous} = socket.assigns
 
+        quickest_way_to_candidates =
+          RealTime.get_quickest_way_to_candidates(
+            bus_stop_no,
+            service_arrival_map,
+            suppressed_messages
+          )
+
         quickest_way_to =
-          RealTime.get_quickest_way_to(bus_stop_no, service_arrival_map, suppressed_messages)
+          quickest_way_to_candidates
+          |> RealTime.determine_quickest_way_to(bus_stop_no)
 
         incoming_buses = get_incoming_buses(cached_predictions, suppressed_messages)
 
@@ -192,6 +200,10 @@ defmodule Display.Utils.DisplayLiveUtil do
           |> Phoenix.LiveView.assign(
             :suppressed_messages,
             suppressed_messages
+          )
+          |> Phoenix.LiveView.assign(
+            :quickest_way_to_candidates,
+            quickest_way_to_candidates
           )
           |> Phoenix.LiveView.assign(
             :quickest_way_to,
@@ -842,11 +854,6 @@ defmodule Display.Utils.DisplayLiveUtil do
     bus_stop_map =
       dest_codes
       |> Buses.get_bus_stop_map_by_nos()
-
-    bus_interchange_map = Buses.get_bus_interchange_service_mapping_by_no(bus_stop_no)
-    bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
-    waypoints_map = Poi.get_waypoints_map(bus_stop_no)
-    sequence_no_map = Buses.get_sequence_no_map(bus_stop_no)
 
     [bus_interchange_map, bus_hub_map, waypoints_map, sequence_no_map] =
       [
