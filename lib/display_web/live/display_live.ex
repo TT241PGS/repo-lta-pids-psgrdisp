@@ -79,6 +79,7 @@ defmodule DisplayWeb.DisplayLive do
         message_timeline_index: nil,
         message: %{},
         cycle_time: nil,
+        quickest_way_to_candidates: %{},
         quickest_way_to: [],
         is_show_non_message_template: false,
         update_messages_timeline_timer: nil,

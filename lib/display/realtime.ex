@@ -178,12 +178,14 @@ defmodule Display.RealTime do
   ]
   """
 
-  def get_quickest_way_to(_bus_stop_no, _service_arrival_map, %{global_message: global_message})
+  def get_quickest_way_to_candidates(_bus_stop_no, _service_arrival_map, %{
+        global_message: global_message
+      })
       when is_bitstring(global_message) do
     []
   end
 
-  def get_quickest_way_to(bus_stop_no, service_arrival_map, %{
+  def get_quickest_way_to_candidates(bus_stop_no, service_arrival_map, %{
         service_message_map: service_message_map,
         hide_services: hide_services
       }) do
@@ -222,6 +224,7 @@ defmodule Display.RealTime do
               %{
                 "arriving_time_at_origin" => service_arrival_time,
                 "arriving_time_at_destination" => travel_time + service_arrival_time,
+                "travel_time" => travel_time,
                 "service_no" => dpi_route_code,
                 "visit_no" => visit_no,
                 "direction" => direction,
@@ -234,13 +237,17 @@ defmodule Display.RealTime do
             else: update_in(acc, [key], &(&1 ++ value))
       end
     end)
-    |> determine_quickest_way_to
+  end
+
+  def determine_quickest_way_to(qwt_candidates, bus_stop_no) do
+    qwt_candidates
+    |> get_top_quickest_way_to
     |> add_poi_metadata()
     |> QuickestWayTo.transform_quickest_way_to(bus_stop_no)
   end
 
-  defp determine_quickest_way_to(quickest_way_to_map) do
-    quickest_way_to_map
+  defp get_top_quickest_way_to(qwt_candidates) do
+    qwt_candidates
     |> Enum.reduce(%{}, fn {k, v}, acc ->
       services =
         Enum.sort(
