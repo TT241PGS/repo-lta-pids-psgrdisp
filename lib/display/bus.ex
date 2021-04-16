@@ -135,8 +135,10 @@ defmodule Display.Buses do
 
   def get_service_direction_map(bus_stop_no) do
     from(s in Buses.Schedule,
-      where: s.point_no == ^bus_stop_no,
-      distinct: [s.dpi_route_code, s.line_no, s.dest_code, s.direction]
+      distinct: [s.dpi_route_code, s.line_no, s.dest_code, s.direction],
+      join: b in Meta.BaseVersion,
+      on: s.base_version == b.base_version,
+      where: s.point_no == ^bus_stop_no and b.status == "live"
     )
     |> Repo.all()
     |> Enum.reduce(%{}, fn service, acc ->
@@ -190,10 +192,12 @@ defmodule Display.Buses do
     end
   end
 
-  def get_no_of_stops_map_by_bus_stop(bus_stop) do
+  def get_no_of_stops_map_by_bus_stop(bus_stop_no) do
     from(s in Buses.Schedule,
-      where: s.point_no == ^bus_stop,
-      distinct: [s.dpi_route_code, s.dest_code, s.no_of_stops]
+      distinct: [s.dpi_route_code, s.dest_code, s.no_of_stops],
+      join: b in Meta.BaseVersion,
+      on: s.base_version == b.base_version,
+      where: s.point_no == ^bus_stop_no and b.status == "live"
     )
     |> Repo.all()
     |> Enum.reduce(%{}, fn service, acc ->
@@ -303,8 +307,9 @@ defmodule Display.Buses do
   def get_last_bus_by_service_by_bus_stop(bus_stop_no) do
     query = "
     select distinct on (dpi_route_code) dpi_route_code, dest_code, arriving_time
-      from pids_schedule
-      where point_no = #{bus_stop_no}
+      from pids_schedule s
+      inner join pids_base_version b on s.base_version = b.base_version
+      where s.point_no=#{bus_stop_no} and b.status = 'live'
       order by dpi_route_code, arriving_time desc;
     "
     SQL.query!(Repo, query, [])
@@ -324,8 +329,9 @@ defmodule Display.Buses do
   # TODO: Query with BaseVersion
   def get_all_services_by_bus_stop(bus_stop_no) do
     query = "
-    select distinct dpi_route_code, dest_code from pids_schedule
-    where point_no = #{bus_stop_no}
+    select distinct dpi_route_code, dest_code from pids_schedule s
+    inner join pids_base_version b on s.base_version = b.base_version
+    where s.point_no=#{bus_stop_no} and b.status = 'live'
     "
     SQL.query!(Repo, query, [])
   end
