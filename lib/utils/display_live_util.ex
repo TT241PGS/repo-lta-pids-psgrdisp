@@ -237,6 +237,8 @@ defmodule Display.Utils.DisplayLiveUtil do
           } -> #{inspect(error)}"
         )
 
+        socket = show_blank_screen(socket)
+
         trigger_next_update_stops(is_trigger_next)
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
         Logger.info(":update_stops failed (#{elapsed_time})")
