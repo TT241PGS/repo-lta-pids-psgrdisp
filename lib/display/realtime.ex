@@ -3,6 +3,8 @@ defmodule Display.RealTime do
   alias Display.{Buses, Poi, QuickestWayTo}
   alias Display.Utils.TimeUtil
 
+  require Logger
+
   def get_predictions_cached(bus_stop_id) do
     key = "pids:bus_arrivals"
     cached_data = Display.Redix.command(["HMGET", key, bus_stop_id])
@@ -232,9 +234,17 @@ defmodule Display.RealTime do
               }
             end)
 
-          if Map.get(acc, key) == nil,
-            do: Map.put(acc, key, value),
-            else: update_in(acc, [key], &(&1 ++ value))
+          timestamp = DateTime.utc_now |> DateTime.to_unix
+
+          case Map.get(acc, key) do
+            nil -> Map.put(acc, key, value)
+            _ ->
+              Enum.each(value, fn service ->
+                Logger.info("#{bus_stop_no}, #{poi_code}, #{timestamp}, #{dpi_route_code}, #{direction}, #{visit_no}, #{get_in(service, ["arriving_time_at_origin"])}, #{get_in(service, ["travel_time"])}")
+              end)
+
+              update_in(acc, [key], &(&1 ++ value))
+          end
       end
     end)
   end
