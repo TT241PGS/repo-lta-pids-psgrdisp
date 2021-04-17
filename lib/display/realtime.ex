@@ -234,13 +234,21 @@ defmodule Display.RealTime do
               }
             end)
 
-          timestamp = DateTime.utc_now |> DateTime.to_unix
+          timestamp = DateTime.utc_now() |> DateTime.to_unix()
 
           case Map.get(acc, key) do
-            nil -> Map.put(acc, key, value)
+            nil ->
+              Map.put(acc, key, value)
+
             _ ->
               Enum.each(value, fn service ->
-                Logger.info("#{bus_stop_no}, #{poi_code}, #{timestamp}, #{dpi_route_code}, #{direction}, #{visit_no}, #{get_in(service, ["arriving_time_at_origin"])}, #{get_in(service, ["travel_time"])}")
+                Logger.info(
+                  "QWT Log, #{bus_stop_no}, #{poi_code}, #{timestamp}, #{dpi_route_code}, #{direction}, #{
+                    visit_no
+                  }, #{get_in(service, ["arriving_time_at_origin"])}, #{
+                    get_in(service, ["travel_time"])
+                  }"
+                )
               end)
 
               update_in(acc, [key], &(&1 ++ value))
