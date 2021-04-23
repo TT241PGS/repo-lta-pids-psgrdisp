@@ -38,3 +38,9 @@ priv/repo/.DS_Store
 .elixir_ls
 
 .env*
+
+*.crt
+*.key
+gen_cert.sh
+req*.cnf
+prediction-*

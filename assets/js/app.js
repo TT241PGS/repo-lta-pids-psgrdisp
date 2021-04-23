@@ -57,3 +57,40 @@ function onDocReady(fn) {
     document.addEventListener("DOMContentLoaded", fn);
   }
 }
+
+window.addEventListener("load", () => {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/service-worker.js");
+    (async () => {
+      const registration = await navigator.serviceWorker.ready;
+      if ('periodicSync' in registration) {
+        try {
+          await registration.periodicSync.register('update-offline-page', {
+            // An interval of one minute.
+            minInterval: 60 * 1000,
+          });
+        } catch (error) {
+          // Periodic background sync cannot be used.
+          // Update now
+          updateOfflinePage()
+        }
+      }
+    })();
+  }
+
+});
+
+window.updateOfflinePage = function () {
+  const CACHE_NAME = "offline";
+  // Customize this with a different URL if needed.
+  const OFFLINE_URL = "offline.html";
+
+  (async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // Setting {cache: 'reload'} in the new request will ensure that the
+    // response isn't fulfilled from the HTTP cache; i.e., it will be from
+    // the network.
+    await cache.add(new Request(OFFLINE_URL, { cache: "reload" }));
+  })()
+
+}

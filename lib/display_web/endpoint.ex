@@ -24,7 +24,7 @@ defmodule DisplayWeb.Endpoint do
     at: "/",
     from: :display,
     gzip: false,
-    only: ~w(css fonts images js favicon.ico robots.txt)
+    only: ~w(css fonts images js favicon.ico robots.txt service-worker.js offline.html)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
