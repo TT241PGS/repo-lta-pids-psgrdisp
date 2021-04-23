@@ -470,11 +470,11 @@ defmodule DisplayWeb.DisplayLive do
       index == nil ->
         0
 
-      index == length(list) - 1 ->
-        0
+      index >= 0 and index < length(list) - 1 ->
+        index + 1
 
       true ->
-        index + 1
+        0
     end
   end
 
