@@ -99,7 +99,7 @@ defmodule AdvisoryTimelinePlayer do
             DisplayWeb.Endpoint.broadcast!(
               "message:" <> panel_id,
               "show_non_message_template",
-              %{}
+              %{timeline: timeline, message_map: message_map}
             )
 
           _ ->
@@ -107,7 +107,7 @@ defmodule AdvisoryTimelinePlayer do
             DisplayWeb.Endpoint.broadcast!(
               "message:" <> panel_id,
               "show_message",
-              %{message: message}
+              %{message: message, timeline: timeline, message_map: message_map}
             )
         end
 
