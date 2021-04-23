@@ -263,47 +263,6 @@ defmodule Display.Buses do
   end
 
   # TODO: Query with BaseVersion, OperatingDay
-  def get_bus_schedule_by_bus_stop(bus_stop_no) do
-    now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
-
-    query = "
-    select distinct bs_outer.dpi_route_code, bs_outer.dest_code, bs_top.arriving_time from pids_schedule bs_outer
-    join lateral (
-      select * from pids_schedule bs_inner
-      where bs_inner.dpi_route_code = bs_outer.dpi_route_code
-      and bs_inner.point_no = #{bus_stop_no}
-      and bs_inner.arriving_time > #{now_in_seconds_past_today}
-      order by bs_inner.arriving_time
-      limit 3
-    ) bs_top on true
-    where bs_outer.point_no = #{bus_stop_no}
-    order by bs_outer.dpi_route_code
-    "
-    SQL.query!(Repo, query, [])
-  end
-
-  # TODO: Query with BaseVersion, OperatingDay
-  def get_incoming_bus_schedule_by_bus_stop(bus_stop_no) do
-    now_in_seconds_past_today = TimeUtil.get_seconds_past_today()
-
-    query = "
-    select distinct bs_outer.dpi_route_code, bs_top.arriving_time from pids_schedule bs_outer
-    join lateral (
-        select * from pids_schedule bs_inner
-        where bs_inner.dpi_route_code = bs_outer.dpi_route_code
-        and bs_inner.point_no = #{bus_stop_no}
-        and bs_inner.arriving_time > #{now_in_seconds_past_today}
-        order by bs_inner.arriving_time
-        limit 1
-    ) bs_top on true
-    where bs_outer.point_no = #{bus_stop_no}
-    order by bs_outer.dpi_route_code
-    limit 5;
-    "
-    SQL.query!(Repo, query, [])
-  end
-
-  # TODO: Query with BaseVersion, OperatingDay
   def get_last_bus_by_service_by_bus_stop(bus_stop_no) do
     query = "
     select distinct on (dpi_route_code) dpi_route_code, dest_code, arriving_time
@@ -341,29 +300,6 @@ defmodule Display.Buses do
       where: p.panel_id == ^panel_id
     )
     |> Repo.one()
-  end
-
-  # TODO: Query with BaseVersion, OperatingDay
-  def get_scheduled_quickest_way_to_by_bus_stop(bus_stop_no) do
-    now_in_seconds_past_today = TimeUtil.now_in_seconds()
-    next_hour_in_seconds_past_today = TimeUtil.next_hour_in_seconds()
-
-    query = "
-    select distinct ranked_qwt_poi.poi_cd_txt, ranked_qwt_poi.svc_txt, ranked_qwt_poi.visit_no_num, ranked_qwt_poi.poi_stop_num, ranked_qwt_poi.tm_prd_num, ranked_qwt_poi.tm_taken_num from
-    (SELECT distinct qwt_poi.*, psm.poi_cd_txt,
-      dense_rank() OVER (PARTITION BY poi_stop_num ORDER BY tm_prd_num ASC)
-      FROM pids_quickest_way_to_poi qwt_poi
-      inner join pids_poi_stops_map psm
-      on psm.pt_no_num = poi_stop_num
-      WHERE depart_stop_num=#{bus_stop_no}
-      and tm_prd_num > #{now_in_seconds_past_today}
-      and tm_prd_num <= #{next_hour_in_seconds_past_today}
-    ) ranked_qwt_poi
-    where dense_rank <=5
-    order by ranked_qwt_poi.poi_cd_txt, tm_taken_num
-    limit 10
-    "
-    SQL.query!(Repo, query, [])
   end
 
   # TODO: Query with BaseVersion, OperatingDay
