@@ -7,11 +7,11 @@ defmodule Display.Utils.DisplayLiveUtil do
   alias Display.Utils.{TimeUtil, NaturalSort}
   alias DisplayWeb.DisplayLive.Utils
 
-  def incoming_bus_reducer(service, acc) do
+  def incoming_bus_reducer(service, acc, next_bus) do
     next_bus_time =
-      if service["NextBus"]["EstimatedArrival"] == "",
+      if get_in(service, [next_bus, "EstimatedArrival"]) in [nil, ""],
         do: nil,
-        else: service["NextBus"]["EstimatedArrival"]
+        else: get_in(service, [next_bus, "EstimatedArrival"])
 
     case next_bus_time do
       nil ->
@@ -36,11 +36,17 @@ defmodule Display.Utils.DisplayLiveUtil do
       }) do
     suppress_services = Map.keys(service_message_map) ++ hide_services
 
-    cached_predictions
-    |> Enum.reduce([], &incoming_bus_reducer(&1, &2))
+    incoming_buses_reducer_1 =
+      cached_predictions
+      |> Enum.reduce([], &incoming_bus_reducer(&1, &2, "NextBus"))
+
+    incoming_buses_reducer_2 =
+      cached_predictions
+      |> Enum.reduce([], &incoming_bus_reducer(&1, &2, "NextBus2"))
+
+    (incoming_buses_reducer_1 ++ incoming_buses_reducer_2)
     |> Enum.filter(&(&1["service_no"] not in suppress_services))
     |> Enum.sort_by(&{&1["time"], &1["service_no"]})
-    |> Enum.uniq_by(fn service -> service["service_no"] end)
     |> Enum.take(5)
     |> Enum.map(fn service ->
       update_in(service, ["time"], &TimeUtil.format_min_to_eta_mins(&1))
