@@ -28,6 +28,8 @@ defmodule Display.QuickestWayTo do
     |> Repo.all()
   end
 
+  # To add alternate POIs
+  # To sort and filter POIs bases on pids_quickest_way_to
   def transform_quickest_way_to(calculated_quickest_way_to_list, bus_stop_no) do
     get_quickest_way_to_list_by_bus_stop(bus_stop_no)
     |> Enum.map(fn qwt ->

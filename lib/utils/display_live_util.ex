@@ -70,6 +70,7 @@ defmodule Display.Utils.DisplayLiveUtil do
             |> add_realtime_direction(service_direction_map)
           end)
 
+        # For QWT
         service_arrival_map =
           cached_predictions
           |> Enum.reduce(%{}, fn service, acc ->
@@ -853,6 +854,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     bus_interchange_map = Buses.get_bus_interchange_service_mapping_by_no(bus_stop_no)
     bus_hub_map = Buses.get_bus_hub_service_mapping_by_no(bus_stop_no)
     waypoints_map = Poi.get_waypoints_map(bus_stop_no)
+    # To get visit_no based on sequence no because waypoint map dont have visit_no
     sequence_no_map = Buses.get_sequence_no_map(bus_stop_no)
 
     destination_pictogram_map =

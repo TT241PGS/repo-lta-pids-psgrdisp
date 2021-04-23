@@ -470,11 +470,11 @@ defmodule DisplayWeb.DisplayLive do
       index == nil ->
         0
 
-      index == length(list) - 1 ->
-        0
+      index >= 0 and index < length(list) - 1 ->
+        index + 1
 
       true ->
-        index + 1
+        0
     end
   end
 
@@ -675,7 +675,7 @@ defmodule DisplayWeb.DisplayLive do
   def handle_info(
         %Phoenix.Socket.Broadcast{
           event: "show_message",
-          payload: %{message: message},
+          payload: %{message: message, timeline: timeline, message_map: message_map},
           topic: "message:" <> panel_id
         },
         %{assigns: %{panel_id: socket_panel_id}} = socket
@@ -684,6 +684,8 @@ defmodule DisplayWeb.DisplayLive do
     socket =
       socket
       |> assign(:message, message)
+      # For debug
+      |> assign(:messages, %{timeline: timeline, message_map: message_map})
 
     %{templates: templates, current_layout_index: current_layout_index} = socket.assigns
     layouts = templates |> Enum.at(1) |> Map.get("layouts")
@@ -696,7 +698,8 @@ defmodule DisplayWeb.DisplayLive do
   def handle_info(
         %Phoenix.Socket.Broadcast{
           event: "show_non_message_template",
-          topic: "message:" <> panel_id
+          topic: "message:" <> panel_id,
+          payload: %{timeline: timeline, message_map: message_map}
         },
         %{assigns: %{panel_id: socket_panel_id}} = socket
       )
@@ -706,6 +709,8 @@ defmodule DisplayWeb.DisplayLive do
 
     socket
     |> assign(:is_show_non_message_template, true)
+    # For debug
+    |> assign(:messages, %{timeline: timeline, message_map: message_map})
     |> DisplayLiveUtil.update_layout(layouts, current_layout_index)
   end
 
