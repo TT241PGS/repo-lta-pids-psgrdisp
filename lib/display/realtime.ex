@@ -335,12 +335,13 @@ defmodule Display.RealTime do
         false
 
       last_bus_time ->
-        # TRUE if next bus arrival time is after one minute less than scheduled last bus arrival time
-        # One minute buffer to show last bus, buffer is needed as the last bus would have already left the stop otherwise
-        # So last bus will be shown just before a minute of scheduled last bus arrival time
+        # TRUE if last bus arrival time minus next bus arrival time is 30mins
+        # Buffer is needed as we can't do equality check with last bus timing from schedule table
+        # So last bus indication is shown atleast 30 mins before the scheduled last bus arrival time
+        # Eg: scheduled last bus time is 23:40, last bus indicator will be shown from 23:10 to last bus arrival from data mall
         Timex.after?(
           DateTime.from_iso8601(next_bus_time) |> elem(1),
-          DateTime.from_iso8601(last_bus_time) |> elem(1) |> DateTime.add(-60, :second)
+          DateTime.from_iso8601(last_bus_time) |> elem(1) |> DateTime.add(-1800, :second)
         )
     end
   end
