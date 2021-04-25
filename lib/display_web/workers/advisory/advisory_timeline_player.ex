@@ -28,10 +28,12 @@ defmodule AdvisoryTimelinePlayer do
   end
 
   def handle_cast(
-        {:new_timeline, new_timeline, _new_message_map, _cycle_time},
-        %{timeline: timeline} = state
+        {:new_timeline, new_timeline, new_message_map, _cycle_time},
+        %{timeline: timeline, message_map: message_map} = state
       )
-      when timeline == new_timeline do
+      # Both conditions are needed as timeline doesn't change when message text is edited
+      # and message_map doesn't change when cycle_time changes
+      when timeline == new_timeline and message_map == new_message_map do
     {:noreply, state}
   end
 
@@ -58,10 +60,10 @@ defmodule AdvisoryTimelinePlayer do
         %{
           current_message_index: current_message_index,
           timer_ref: timer_ref,
-          timeline: timeline
+          timeline: timeline,
+          message_map: message_map
         } = state
-      )
-      when timeline != new_timeline do
+      ) do
     state =
       Map.merge(state, %{
         message_map: new_message_map,
