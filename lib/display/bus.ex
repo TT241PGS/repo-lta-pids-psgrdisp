@@ -234,9 +234,16 @@ defmodule Display.Buses do
     |> Enum.reduce(%{}, fn [dpi_route_code, dest_code, arriving_time], acc ->
       key = {dpi_route_code, dest_code}
 
+      # If last bus time is next day, and current time is next day, subtract one day from last bus time
+      # This is needed because in the above case, one day gets added to last bus time when conveting to iso
+      time_iso =
+        if TimeUtil.get_seconds_past_today() <= 2 * 60 * 60 and arriving_time >= 86400,
+          do: TimeUtil.get_iso_date_from_seconds(arriving_time - 86400),
+          else: TimeUtil.get_iso_date_from_seconds(arriving_time)
+
       value = %{
         "time_seconds" => arriving_time,
-        "time_iso" => TimeUtil.get_iso_date_from_seconds(arriving_time)
+        "time_iso" => time_iso
       }
 
       Map.put(acc, key, value)
