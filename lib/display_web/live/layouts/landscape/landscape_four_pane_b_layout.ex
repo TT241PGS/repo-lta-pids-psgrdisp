@@ -15,9 +15,22 @@ defmodule LandscapeFourPaneBLayout do
       </header>
       <div class="container two-columns">
         <div class="column left-column">
-          <div >
-            <IncomingBusLandscape incoming_buses={{@prop.incoming_buses}} :if={{length(@prop.incoming_buses) > 0}} />
-            <QuickestWayToLandscape maxLength=1 qwts={{@prop.quickest_way_to}} :if={{length(@prop.quickest_way_to) > 0}} />
+          <div>
+            <IncomingBusLandscape
+              :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "next_buses_arriving_at_stop"}}
+              incoming_buses={{@prop.incoming_buses}} :if={{length(@prop.incoming_buses) > 0}} />
+            <AdvisoriesLandscape
+              message={{@prop.message}}
+              :if={{
+                (get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "scheduled_and_ad_hoc_messages") and
+                @prop.message != %{}
+              }}
+              current_pane="pane1"
+              panes={{@prop.current_layout_panes}}
+            />
+            <QuickestWayToLandscape
+              :if={{get_in(@prop.current_layout_panes, ["pane2", "type", "value"]) == "quickest_way_to"}}
+               maxLength=1 qwts={{@prop.quickest_way_to}} :if={{length(@prop.quickest_way_to) > 0}} />
             <MultimediaLandscape multimedia={{@prop.multimedia}} image_sequence_url={{@prop.multimedia_image_sequence_current_url}} :if={{get_in(@prop.current_layout_panes, ["pane3", "type", "value"]) == "multimedia"}}/>
           </div>
         </div>
@@ -29,9 +42,5 @@ defmodule LandscapeFourPaneBLayout do
 
     </div>
     """
-
-    # <MultimediaLandscape multimedia={{@prop.multimedia}} image_sequence_url={{@prop.multimedia_image_sequence_current_url}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "multimedia"}}/>
-    # <IncomingBusLandscape incoming_buses={{@prop.incoming_buses}} :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "next_buses_arriving_at_stop" or get_in(@prop.current_layout_panes, ["pane2", "type", "value"]) == "next_buses_arriving_at_stop" and length(@prop.incoming_buses) > 0}} />
-    # <QuickestWayToLandscape services={{@prop.quickest_way_to}} :if={{get_in(@prop.current_layout_panes, ["pane2", "type", "value"]) == "quickest_way_to" or get_in(@prop.current_layout_panes, ["pane3", "type", "value"]) == "quickest_way_to" and length(@prop.quickest_way_to) > 0}} />
   end
 end

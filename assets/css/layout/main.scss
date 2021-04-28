@@ -102,32 +102,34 @@ body {
   }
 
   .container .quickest-way {
-    margin-top: 0px;
-    position: absolute;
-    top: 690px;
+    margin-top: 34px;
+    position: relative;
+    margin-right: 66px;
   }
 
   .multimedia {
     position: absolute;
-    top: 1130px;
-    width: 1850px;
+    width: 1830px;
+
+    .media-item{
+      width: 97%;
+      margin: 32px 0px 32px 0px; 
+      display: block
+    }
 
     &.one-pane {
       top: 150px;
-      width: 3800px;
+      width: 3500px;
+      margin: 16px 0px 0px 120px;
     }
   }
 
   .container .advisories-container {
-    position: absolute;
-    top: 1830px;
+    position: relative;
     width: 1780px;
+    margin-top: 126px;
   }
 
-  .incoming-buses {
-    position: absolute;
-    top: 150px;
-  }
 
   .next-buses .next-bus .bus-info-landscape {
     padding: 55px 0;

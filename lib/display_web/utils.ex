@@ -200,4 +200,8 @@ defmodule DisplayWeb.DisplayLive.Utils do
       false -> swapped_map
     end
   end
+
+  def get_content_type(current_layout_panes, pane) do
+    get_in(current_layout_panes, [pane, "type", "value"])
+  end
 end
