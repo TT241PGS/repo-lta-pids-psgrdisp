@@ -3,6 +3,7 @@ defmodule QuickestWayToPortrait do
   use Surface.LiveComponent
 
   property(qwts, :string, default: "")
+  property(maxLength, :integer, default: 2)
 
   def render(assigns) do
     ~H"""
@@ -11,7 +12,7 @@ defmodule QuickestWayToPortrait do
       <div class="heading-2">Option 1</div>
       <div class="heading-3">Option 2</div>
       <div class="row">
-        <div class={{"row", "row-odd": index in [0,2], "row-even": index in [1,3]}} :for={{ {qwt, index} <- Enum.with_index(@qwts) |> Enum.take(2) }}>
+        <div class={{"row", "row-odd": index in [0,2], "row-even": index in [1,3]}} :for={{ {qwt, index} <- Enum.with_index(@qwts) |> Enum.take(@maxLength) }}>
           <div class="group-info">
             <div class="left-info">
               <div>
