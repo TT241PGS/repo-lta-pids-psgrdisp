@@ -22,9 +22,6 @@ body {
           width: 1845px;
 
           &.left-column {
-            margin-right: 25px;
-            height: 1920px;
-            margin-top: 40px;
             border-right: 1px solid #707070;
           }
 
@@ -188,8 +185,8 @@ body {
 }
 }
 
-.grid-row-7 {
+.grid-row-6 {
     display: grid;
     grid-auto-flow: column;
-    grid-template-rows: repeat(7, auto);    
+    grid-template-rows: repeat(6, auto);    
 }
