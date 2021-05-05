@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" height="100%">
 
 <head>
   <meta charset="utf-8" />
@@ -11,14 +11,41 @@
   <!-- Inline the page's stylesheet. -->
   <style>
     body {
-      font-family: helvetica, arial, sans-serif;
-      background-color: black;
+      background-color: #333333;
+      color: white;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #main {
+      background-color: #303030;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 3vh;
+      font-family: Verdana;
+      height: 100%;
+    }
+
+    p {
+      margin: 10px;
     }
   </style>
 </head>
 
 <body>
-
+  <div id="main">
+    <p>
+      Bus Arrival information is not currently available from this panel.
+    </p>
+    <p>
+      Please refer to poster at the shelter for information on bus services.
+    </p>
+  </div>
   <!-- Inline the page's JavaScript file. -->
   <script>
 
