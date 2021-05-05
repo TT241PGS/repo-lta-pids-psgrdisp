@@ -68,7 +68,7 @@
 
 @font-face {
   font-family: 'Josefin Sans';
-  src: url('/fonts/Josefin_Sans/Josefin_Sans.ttf') format('truetype');
+  src: url('/fonts/Josefin_Sans/JosefinSans-Regular.ttf') format('truetype');
   font-style: normal;
   font-weight: normal;
   text-rendering: optimizeLegibility;
@@ -76,7 +76,7 @@
 
 @font-face {
   font-family: 'Comfortaa';
-  src: url('/fonts/Comfortaa/Comfortaa.ttf') format('truetype');
+  src: url('/fonts/Comfortaa/Comfortaa-Regular.ttf') format('truetype');
   font-style: normal;
   font-weight: normal;
   text-rendering: optimizeLegibility;
@@ -92,12 +92,12 @@
   font-weight: 400;
 }
 
-.monserrat {
+.montserrat {
   font-family: 'Montserrat', sans-serif !important;
   font-weight: 400;
 }
 
-.josefin {
+.josefin-sans {
   font-family: 'Josefin Sans', sans-serif !important;
   font-weight: 400;
 }
