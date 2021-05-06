@@ -102,10 +102,13 @@ defmodule Display.Poi do
   end
 
   def get_waypoints_map(bus_stop_no) do
+    current_poi_query =
+      from psm in PoiStopsMapping, select: psm.poi_code, where: psm.point_no == ^bus_stop_no
+
     from(w in Waypoint,
       join: p in Poi,
       on: w.poi_stop_txt == p.code,
-      where: w.cur_stop_no == ^bus_stop_no,
+      where: w.cur_stop_no == ^bus_stop_no and p.code not in subquery(current_poi_query),
       select: %{
         dpi_route_code: w.dpi_route_code,
         direction: w.direction,
