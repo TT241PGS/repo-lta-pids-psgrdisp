@@ -347,7 +347,6 @@ defmodule Display.RealTime do
           Map.to_list(last_bus) |> List.first() |> elem(1)
       end
 
-
     case Access.get(last_bus, "time_iso") do
       nil ->
         false

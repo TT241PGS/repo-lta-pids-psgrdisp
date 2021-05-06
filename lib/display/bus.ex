@@ -254,7 +254,16 @@ defmodule Display.Buses do
     %Postgrex.Result{rows: rows} = Buses.get_sequence_no_by_service_by_stop(bus_stop_no)
 
     rows
-    |> Enum.reduce(%{}, fn [dpi_route_code, line_no, direction, visit_no, sequence_no], acc ->
+    |> Enum.reduce(%{}, fn [
+                             dpi_route_code,
+                             line_no,
+                             direction,
+                             visit_no,
+                             sequence_no,
+                             org_code,
+                             dest_code
+                           ],
+                           acc ->
       visit_no = Integer.to_string(visit_no)
 
       service_no =
@@ -263,9 +272,9 @@ defmodule Display.Buses do
           _ -> dpi_route_code
         end
 
-      key = {service_no, direction, visit_no}
+      key = {service_no, direction, visit_no, org_code, dest_code}
 
-      value = Map.put(acc, key, sequence_no)
+      Map.put(acc, key, sequence_no)
     end)
   end
 
@@ -283,7 +292,7 @@ defmodule Display.Buses do
 
   def get_sequence_no_by_service_by_stop(bus_stop_no) do
     query = "
-    select distinct on (dpi_route_code, line_no, direction, visit_no) dpi_route_code, line_no, direction, visit_no, sequence_no
+    select distinct on (dpi_route_code, line_no, direction, visit_no, org_code, dest_code) dpi_route_code, line_no, direction, visit_no, sequence_no, org_code, dest_code
     from pids_schedule s
     inner join pids_base_version b on s.base_version = b.base_version
     where s.point_no=#{bus_stop_no} and b.status = 'live'
