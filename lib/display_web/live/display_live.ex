@@ -727,28 +727,6 @@ defmodule DisplayWeb.DisplayLive do
     theme = "dark"
 
     cond do
-      # when its end of operating day - default is false so it'll be skipped over
-      assigns.end_of_operating_day ->
-        case assigns.layout_mode do
-          "landscape" ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-            </div>
-            """
-
-          "portrait" ->
-            ~H"""
-            <div class={{"content-wrapper portrait #{theme}"}}>
-            </div>
-            """
-
-          nil ->
-            ~H"""
-            <div class={{"content-wrapper"}}>
-            </div>
-            """
-        end
-
       # svr and device online + data from datamall
       assigns.predictions_current != [] ->
         case assigns.current_layout_value do
@@ -816,8 +794,30 @@ defmodule DisplayWeb.DisplayLive do
             """
         end
 
+      # when its end of operating day - default is false so it'll be skipped over
+      assigns.end_of_operating_day ->
+        case assigns.layout_mode do
+          "landscape" ->
+            ~H"""
+            <div class={{"content-wrapper landscape #{theme}"}}>
+            </div>
+            """
+
+          "portrait" ->
+            ~H"""
+            <div class={{"content-wrapper portrait #{theme}"}}>
+            </div>
+            """
+
+          nil ->
+            ~H"""
+            <div class={{"content-wrapper"}}>
+            </div>
+            """
+        end
+
       # svr, device online + no data from datamall
-      assigns.predictions_current == [] ->
+      true ->
         case assigns.layout_mode do
           "landscape" ->
             ~H"""
