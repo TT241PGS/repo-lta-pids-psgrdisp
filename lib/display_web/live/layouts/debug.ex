@@ -39,6 +39,10 @@ defmodule Debug do
         <p>{{inspect(@prop.layout_mode)}}</p>
       </section>
       <section>
+        <h2>Service Waypoints</h2>
+        <p :for={{ service <- @prop.waypoints}}>{{inspect(service)}}</p>
+      </section>
+      <section>
         <h2>QWT Candidates</h2>
         <table>
           <tr>

@@ -131,6 +131,24 @@ defmodule Display.Utils.DisplayLiveUtil do
             end
           end)
 
+        # For debug mode
+        waypoints =
+          cached_predictions
+          |> Enum.map(fn service ->
+            service_no = service["ServiceNo"]
+
+            destination = get_in(service, ["NextBus", "Destination"])
+
+            waypoints =
+              get_in(service, ["NextBus", "WayPoints"]) ||
+                []
+                |> Enum.map(fn waypoint -> waypoint["text"] end)
+                |> Enum.take(2)
+                |> Enum.join(", ")
+
+            {service_no, destination, waypoints}
+          end)
+
         socket =
           socket
           |> Phoenix.LiveView.assign(:is_bus_interchange, is_bus_interchange)
@@ -211,6 +229,10 @@ defmodule Display.Utils.DisplayLiveUtil do
           |> Phoenix.LiveView.assign(
             :quickest_way_to,
             quickest_way_to
+          )
+          |> Phoenix.LiveView.assign(
+            :waypoints,
+            waypoints
           )
 
         trigger_next_update_stops(is_trigger_next)
