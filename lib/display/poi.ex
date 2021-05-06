@@ -147,12 +147,24 @@ defmodule Display.Poi do
         origin_code,
         dest_code
       ) do
-    # if service_no == "67" do
-    #   IO.inspect(
-    #     {service_no, direction, get_in(sequence_no_map, [{service_no, direction, visit_no}]),
-    #      waypoints_map, {service_no, direction, visit_no}, sequence_no_map}
-    #   )
-    # end
+    origin_stop_sequence_no_map =
+      Map.take(
+        sequence_no_map,
+        [
+          {service_no, direction, visit_no, origin_code, dest_code},
+          {service_no, direction, visit_no, Utils.swap_dest_code_direction(origin_code),
+           Utils.swap_dest_code_direction(dest_code)}
+        ]
+      )
+
+    origin_stop_sequence_no =
+      cond do
+        origin_stop_sequence_no_map == %{} ->
+          nil
+
+        true ->
+          Map.to_list(origin_stop_sequence_no_map) |> List.first() |> elem(1)
+      end
 
     waypoints =
       Map.take(waypoints_map, [
@@ -167,9 +179,6 @@ defmodule Display.Poi do
 
       true ->
         waypoints = Map.to_list(waypoints) |> List.first() |> elem(1)
-
-        origin_stop_sequence_no =
-          get_in(sequence_no_map, [{service_no, direction, visit_no, origin_code, dest_code}])
 
         waypoints
         |> Enum.filter(fn waypoint ->
