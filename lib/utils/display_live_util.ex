@@ -64,6 +64,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
         last_bus_map = Buses.get_last_buses_map(bus_stop_no)
+
         # Used to determine direction from destination code
         service_direction_map = Buses.get_service_direction_map(bus_stop_no)
         suppressed_messages = Messages.get_suppressed_messages(bus_stop_no)
@@ -131,8 +132,19 @@ defmodule Display.Utils.DisplayLiveUtil do
             end
           end)
 
+        # end of service for the day - show no more messages
+        last_bus_in_seconds =
+          Enum.map(last_bus_map, fn {_, v} -> v["time_seconds"] end)
+          |> Enum.sort()
+          |> List.last()
+
+        # handling message when there are no more buses (time after the last bus)
+        current_in_seconds = TimeUtil.now_in_seconds()
+        end_of_operating_day = if current_in_seconds > last_bus_in_seconds, do: true, else: false
+
         socket =
           socket
+          |> Phoenix.LiveView.assign(:end_of_operating_day, end_of_operating_day)
           |> Phoenix.LiveView.assign(:is_bus_interchange, is_bus_interchange)
           |> Phoenix.LiveView.assign(:predictions_scheduled_set_1_column, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_set_2_column, [])
@@ -256,6 +268,7 @@ defmodule Display.Utils.DisplayLiveUtil do
   def show_blank_screen(socket) do
     socket =
       socket
+      |> Phoenix.LiveView.assign(:end_of_operating_day, false)
       |> Phoenix.LiveView.assign(:is_bus_interchange, false)
       |> Phoenix.LiveView.assign(:predictions_scheduled_set_1_column, [])
       |> Phoenix.LiveView.assign(:predictions_scheduled_set_2_column, [])
@@ -372,6 +385,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
     socket =
       socket
+      |> Phoenix.LiveView.assign(:end_of_operating_day, false)
       |> Phoenix.LiveView.assign(:is_bus_interchange, is_bus_interchange)
       |> Phoenix.LiveView.assign(:predictions_realtime_set_1_column, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_set_2_column, [])
