@@ -11,6 +11,8 @@ defmodule Display.Poi.Waypoint do
     field(:poi_stop_no, :integer)
     field(:poi_stop_txt, :string)
     field(:poi_comnt_txt, :string)
+    field(:org_code, :integer)
+    field(:dest_code, :integer)
   end
 
   @field [
@@ -20,7 +22,9 @@ defmodule Display.Poi.Waypoint do
     :sequence_no,
     :poi_stop_no,
     :poi_stop_txt,
-    :poi_comnt_txt
+    :poi_comnt_txt,
+    :org_code,
+    :dest_code
   ]
   def changeset(pids_waypoint, params \\ %{}) do
     cast(pids_waypoint, params, @field)

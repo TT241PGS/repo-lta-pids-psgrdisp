@@ -5,6 +5,7 @@ defmodule Display.Poi do
   use Timex
   alias Display.Repo
   alias Display.Poi.{Poi, PoiStopsMapping, Waypoint}
+  alias DisplayWeb.DisplayLive.Utils
 
   def get_many_destinations_pictogram(dest_codes) when not is_list(dest_codes), do: nil
 
@@ -101,15 +102,20 @@ defmodule Display.Poi do
   end
 
   def get_waypoints_map(bus_stop_no) do
+    current_poi_query =
+      from psm in PoiStopsMapping, select: psm.poi_code, where: psm.point_no == ^bus_stop_no
+
     from(w in Waypoint,
       join: p in Poi,
       on: w.poi_stop_txt == p.code,
-      where: w.cur_stop_no == ^bus_stop_no,
+      where: w.cur_stop_no == ^bus_stop_no and p.code not in subquery(current_poi_query),
       select: %{
         dpi_route_code: w.dpi_route_code,
         direction: w.direction,
         sequence_no: w.sequence_no,
         poi_stop_no: w.poi_stop_no,
+        org_code: w.org_code,
+        dest_code: w.dest_code,
         pictograms: p.pictogram_url,
         text: p.name
       },
@@ -118,7 +124,9 @@ defmodule Display.Poi do
     )
     |> Repo.all()
     |> Enum.group_by(
-      fn waypoint -> {waypoint.dpi_route_code, waypoint.direction} end,
+      fn waypoint ->
+        {waypoint.dpi_route_code, waypoint.direction, waypoint.org_code, waypoint.dest_code}
+      end,
       fn waypoint ->
         %{
           "text" => waypoint.text,
@@ -139,19 +147,38 @@ defmodule Display.Poi do
         origin_code,
         dest_code
       ) do
-    # if service_no == "67" do
-    #   IO.inspect(
-    #     {service_no, direction, get_in(sequence_no_map, [{service_no, direction, visit_no}]),
-    #      waypoints_map, {service_no, direction, visit_no}, sequence_no_map}
-    #   )
-    # end
+    origin_stop_sequence_no_map =
+      Map.take(
+        sequence_no_map,
+        [
+          {service_no, direction, visit_no, origin_code, dest_code},
+          {service_no, direction, visit_no, Utils.swap_dest_code_direction(origin_code),
+           Utils.swap_dest_code_direction(dest_code)}
+        ]
+      )
 
-    case get_in(waypoints_map, [{service_no, direction}]) do
-      nil ->
+    origin_stop_sequence_no =
+      cond do
+        origin_stop_sequence_no_map == %{} ->
+          nil
+
+        true ->
+          Map.to_list(origin_stop_sequence_no_map) |> List.first() |> elem(1)
+      end
+
+    waypoints =
+      Map.take(waypoints_map, [
+        {service_no, direction, origin_code, dest_code},
+        {service_no, direction, Utils.swap_dest_code_direction(origin_code),
+         Utils.swap_dest_code_direction(dest_code)}
+      ])
+
+    cond do
+      waypoints == %{} ->
         nil
 
-      waypoints ->
-        origin_stop_sequence_no = get_in(sequence_no_map, [{service_no, direction, visit_no}])
+      true ->
+        waypoints = Map.to_list(waypoints) |> List.first() |> elem(1)
 
         waypoints
         |> Enum.filter(fn waypoint ->
