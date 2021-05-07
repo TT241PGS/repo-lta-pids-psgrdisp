@@ -531,6 +531,15 @@ defmodule Display.Utils.DisplayLiveUtil do
     end)
   end
 
+  def get_template_details_from_cms_by_template_assign_workflow_id(template_assign_workflow_id) do
+    Templates.get_template_detail_by_workflow_id(template_assign_workflow_id)
+    |> Enum.map(fn template ->
+      template
+      |> get_in([:template_detail])
+      |> Jason.decode!()
+    end)
+  end
+
   def create_predictions_set_1_column(cached_predictions) do
     create_predictions_columnwise(cached_predictions, 1)
   end

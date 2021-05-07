@@ -7,6 +7,7 @@ defmodule Display.Templates do
   alias Display.Repo
 
   alias Display.Templates.{TemplateAssignment, TemplateData}
+  alias Display.Workflow.CmsWorkflow
 
   def list_templates_by_panel_id(panel_id) do
     from(ctd in TemplateData,
@@ -212,5 +213,49 @@ defmodule Display.Templates do
   """
   def change_template_assignment(%TemplateAssignment{} = template_assignment, attrs \\ %{}) do
     TemplateAssignment.changeset(template_assignment, attrs)
+  end
+
+  defp get_workflow_payload_text_from_cms_workflow(workflow_id) do
+    case Repo.get_by(CmsWorkflow, wrkflw_id_num: workflow_id) do
+      nil ->
+        nil
+
+      data ->
+        workflow_payload = data |> Map.get(:wrkflw_payload_txt) |> Jason.decode!()
+
+        %{
+          :template_set_a => workflow_payload["templateDataIdForSet1"]["templateDataId"],
+          :template_set_b => workflow_payload["templateDataIdForSet2"]["templateDataId"],
+          :panel_id => workflow_payload["busStopPanelId"]
+        }
+    end
+  end
+
+  @doc """
+  Returns workflow payload text for assign template
+  ## Examples
+
+      iex> get_template_detail_by_workflow_id("768956557B91")
+  """
+  def get_template_detail_by_workflow_id(workflow_id) do
+    template_data_map = get_workflow_payload_text_from_cms_workflow(workflow_id)
+
+    template_set_a = Repo.get(TemplateData, template_data_map[:template_set_a])
+
+    template_set_a = %{
+      :template_data_id => template_set_a |> Map.get(:template_data_id),
+      :template_detail => template_set_a |> Map.get(:template_detail),
+      :template_set_code => "A"
+    }
+
+    template_set_b = Repo.get(TemplateData, template_data_map[:template_set_b])
+
+    template_set_b = %{
+      :template_data_id => template_set_b |> Map.get(:template_data_id),
+      :template_detail => template_set_b |> Map.get(:template_detail),
+      :template_set_code => "B"
+    }
+
+    [template_set_a, template_set_b]
   end
 end
