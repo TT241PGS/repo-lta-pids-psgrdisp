@@ -18,6 +18,7 @@ defmodule DisplayWeb.DisplayLive do
 
     socket =
       assign(socket,
+        end_of_operating_day: false,
         panel_id: panel_id,
         skip_realtime: assigns["skip_realtime"] || false,
         debug: assigns["debug"] || false,
@@ -48,6 +49,7 @@ defmodule DisplayWeb.DisplayLive do
         predictions_realtime_7_per_page: [],
         predictions_realtime_9_per_page: [],
         predictions_realtime_10_per_page: [],
+        predictions_realtime_11_per_page: [],
         predictions_realtime_12_per_page: [],
         predictions_realtime_14_per_page: [],
         predictions_realtime_5_per_page_index: nil,
@@ -55,6 +57,7 @@ defmodule DisplayWeb.DisplayLive do
         predictions_realtime_7_per_page_index: nil,
         predictions_realtime_9_per_page_index: nil,
         predictions_realtime_10_per_page_index: nil,
+        predictions_realtime_11_per_page_index: nil,
         predictions_realtime_12_per_page_index: nil,
         predictions_realtime_14_per_page_index: nil,
         predictions_scheduled_5_per_page: [],
@@ -62,6 +65,7 @@ defmodule DisplayWeb.DisplayLive do
         predictions_scheduled_7_per_page: [],
         predictions_scheduled_9_per_page: [],
         predictions_scheduled_10_per_page: [],
+        predictions_scheduled_11_per_page: [],
         predictions_scheduled_12_per_page: [],
         predictions_scheduled_14_per_page: [],
         predictions_scheduled_5_per_page_index: nil,
@@ -87,7 +91,10 @@ defmodule DisplayWeb.DisplayLive do
         multimedia_image_sequence_next_trigger_at: nil,
         multimedia_image_sequence_current_index: nil,
         multimedia_image_sequence_current_url: nil,
-        zoom: assigns["zoom"] || 1
+        waypoints: [],
+        zoom: assigns["zoom"] || 1,
+        preview_workflow: assigns["preview_workflow"] || nil,
+        preview_message: assigns["preview_message"] || nil
       )
 
     case Process.get(:"$callers") do
@@ -97,13 +104,47 @@ defmodule DisplayWeb.DisplayLive do
 
     if connected?(socket) do
       DisplayWeb.Endpoint.subscribe("poller")
-      DisplayWeb.Endpoint.subscribe("message:#{panel_id}")
+      %{preview_workflow: preview_workflow, preview_message: preview_message} = socket.assigns
 
-      # Only one instance of each children is created, even if same panel is opened in multiple tabs
-      AdvisorySupervisor.start_link(panel_id)
-      AdvisorySupervisor.start(panel_id)
+      socket =
+        cond do
+          # Preview template with sample message
+          is_bitstring(preview_workflow) and is_bitstring(preview_message) ->
+            init_preview_messages(socket, preview_message)
+
+          # Preview template without message
+          is_bitstring(preview_workflow) ->
+            socket
+
+          # Default functionality
+          true ->
+            DisplayWeb.Endpoint.subscribe("message:#{panel_id}")
+
+            # Only one instance of each children is created, even if same panel is opened in multiple tabs
+            AdvisorySupervisor.start_link(panel_id)
+            AdvisorySupervisor.start(panel_id)
+            socket
+        end
+
+      init_handlers(socket, start_time)
+    else
+      {:ok, socket}
     end
+  end
 
+  def init_preview_messages(socket, preview_message) do
+    message = %{
+      line: nil,
+      pm: 100,
+      text: "This is #{preview_message} preview message",
+      type: "#{String.upcase(preview_message) |> String.trim()}"
+    }
+
+    socket
+    |> assign(:message, message)
+  end
+
+  def init_handlers(socket, start_time) do
     Process.send_after(self(), :update_stops_repeatedly, 0)
     Process.send_after(self(), :update_layout_repeatedly, 0)
     Process.send_after(self(), :update_time_repeatedly, 0)
@@ -546,14 +587,26 @@ defmodule DisplayWeb.DisplayLive do
 
     %{
       panel_id: panel_id,
-      messages: messages,
+      message: message,
       current_layout_index: current_layout_index,
-      is_show_non_message_template: is_show_non_message_template
+      is_show_non_message_template: is_show_non_message_template,
+      preview_workflow: preview_workflow
     } = socket.assigns
 
     templates =
-      DisplayLiveUtil.get_template_details_from_cms(panel_id)
-      |> DisplayLiveUtil.discard_inactive_multimedia_layouts()
+      case preview_workflow do
+        nil ->
+          DisplayLiveUtil.get_template_details_from_cms(panel_id)
+          |> DisplayLiveUtil.discard_inactive_multimedia_layouts()
+
+        preview_workflow ->
+          DisplayLiveUtil.get_template_details_from_cms_by_template_assign_workflow_id(
+            preview_workflow
+          )
+          |> DisplayLiveUtil.discard_inactive_multimedia_layouts()
+      end
+
+    IO.inspect(templates)
 
     socket = socket |> assign(:templates, templates)
 
@@ -569,7 +622,7 @@ defmodule DisplayWeb.DisplayLive do
           0
 
         # If messages are not present, show template A
-        is_nil(messages.timeline) ->
+        message == %{} ->
           0
 
         # If messages are present, show template B
@@ -725,76 +778,127 @@ defmodule DisplayWeb.DisplayLive do
   def render(assigns) do
     theme = "dark"
 
-    case assigns.current_layout_value do
-      "landscape_one_pane" ->
-        ~H"""
-        <div class={{"content-wrapper landscape #{theme}"}}>
-          <LandscapeOnePaneLayout prop={{assigns}}/>
-        </div>
-        """
+    cond do
+      # svr and device online + data from datamall
+      assigns.predictions_current != [] ->
+        case assigns.current_layout_value do
+          "landscape_one_pane" ->
+            ~H"""
+            <div class={{"content-wrapper landscape #{theme}"}}>
+              <LandscapeOnePaneLayout prop={{assigns}}/>
+            </div>
+            """
 
-      "landscape_three_pane" ->
-        ~H"""
-        <div class={{"content-wrapper landscape #{theme}"}}>
-          <LandscapeThreePaneLayout prop={{assigns}}/>
-        </div>
-        """
+          "landscape_three_pane" ->
+            ~H"""
+            <div class={{"content-wrapper landscape #{theme}"}}>
+              <LandscapeThreePaneLayout prop={{assigns}}/>
+            </div>
+            """
 
-      "landscape_four_pane_a" ->
-        ~H"""
-        <div class={{"content-wrapper landscape #{theme}"}}>
-          <LandscapeFourPaneALayout prop={{assigns}}/>
-        </div>
-        """
+          "landscape_four_pane_a" ->
+            ~H"""
+            <div class={{"content-wrapper landscape #{theme}"}}>
+              <LandscapeFourPaneALayout prop={{assigns}}/>
+            </div>
+            """
 
-      "landscape_four_pane_b" ->
-        ~H"""
-        <div class={{"content-wrapper landscape #{theme}"}}>
-          <LandscapeFourPaneBLayout prop={{assigns}}/>
-        </div>
-        """
+          "landscape_four_pane_b" ->
+            ~H"""
+            <div class={{"content-wrapper landscape #{theme}"}}>
+              <LandscapeFourPaneBLayout prop={{assigns}}/>
+            </div>
+            """
 
-      "portrait_one_pane" ->
-        ~H"""
-        <div class={{"content-wrapper portrait #{theme}"}}>
-          <PortraitOnePaneLayout prop={{assigns}} service_per_page="10"/>
-        </div>
-        """
+          "portrait_one_pane" ->
+            ~H"""
+            <div class={{"content-wrapper portrait #{theme}"}}>
+              <PortraitOnePaneLayout prop={{assigns}} service_per_page="10"/>
+            </div>
+            """
 
-      "portrait_two_pane" ->
-        ~H"""
-        <div class={{"content-wrapper portrait #{theme}"}}>
-          <PortraitTwoPaneLayout prop={{assigns}} service_per_page="9"/>
-        </div>
-        """
+          "portrait_two_pane" ->
+            ~H"""
+            <div class={{"content-wrapper portrait #{theme}"}}>
+              <PortraitTwoPaneLayout prop={{assigns}} service_per_page="9"/>
+            </div>
+            """
 
-      "portrait_three_pane" ->
-        ~H"""
-        <div class={{"content-wrapper portrait #{theme}"}}>
-          <PortraitThreePaneALayout prop={{assigns}} service_per_page="7"/>
-        </div>
-        """
+          "portrait_three_pane" ->
+            ~H"""
+            <div class={{"content-wrapper portrait #{theme}"}}>
+              <PortraitThreePaneALayout prop={{assigns}} service_per_page="7"/>
+            </div>
+            """
 
-      "portrait_three_pane_b" ->
-        ~H"""
-        <div class={{"content-wrapper portrait #{theme}"}}>
-          <PortraitThreePaneBLayout prop={{assigns}} service_per_page="5"/>
-        </div>
-        """
+          "portrait_three_pane_b" ->
+            ~H"""
+            <div class={{"content-wrapper portrait #{theme}"}}>
+              <PortraitThreePaneBLayout prop={{assigns}} service_per_page="5"/>
+            </div>
+            """
 
-      nil ->
-        ~H"""
-        <div class={{"content-wrapper landscape #{theme}"}}>
-          <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
-        </div>
-        """
+          nil ->
+            ~H"""
+            <div class={{"content-wrapper landscape #{theme}"}}>
+              <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
+            </div>
+            """
 
-      unknown_layout ->
-        ~H"""
-        <unknown_layout class={{"content-wrapper landscape #{theme}"}}>
-          <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
-        </unknown_layout>
-        """
+          unknown_layout ->
+            ~H"""
+            <unknown_layout class={{"content-wrapper landscape #{theme}"}}>
+              <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
+            </unknown_layout>
+            """
+        end
+
+      # when its end of operating day - default is false so it'll be skipped over
+      assigns.end_of_operating_day ->
+        case assigns.layout_mode do
+          "landscape" ->
+            ~H"""
+            <div class={{"content-wrapper landscape #{theme}"}}>
+            </div>
+            """
+
+          "portrait" ->
+            ~H"""
+            <div class={{"content-wrapper portrait #{theme}"}}>
+            </div>
+            """
+
+          nil ->
+            ~H"""
+            <div class={{"content-wrapper"}}>
+            </div>
+            """
+        end
+
+      # svr, device online + no data from datamall
+      true ->
+        case assigns.layout_mode do
+          "landscape" ->
+            ~H"""
+            <div class={{"content-wrapper landscape #{theme}"}}>
+              <NoBusInfoMessage/>
+            </div>
+            """
+
+          "portrait" ->
+            ~H"""
+            <div class={{"content-wrapper portrait #{theme}"}}>
+              <NoBusInfoMessage/>
+            </div>
+            """
+
+          nil ->
+            ~H"""
+            <div class={{"content-wrapper"}}>
+              <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
+            </div>
+            """
+        end
     end
   end
 end

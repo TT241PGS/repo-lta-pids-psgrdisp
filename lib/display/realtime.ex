@@ -2,7 +2,7 @@ defmodule Display.RealTime do
   @moduledoc false
   alias Display.{Buses, Poi, QuickestWayTo}
   alias Display.Utils.TimeUtil
-
+  alias DisplayWeb.DisplayLive.Utils
   require Logger
 
   def get_predictions_cached(bus_stop_id) do
@@ -326,9 +326,26 @@ defmodule Display.RealTime do
   end
 
   defp is_last_bus?(service_no, next_bus, last_bus_map) do
-    dest_code = next_bus["DestinationCode"]
-    last_bus = get_in(last_bus_map, [{service_no, dest_code |> String.to_integer()}])
+    dest_code = next_bus["DestinationCode"] |> String.to_integer()
     next_bus_time = next_bus["EstimatedArrival"]
+
+    last_bus =
+      Map.take(
+        last_bus_map,
+        [
+          {service_no, dest_code},
+          {service_no, Utils.swap_dest_code_dest_name(dest_code)}
+        ]
+      )
+
+    last_bus =
+      cond do
+        last_bus == %{} ->
+          %{}
+
+        true ->
+          Map.to_list(last_bus) |> List.first() |> elem(1)
+      end
 
     case Access.get(last_bus, "time_iso") do
       nil ->

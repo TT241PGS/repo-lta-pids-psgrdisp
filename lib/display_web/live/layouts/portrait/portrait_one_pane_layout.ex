@@ -5,7 +5,7 @@ defmodule PortraitOnePaneLayout do
   alias DisplayWeb.DisplayLive.Utils
 
   property(prop, :map, default: %{})
-  property(service_per_page, :string, default: "10")
+  property(service_per_page, :string, default: "11")
 
   def render(assigns) do
     ~H"""
@@ -24,7 +24,7 @@ defmodule PortraitOnePaneLayout do
         stopPredictionsScheduledSet={{Utils.get_stop_predictions_scheduled_set(@prop, @service_per_page)}}
         :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}}
       />
-      <MultimediaPortrait
+      <OnePaneMultimediaPortrait
       multimedia={{@prop.multimedia}}
       image_sequence_url={{@prop.multimedia_image_sequence_current_url}}
       :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "multimedia"}}

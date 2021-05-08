@@ -61,9 +61,22 @@ defmodule Display.Utils.DisplayLiveUtil do
         is_trigger_next,
         is_prediction_next_slide_scheduled
       ) do
+    last_bus_map = Buses.get_last_buses_map(bus_stop_no)
+
+    # end of service for the day - show no more messages
+    last_bus_in_seconds =
+      Enum.map(last_bus_map, fn {_, v} -> v["time_seconds"] end)
+      |> Enum.sort()
+      |> List.last()
+
+    # handling message when there are no more buses (time after the last bus)
+    current_in_seconds = TimeUtil.now_in_seconds()
+    end_of_operating_day = current_in_seconds > last_bus_in_seconds
+
+    socket = Phoenix.LiveView.assign(socket, :end_of_operating_day, end_of_operating_day)
+
     case RealTime.get_predictions_cached(bus_stop_no) do
       {:ok, cached_predictions} ->
-        last_bus_map = Buses.get_last_buses_map(bus_stop_no)
         # Used to determine direction from destination code
         service_direction_map = Buses.get_service_direction_map(bus_stop_no)
         suppressed_messages = Messages.get_suppressed_messages(bus_stop_no)
@@ -131,6 +144,24 @@ defmodule Display.Utils.DisplayLiveUtil do
             end
           end)
 
+        # For debug mode
+        waypoints =
+          cached_predictions
+          |> Enum.map(fn service ->
+            service_no = service["ServiceNo"]
+
+            destination = get_in(service, ["NextBus", "Destination"])
+
+            waypoints =
+              get_in(service, ["NextBus", "WayPoints"]) ||
+                []
+                |> Enum.map(fn waypoint -> waypoint["text"] end)
+                |> Enum.take(2)
+                |> Enum.join(", ")
+
+            {service_no, destination, waypoints}
+          end)
+
         socket =
           socket
           |> Phoenix.LiveView.assign(:is_bus_interchange, is_bus_interchange)
@@ -151,6 +182,7 @@ defmodule Display.Utils.DisplayLiveUtil do
           |> Phoenix.LiveView.assign(:predictions_scheduled_7_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_9_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_10_per_page, [])
+          |> Phoenix.LiveView.assign(:predictions_scheduled_11_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_12_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_14_per_page, [])
           |> Phoenix.LiveView.assign(:predictions_scheduled_5_per_page_index, nil)
@@ -211,6 +243,10 @@ defmodule Display.Utils.DisplayLiveUtil do
           |> Phoenix.LiveView.assign(
             :quickest_way_to,
             quickest_way_to
+          )
+          |> Phoenix.LiveView.assign(
+            :waypoints,
+            waypoints
           )
 
         trigger_next_update_stops(is_trigger_next)
@@ -489,6 +525,15 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   def get_template_details_from_cms(panel_id) do
     Templates.list_templates_by_panel_id(panel_id)
+    |> Enum.map(fn template ->
+      template
+      |> get_in([:template_detail])
+      |> Jason.decode!()
+    end)
+  end
+
+  def get_template_details_from_cms_by_template_assign_workflow_id(template_assign_workflow_id) do
+    Templates.get_template_detail_by_workflow_id(template_assign_workflow_id)
     |> Enum.map(fn template ->
       template
       |> get_in([:template_detail])

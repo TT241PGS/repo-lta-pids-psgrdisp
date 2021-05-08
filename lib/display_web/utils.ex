@@ -77,10 +77,28 @@ defmodule DisplayWeb.DisplayLive.Utils do
         "color"
       ])
 
-    case is_bitstring(color) do
-      true -> "color: #{color} !important"
-      false -> ""
-    end
+    size =
+      get_in(panes, [
+        current_pane,
+        "config",
+        "#{get_in(message, [:type]) |> String.downcase()}_messages_font",
+        "size"
+      ])
+
+    color =
+      case is_bitstring(color) do
+        true -> ["color: #{color} !important"]
+        false -> []
+      end
+
+    size =
+      case is_bitstring(size) do
+        true -> ["font-size: #{size}px !important"]
+        false -> []
+      end
+
+    style = color ++ size
+    style |> Enum.join(";")
   end
 
   def get_stop_predictions_realtime_set(prop, service_per_page) do
@@ -90,6 +108,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
       "7" -> prop.predictions_realtime_7_per_page
       "9" -> prop.predictions_realtime_9_per_page
       "10" -> prop.predictions_realtime_10_per_page
+      "11" -> prop.predictions_realtime_11_per_page
       "12" -> prop.predictions_realtime_12_per_page
       "14" -> prop.predictions_realtime_14_per_page
       _ -> []
