@@ -213,6 +213,10 @@ defmodule Display.Utils.DisplayLiveUtil do
             create_predictions_10_per_page(cached_predictions)
           )
           |> Phoenix.LiveView.assign(
+            :predictions_realtime_11_per_page,
+            create_predictions_11_per_page(cached_predictions)
+          )
+          |> Phoenix.LiveView.assign(
             :predictions_realtime_12_per_page,
             create_predictions_12_per_page(cached_predictions)
           )
@@ -340,6 +344,10 @@ defmodule Display.Utils.DisplayLiveUtil do
         []
       )
       |> Phoenix.LiveView.assign(
+        :predictions_realtime_11_per_page,
+        []
+      )
+      |> Phoenix.LiveView.assign(
         :predictions_realtime_12_per_page,
         []
       )
@@ -426,6 +434,7 @@ defmodule Display.Utils.DisplayLiveUtil do
       |> Phoenix.LiveView.assign(:predictions_realtime_7_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_9_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_10_per_page, [])
+      |> Phoenix.LiveView.assign(:predictions_realtime_11_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_12_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_14_per_page, [])
       |> Phoenix.LiveView.assign(:predictions_realtime_5_per_page_index, nil)
@@ -433,6 +442,7 @@ defmodule Display.Utils.DisplayLiveUtil do
       |> Phoenix.LiveView.assign(:predictions_realtime_7_per_page_index, nil)
       |> Phoenix.LiveView.assign(:predictions_realtime_9_per_page_index, nil)
       |> Phoenix.LiveView.assign(:predictions_realtime_10_per_page_index, nil)
+      |> Phoenix.LiveView.assign(:predictions_realtime_11_per_page_index, nil)
       |> Phoenix.LiveView.assign(:predictions_realtime_12_per_page_index, nil)
       |> Phoenix.LiveView.assign(:predictions_realtime_14_per_page_index, nil)
       |> Phoenix.LiveView.assign(
@@ -585,6 +595,10 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   def create_predictions_10_per_page(cached_predictions) do
     create_predictions_rowwise(cached_predictions, 10)
+  end
+
+  def create_predictions_11_per_page(cached_predictions) do
+    create_predictions_rowwise(cached_predictions, 11)
   end
 
   def create_predictions_12_per_page(cached_predictions) do

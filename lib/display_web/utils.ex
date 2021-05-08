@@ -135,6 +135,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
       "7" -> prop.predictions_realtime_7_per_page_index
       "9" -> prop.predictions_realtime_9_per_page_index
       "10" -> prop.predictions_realtime_10_per_page_index
+      "11" -> prop.predictions_realtime_11_per_page_index
       "12" -> prop.predictions_realtime_12_per_page_index
       "14" -> prop.predictions_realtime_14_per_page_index
       _ -> nil
@@ -148,6 +149,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
       "7" -> prop.predictions_scheduled_7_per_page_index
       "9" -> prop.predictions_scheduled_9_per_page_index
       "10" -> prop.predictions_scheduled_10_per_page_index
+      "11" -> prop.predictions_scheduled_11_per_page_index
       "12" -> prop.predictions_scheduled_12_per_page_index
       "14" -> prop.predictions_scheduled_14_per_page_index
       _ -> nil
@@ -223,4 +225,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
   def get_content_type(current_layout_panes, pane) do
     get_in(current_layout_panes, [pane, "type", "value"])
   end
+
+  def one_pane_multimedia(true), do: "one-pane-multimedia-wrapper"
+  def one_pane_multimedia(false), do: "multimedia-wrapper"
 end

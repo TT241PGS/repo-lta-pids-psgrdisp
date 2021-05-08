@@ -24,12 +24,15 @@ defmodule PortraitOnePaneLayout do
         stopPredictionsScheduledSet={{Utils.get_stop_predictions_scheduled_set(@prop, @service_per_page)}}
         :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}}
       />
-      <OnePaneMultimediaPortrait
+      <MultimediaPortrait
+      onePane=true
       multimedia={{@prop.multimedia}}
       image_sequence_url={{@prop.multimedia_image_sequence_current_url}}
       :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "multimedia"}}
     />
-      <Legend />
+      <Legend
+      :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "predictions_by_service"}}
+       />
     </div>
     """
   end
