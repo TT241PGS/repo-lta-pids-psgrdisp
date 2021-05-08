@@ -34,7 +34,15 @@ let liveSocket = new LiveSocket("/live", Socket, {
 });
 
 // Show progress bar on live navigation and form submits
-window.addEventListener("phx:page-loading-start", info => NProgress.start());
+window.addEventListener("phx:page-loading-start", info => {
+  // When the server completely stops responding or throws any internal error
+  if (info.detail && info.detail.kind && info.detail.kind === "error") {
+    // Reload is needed to go in offline mode, when the server stops responding
+    location.reload();
+  } else {
+    NProgress.start()
+  }
+});
 window.addEventListener("phx:page-loading-stop", info => NProgress.done());
 
 // connect if there are any LiveViews on the page
@@ -57,6 +65,11 @@ function onDocReady(fn) {
     document.addEventListener("DOMContentLoaded", fn);
   }
 }
+
+// When internet connection lost, reload page so that service worker will load offline.html instantly
+window.addEventListener('offline', () => {
+  location.reload();
+});
 
 window.addEventListener("load", () => {
   if ("serviceWorker" in navigator) {

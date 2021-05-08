@@ -34,7 +34,6 @@
     p {
       margin: 10px;
     }
-    
   </style>
 </head>
 
@@ -70,7 +69,7 @@
       } catch {
         // Unable to connect to the server, ignore.
       }
-      window.setTimeout(checkNetworkAndReload, 5000);
+      window.setTimeout(checkNetworkAndReload, 10 * 1000);
     }
 
     checkNetworkAndReload();
