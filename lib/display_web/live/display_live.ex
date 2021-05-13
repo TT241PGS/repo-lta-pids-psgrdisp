@@ -882,12 +882,14 @@ defmodule DisplayWeb.DisplayLive do
           "landscape" ->
             ~H"""
             <div class={{"content-wrapper landscape #{theme}"}}>
+              <LandscapeEndOfOperatingDayLayout prop={{assigns}}/>
             </div>
             """
 
           "portrait" ->
             ~H"""
             <div class={{"content-wrapper portrait #{theme}"}}>
+              <PortraitEndOfOperatingDayLayout prop={{assigns}}/>
             </div>
             """
 

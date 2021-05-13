@@ -259,3 +259,29 @@ body {
     white-space: normal;
   }
 }
+
+.end-of-operating-day {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: Verdana;
+  height: 90%;
+  font-size: 6vh;
+  color: white;
+}
+
+.landscape-msg {
+  @extend .end-of-operating-day;
+  p {
+    margin: 10px;
+  }
+}
+
+.portrait-msg {
+  @extend .end-of-operating-day;
+  p {
+    margin: 10px;
+  }
+}
