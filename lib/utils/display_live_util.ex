@@ -3,7 +3,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   require Logger
 
-  alias Display.{Buses, Messages, Poi, RealTime, Scheduled, Templates}
+  alias Display.{Buses, Messages, Poi, RealTime, Scheduled, Templates, PredictionStatus}
   alias Display.Utils.{TimeUtil, NaturalSort}
   alias DisplayWeb.DisplayLive.Utils
 
@@ -270,6 +270,10 @@ defmodule Display.Utils.DisplayLiveUtil do
           "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
         )
 
+        if not end_of_operating_day do
+          PredictionStatus.create_pids_prediction_error_log("Cached_predictions not_found", socket.assigns.panel_id, "panel")
+        end
+
         socket = show_blank_screen(socket)
 
         trigger_next_update_stops(is_trigger_next)
@@ -283,6 +287,10 @@ defmodule Display.Utils.DisplayLiveUtil do
             inspect({bus_stop_no, bus_stop_name})
           } -> #{inspect(error)}"
         )
+
+        if not end_of_operating_day do
+          PredictionStatus.create_pids_prediction_error_log("#{inspect(error)}", socket.assigns.panel_id, "panel")
+        end
 
         socket = show_blank_screen(socket)
 
