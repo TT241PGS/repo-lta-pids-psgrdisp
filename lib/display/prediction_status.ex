@@ -8,9 +8,9 @@ defmodule Display.PredictionStatus do
   def create_pids_prediction_error_log(reason, source, source_type) do
     %PidsPredictionErrorLog{}
     |> PidsPredictionErrorLog.changeset(%{
-      reason: reason,
-      source: source,
-      source_type: source_type
+      rsn_txt: reason,
+      src_txt: source,
+      src_typ_txt: source_type
     })
     |> Repo.insert()
   end
