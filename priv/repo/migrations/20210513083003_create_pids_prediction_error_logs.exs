@@ -10,6 +10,5 @@ defmodule Display.Repo.Migrations.CreatePidsPredictionErrorLogs do
 
       timestamps()
     end
-
   end
 end

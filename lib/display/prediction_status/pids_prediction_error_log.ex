@@ -2,7 +2,7 @@ defmodule Display.PredictionStatus.PidsPredictionErrorLog do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key{:id, Ecto.UUID, autogenerate: true}
+  @primary_key {:id, Ecto.UUID, autogenerate: true}
 
   schema "pids_prediction_error_logs" do
     field :reason, :string
