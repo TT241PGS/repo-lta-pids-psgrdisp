@@ -800,6 +800,7 @@ defmodule DisplayWeb.DisplayLive do
 
   def render(assigns) do
     theme = "dark"
+
     cond do
       # svr and device online + data from datamall
       assigns.predictions_current != [] ->
