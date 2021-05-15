@@ -71,10 +71,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
     # handling message when there are no more buses (time after the last bus)
     current_in_seconds = TimeUtil.now_in_seconds()
-    end_of_operating_day = current_in_seconds > last_bus_in_seconds
-
-    IO.inspect("LAST BUS::#{last_bus_in_seconds}")
-    IO.inspect("TIME::#{current_in_seconds}")
+    end_of_operating_day = current_in_seconds < last_bus_in_seconds
 
     socket = Phoenix.LiveView.assign(socket, :end_of_operating_day, end_of_operating_day)
 

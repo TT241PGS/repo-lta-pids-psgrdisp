@@ -1,4 +1,4 @@
-defmodule PortraitEndOfOperatingDayLayout do
+defmodule PortraitNoBusInfoMessage do
   @moduledoc false
   use Surface.LiveComponent
 
@@ -15,7 +15,10 @@ defmodule PortraitEndOfOperatingDayLayout do
 
     <div class="portrait-msg">
       <p>
-        SHOW END OF OPERATING DAY MESSAGE
+        Bus Arrival information is not currently available from this panel.
+      </p>
+      <p>
+        Please refer to poster at the shelter for information on bus services.
       </p>
     </div>
     """

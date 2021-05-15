@@ -268,13 +268,13 @@ body {
   justify-content: center;
   font-family: Verdana;
   height: 90%;
-  font-size: 6vh;
   color: white;
 }
 
 .landscape-msg {
   @extend .end-of-operating-day;
   p {
+    font-size: 9vh;
     margin: 10px;
   }
 }
@@ -282,6 +282,7 @@ body {
 .portrait-msg {
   @extend .end-of-operating-day;
   p {
+    font-size: 6.5vh;
     margin: 10px;
   }
 }

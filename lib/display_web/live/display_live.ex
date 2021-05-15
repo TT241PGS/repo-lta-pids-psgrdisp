@@ -800,7 +800,6 @@ defmodule DisplayWeb.DisplayLive do
 
   def render(assigns) do
     theme = "dark"
-
     cond do
       # svr and device online + data from datamall
       assigns.predictions_current != [] ->
@@ -882,14 +881,14 @@ defmodule DisplayWeb.DisplayLive do
           "landscape" ->
             ~H"""
             <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeEndOfOperatingDayLayout prop={{assigns}}/>
+              <LandscapeNoBusInfoMessage prop={{assigns}}/>
             </div>
             """
 
           "portrait" ->
             ~H"""
             <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitEndOfOperatingDayLayout prop={{assigns}}/>
+              <PortraitNoBusInfoMessage prop={{assigns}}/>
             </div>
             """
 
@@ -906,14 +905,14 @@ defmodule DisplayWeb.DisplayLive do
           "landscape" ->
             ~H"""
             <div class={{"content-wrapper landscape #{theme}"}}>
-              <NoBusInfoMessage/>
+              <LandscapeNoBusInfoMessage prop={{assigns}}/>
             </div>
             """
 
           "portrait" ->
             ~H"""
             <div class={{"content-wrapper portrait #{theme}"}}>
-              <NoBusInfoMessage/>
+              <PortraitNoBusInfoMessage prop={{assigns}}/>
             </div>
             """
 
