@@ -7,7 +7,7 @@ defmodule DisplayWeb.ErrorLogController do
   alias Display.PredictionStatus
 
   def handle(conn, params) do
-    PredictionStatus.create_pids_prediction_error_log(params["error"], "poller", "poller")
+    PredictionStatus.create_poller_error_log(params["error"])
 
     conn
     |> put_resp_content_type("application/json")

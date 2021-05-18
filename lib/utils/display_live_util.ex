@@ -270,13 +270,13 @@ defmodule Display.Utils.DisplayLiveUtil do
           "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
         )
 
-        if not end_of_operating_day do
-          PredictionStatus.create_pids_prediction_error_log(
-            "Cached_predictions not_found",
-            socket.assigns.panel_id,
-            "panel"
-          )
-        end
+        # if not end_of_operating_day do
+        #   PredictionStatus.create_poller_error_log(
+        #     "Cached_predictions not_found",
+        #     socket.assigns.panel_id,
+        #     "panel"
+        #   )
+        # end
 
         socket = show_blank_screen(socket)
 
@@ -292,13 +292,13 @@ defmodule Display.Utils.DisplayLiveUtil do
           } -> #{inspect(error)}"
         )
 
-        if not end_of_operating_day do
-          PredictionStatus.create_pids_prediction_error_log(
-            "#{inspect(error)}",
-            socket.assigns.panel_id,
-            "panel"
-          )
-        end
+        # if not end_of_operating_day do
+        #   PredictionStatus.create_poller_error_log(
+        #     "#{inspect(error)}",
+        #     socket.assigns.panel_id,
+        #     "panel"
+        #   )
+        # end
 
         socket = show_blank_screen(socket)
 
