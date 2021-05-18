@@ -226,8 +226,8 @@ defmodule Display.RealTime do
           {dpi_route_code, direction, visit_no, origin_code |> to_string,
            destination_code |> to_string},
           {dpi_route_code, direction, visit_no,
-           Utils.swap_dest_code_waypoint(origin_code) |> to_string,
-           Utils.swap_dest_code_waypoint(destination_code) |> to_string}
+           Utils.swap_dest_code_lta_to_datamall(origin_code) |> to_string,
+           Utils.swap_dest_code_lta_to_datamall(destination_code) |> to_string}
         ])
 
       cond do
@@ -354,7 +354,7 @@ defmodule Display.RealTime do
         last_bus_map,
         [
           {service_no, dest_code},
-          {service_no, Utils.swap_dest_code_dest_name(dest_code)}
+          {service_no, Utils.dest_code_datamall_to_lta(dest_code)}
         ]
       )
 

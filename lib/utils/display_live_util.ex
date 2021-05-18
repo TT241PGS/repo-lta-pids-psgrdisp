@@ -706,7 +706,7 @@ defmodule Display.Utils.DisplayLiveUtil do
       ["NextBus", "Destination"],
       Buses.get_bus_stop_name_from_bus_stop_map(
         bus_stop_map,
-        Utils.swap_dest_code_dest_name(dest_code)
+        Utils.dest_code_datamall_to_lta(dest_code)
       )
     )
     |> put_in(
@@ -844,7 +844,7 @@ defmodule Display.Utils.DisplayLiveUtil do
             service_direction_map,
             [
               {service["ServiceNo"], dest_code},
-              {service["ServiceNo"], Utils.swap_dest_code_direction(dest_code)}
+              {service["ServiceNo"], Utils.dest_code_datamall_to_lta(dest_code)}
             ]
           )
 
@@ -893,7 +893,7 @@ defmodule Display.Utils.DisplayLiveUtil do
           ["DestinationCode"],
           &Buses.get_bus_stop_name_from_bus_stop_map(
             bus_stop_map,
-            Utils.swap_dest_code_dest_name(&1)
+            Utils.dest_code_datamall_to_lta(&1)
           )
         )
     end

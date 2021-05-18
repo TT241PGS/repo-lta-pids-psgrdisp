@@ -1,5 +1,5 @@
 defmodule DisplayWeb.DisplayLive.Utils do
-  @dest_code_waypoint_map %{
+  @dest_code_lta_to_datamall_map %{
     02089 => 02099,
     03218 => 03239,
     11389 => 11379,
@@ -15,7 +15,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
     84439 => 84299
   }
 
-  @dest_code_dest_name_map %{
+  @dest_code_datamall_to_lta_map %{
     02099 => 02089,
     03239 => 03218,
     11379 => 11389,
@@ -28,21 +28,6 @@ defmodule DisplayWeb.DisplayLive.Utils do
     59009 => 59008,
     75009 => 75008,
     77009 => 77008,
-    84299 => 84439
-  }
-
-  @dest_code_dest_direction_map %{
-    02099 => 02089,
-    03239 => 03218,
-    11379 => 11389,
-    22009 => 22008,
-    22609 => 22199,
-    46009 => 46008,
-    46069 => 46101,
-    52009 => 52008,
-    55009 => 55231,
-    59009 => 59008,
-    75009 => 75008,
     84299 => 84439
   }
 
@@ -188,15 +173,15 @@ defmodule DisplayWeb.DisplayLive.Utils do
     bus_stop_nos =
       bus_stop_nos
       |> Enum.map(fn bus_stop_no ->
-        case Map.get(@dest_code_dest_name_map, String.to_integer(bus_stop_no)) do
+        case Map.get(@dest_code_datamall_to_lta_map, String.to_integer(bus_stop_no)) do
           nil -> bus_stop_no |> String.to_integer()
           new_no -> new_no
         end
       end)
   end
 
-  def swap_dest_code_waypoint(dest_code) do
-    swapped_map = @dest_code_waypoint_map[dest_code]
+  def swap_dest_code_lta_to_datamall(dest_code) do
+    swapped_map = @dest_code_lta_to_datamall_map[dest_code]
 
     case is_nil(swapped_map) do
       true -> dest_code
@@ -204,17 +189,8 @@ defmodule DisplayWeb.DisplayLive.Utils do
     end
   end
 
-  def swap_dest_code_dest_name(dest_code) do
-    swapped_map = @dest_code_dest_name_map[dest_code]
-
-    case is_nil(swapped_map) do
-      true -> dest_code
-      false -> swapped_map
-    end
-  end
-
-  def swap_dest_code_direction(dest_code) do
-    swapped_map = @dest_code_dest_direction_map[dest_code]
+  def dest_code_datamall_to_lta(dest_code) do
+    swapped_map = @dest_code_datamall_to_lta_map[dest_code]
 
     case is_nil(swapped_map) do
       true -> dest_code
