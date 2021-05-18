@@ -844,7 +844,7 @@ defmodule Display.Utils.DisplayLiveUtil do
             service_direction_map,
             [
               {service["ServiceNo"], dest_code},
-              {service["ServiceNo"], Utils.swap_dest_code_direction(dest_code)}
+              {service["ServiceNo"], Utils.swap_dest_code_dest_name(dest_code)}
             ]
           )
 

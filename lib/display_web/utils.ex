@@ -31,22 +31,6 @@ defmodule DisplayWeb.DisplayLive.Utils do
     84299 => 84439
   }
 
-  @dest_code_dest_direction_map %{
-    02099 => 02089,
-    03239 => 03218,
-    11379 => 11389,
-    22009 => 22008,
-    22609 => 22199,
-    46009 => 46008,
-    46069 => 46101,
-    52009 => 52008,
-    55009 => 55231,
-    59009 => 59008,
-    75009 => 75008,
-    77009 => 77008,
-    84299 => 84439
-  }
-
   def get_message_class_names(panes, current_pane, message) do
     [
       "advisory-content",
@@ -207,15 +191,6 @@ defmodule DisplayWeb.DisplayLive.Utils do
 
   def swap_dest_code_dest_name(dest_code) do
     swapped_map = @dest_code_dest_name_map[dest_code]
-
-    case is_nil(swapped_map) do
-      true -> dest_code
-      false -> swapped_map
-    end
-  end
-
-  def swap_dest_code_direction(dest_code) do
-    swapped_map = @dest_code_dest_direction_map[dest_code]
 
     case is_nil(swapped_map) do
       true -> dest_code
