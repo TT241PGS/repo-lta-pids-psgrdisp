@@ -154,8 +154,8 @@ defmodule Display.Poi do
         sequence_no_map,
         [
           {service_no, direction, visit_no, origin_code, dest_code},
-          {service_no, direction, visit_no, Utils.swap_dest_code_dest_name(origin_code),
-           Utils.swap_dest_code_dest_name(dest_code)}
+          {service_no, direction, visit_no, Utils.dest_code_datamall_to_lta(origin_code),
+           Utils.dest_code_datamall_to_lta(dest_code)}
         ]
       )
 
@@ -171,8 +171,8 @@ defmodule Display.Poi do
     waypoints =
       Map.take(waypoints_map, [
         {service_no, direction, origin_code, dest_code},
-        {service_no, direction, Utils.swap_dest_code_dest_name(origin_code),
-         Utils.swap_dest_code_dest_name(dest_code)}
+        {service_no, direction, Utils.dest_code_datamall_to_lta(origin_code),
+         Utils.dest_code_datamall_to_lta(dest_code)}
       ])
 
     cond do
@@ -186,7 +186,7 @@ defmodule Display.Poi do
           get_poi_cd_from_dest_code(
             waypoints,
             dest_code,
-            Utils.swap_dest_code_waypoint(dest_code)
+            Utils.swap_dest_code_lta_to_datamall(dest_code)
           )
 
         waypoints
@@ -197,8 +197,8 @@ defmodule Display.Poi do
           waypoint["poi_stop_no"] not in [
             dest_code,
             origin_code,
-            Utils.swap_dest_code_dest_name(origin_code),
-            Utils.swap_dest_code_dest_name(dest_code)
+            Utils.dest_code_datamall_to_lta(origin_code),
+            Utils.dest_code_datamall_to_lta(dest_code)
           ]
         end)
         |> Enum.filter(fn waypoint ->

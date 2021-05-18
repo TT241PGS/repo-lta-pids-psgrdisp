@@ -1,5 +1,5 @@
 defmodule DisplayWeb.DisplayLive.Utils do
-  @dest_code_waypoint_map %{
+  @dest_code_lta_to_datamall_map %{
     02089 => 02099,
     03218 => 03239,
     11389 => 11379,
@@ -15,7 +15,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
     84439 => 84299
   }
 
-  @dest_code_dest_name_map %{
+  @dest_code_datamall_to_lta_map %{
     02099 => 02089,
     03239 => 03218,
     11379 => 11389,
@@ -173,15 +173,15 @@ defmodule DisplayWeb.DisplayLive.Utils do
     bus_stop_nos =
       bus_stop_nos
       |> Enum.map(fn bus_stop_no ->
-        case Map.get(@dest_code_dest_name_map, String.to_integer(bus_stop_no)) do
+        case Map.get(@dest_code_datamall_to_lta_map, String.to_integer(bus_stop_no)) do
           nil -> bus_stop_no |> String.to_integer()
           new_no -> new_no
         end
       end)
   end
 
-  def swap_dest_code_waypoint(dest_code) do
-    swapped_map = @dest_code_waypoint_map[dest_code]
+  def swap_dest_code_lta_to_datamall(dest_code) do
+    swapped_map = @dest_code_lta_to_datamall_map[dest_code]
 
     case is_nil(swapped_map) do
       true -> dest_code
@@ -189,8 +189,8 @@ defmodule DisplayWeb.DisplayLive.Utils do
     end
   end
 
-  def swap_dest_code_dest_name(dest_code) do
-    swapped_map = @dest_code_dest_name_map[dest_code]
+  def dest_code_datamall_to_lta(dest_code) do
+    swapped_map = @dest_code_datamall_to_lta_map[dest_code]
 
     case is_nil(swapped_map) do
       true -> dest_code
