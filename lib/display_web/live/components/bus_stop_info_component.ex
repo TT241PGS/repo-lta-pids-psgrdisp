@@ -6,10 +6,10 @@ defmodule BusStopInfo do
   property busStopName, :string, default: ""
 
   def render(assigns) do
-    ~H"""
+    ~L"""
     <div class="bus-stop-info">
-      <div class="bus-stop-number">{{ @busStopNo }}</div>
-      <div class="bus-stop-name">{{ @busStopName }} </div>
+      <div class="bus-stop-number"><%= @busStopNo %></div>
+      <div phx-hook="BusStopName" data-stopname="<%= @busStopName %>" class="bus-stop-name"><%= @busStopName %></div>
     </div>
     """
   end
