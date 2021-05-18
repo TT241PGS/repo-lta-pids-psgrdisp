@@ -43,6 +43,7 @@ defmodule DisplayWeb.DisplayLive.Utils do
     55009 => 55231,
     59009 => 59008,
     75009 => 75008,
+    77009 => 77008,
     84299 => 84439
   }
 
