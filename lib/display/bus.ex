@@ -322,15 +322,15 @@ defmodule Display.Buses do
 
   def get_realtime_quickest_way_to_by_bus_stop(bus_stop_no) do
     query = "
-    select distinct on(poi_cd_txt, poi_stop_num, svc_txt, direction_num, visit_no_num) poi_cd_txt, poi_stop_num, svc_txt, direction_num, visit_no_num, tm_taken_num from
-      (select psm.poi_cd_txt, qwt_poi.poi_stop_num, qwt_poi.svc_txt, qwt_poi.direction_num, qwt_poi.visit_no_num, qwt_poi.tm_taken_num
+    select distinct on(poi_cd_txt, org_code, dest_code, svc_txt, direction_num, visit_no_num) poi_cd_txt, org_code, dest_code, svc_txt, direction_num, visit_no_num, tm_taken_num from
+      (select psm.poi_cd_txt, qwt_poi.poi_stop_num, qwt_poi.org_code, qwt_poi.dest_code, qwt_poi.svc_txt, qwt_poi.direction_num, qwt_poi.visit_no_num, qwt_poi.tm_taken_num
       FROM pids_quickest_way_to_poi qwt_poi
       inner join pids_poi_stops_map psm
       on psm.pt_no_num = poi_stop_num
       where depart_stop_num=#{bus_stop_no}
-      group by psm.poi_cd_txt, qwt_poi.poi_stop_num, qwt_poi.svc_txt, qwt_poi.direction_num, qwt_poi.visit_no_num, qwt_poi.tm_taken_num
-      order by psm.poi_cd_txt, qwt_poi.poi_stop_num, qwt_poi.svc_txt, qwt_poi.direction_num, qwt_poi.visit_no_num, tm_taken_num) r
-    order by poi_cd_txt, poi_stop_num, svc_txt, direction_num, visit_no_num, tm_taken_num
+      group by psm.poi_cd_txt, qwt_poi.poi_stop_num, qwt_poi.org_code, qwt_poi.dest_code, qwt_poi.svc_txt, qwt_poi.direction_num, qwt_poi.visit_no_num, qwt_poi.tm_taken_num
+      order by psm.poi_cd_txt, qwt_poi.poi_stop_num, qwt_poi.org_code, qwt_poi.dest_code, qwt_poi.svc_txt, qwt_poi.direction_num, qwt_poi.visit_no_num, tm_taken_num) r
+    order by poi_cd_txt, org_code, dest_code, svc_txt, direction_num, visit_no_num, tm_taken_num
     "
     SQL.query!(Repo, query, [])
   end

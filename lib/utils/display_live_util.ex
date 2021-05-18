@@ -100,6 +100,8 @@ defmodule Display.Utils.DisplayLiveUtil do
               end
 
             direction = get_in(service, ["NextBus", "Direction"])
+            origin_code = get_in(service, ["NextBus", "OriginCode"])
+            destination_code = get_in(service, ["NextBus", "DestinationCode"])
 
             next_bus_1_eta = service["NextBus"]["EstimatedArrival"]
 
@@ -112,7 +114,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
             Map.put(
               acc,
-              {service["ServiceNo"], direction, visit_no},
+              {service["ServiceNo"], direction, visit_no, origin_code, destination_code},
               value
             )
           end)

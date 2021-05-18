@@ -195,15 +195,24 @@ defmodule Display.RealTime do
     suppress_services = Map.keys(service_message_map) ++ hide_services
 
     rows
-    |> Enum.filter(fn [_poi_code, _, dpi_route_code, _, _, _] ->
+    |> Enum.filter(fn [_poi_code, _origin_code, _destination_code, dpi_route_code, _, _, _] ->
       dpi_route_code not in suppress_services
     end)
-    |> Enum.uniq_by(fn [poi_code, _poi_stop_code, dpi_route_code, _, _visit_no, _] ->
-      {poi_code, dpi_route_code}
+    |> Enum.uniq_by(fn [
+                         poi_code,
+                         origin_code,
+                         destination_code,
+                         dpi_route_code,
+                         _,
+                         _visit_no,
+                         _
+                       ] ->
+      {poi_code, origin_code, destination_code, dpi_route_code}
     end)
     |> Enum.reduce(%{}, fn [
                              poi_code,
-                             _poi_stop_code,
+                             origin_code,
+                             destination_code,
                              dpi_route_code,
                              direction,
                              visit_no,
@@ -212,11 +221,22 @@ defmodule Display.RealTime do
                            acc ->
       key = poi_code
 
-      case get_in(service_arrival_map, [{dpi_route_code, direction, visit_no}]) do
-        nil ->
+      service_arrival_times =
+        Map.take(service_arrival_map, [
+          {dpi_route_code, direction, visit_no, origin_code |> to_string,
+           destination_code |> to_string},
+          {dpi_route_code, direction, visit_no,
+           Utils.swap_dest_code_waypoint(origin_code) |> to_string,
+           Utils.swap_dest_code_waypoint(destination_code) |> to_string}
+        ])
+
+      cond do
+        service_arrival_times == %{} ->
           acc
 
-        service_arrival_times ->
+        true ->
+          service_arrival_times = Map.values(service_arrival_times) |> List.first()
+
           value =
             service_arrival_times
             |> Enum.map(fn service_arrival_time ->

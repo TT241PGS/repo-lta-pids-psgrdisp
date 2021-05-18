@@ -117,7 +117,8 @@ defmodule Display.Poi do
         org_code: w.org_code,
         dest_code: w.dest_code,
         pictograms: p.pictogram_url,
-        text: p.name
+        text: p.name,
+        poi_code: p.code
       },
       distinct: true,
       order_by: [w.dpi_route_code, w.direction, w.sequence_no, w.poi_stop_no, p.pictogram_url]
@@ -132,7 +133,8 @@ defmodule Display.Poi do
           "text" => waypoint.text,
           "pictograms" => waypoint.pictograms,
           "poi_stop_no" => waypoint.poi_stop_no,
-          "sequence_no" => waypoint.sequence_no
+          "sequence_no" => waypoint.sequence_no,
+          "poi_code" => waypoint.poi_code
         }
       end
     )
@@ -180,12 +182,27 @@ defmodule Display.Poi do
       true ->
         waypoints = Map.to_list(waypoints) |> List.first() |> elem(1)
 
+        destination_poi_code =
+          get_poi_cd_from_dest_code(
+            waypoints,
+            dest_code,
+            Utils.swap_dest_code_waypoint(dest_code)
+          )
+
         waypoints
         |> Enum.filter(fn waypoint ->
           waypoint["sequence_no"] > origin_stop_sequence_no
         end)
         |> Enum.filter(fn waypoint ->
-          waypoint["poi_stop_no"] not in [dest_code, origin_code]
+          waypoint["poi_stop_no"] not in [
+            dest_code,
+            origin_code,
+            Utils.swap_dest_code_direction(origin_code),
+            Utils.swap_dest_code_direction(dest_code)
+          ]
+        end)
+        |> Enum.filter(fn waypoint ->
+          waypoint["poi_code"] != destination_poi_code
         end)
         |> Enum.uniq_by(fn e -> if is_nil(e["text"]), do: e, else: e["text"] end)
         |> Enum.map(fn waypoint ->
@@ -234,5 +251,11 @@ defmodule Display.Poi do
           }
         end)
     end
+  end
+
+  def get_poi_cd_from_dest_code(waypoints, dest_code, swap_dest_code) do
+    Enum.find_value(waypoints, fn waypoint ->
+      waypoint["poi_stop_no"] in ([dest_code] ++ [swap_dest_code]) and waypoint["poi_code"]
+    end)
   end
 end

@@ -11,6 +11,9 @@ defmodule Debug do
         border: 1px solid #ffffff0d;
         padding: 10px;
       }
+      body {
+        overflow: auto !important;
+      }
     </style>
     <div class="debug">
       <section>
