@@ -29,7 +29,17 @@ window.currentPredictionsSlides = null;
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
+
+let Hooks = {};
+Hooks.BusStopName = {
+  // when component mounts, store the bus stop name in localstorage. To be used by offline.html
+  mounted() {
+    window.localStorage.setItem('busStopName', this.el.dataset.stopname);
+  }
+}
+
 let liveSocket = new LiveSocket("/live", Socket, {
+  hooks: Hooks,
   params: { _csrf_token: csrfToken }
 });
 

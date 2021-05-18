@@ -882,12 +882,14 @@ defmodule DisplayWeb.DisplayLive do
           "landscape" ->
             ~H"""
             <div class={{"content-wrapper landscape #{theme}"}}>
+              <LandscapeNoBusInfoMessage prop={{assigns}}/>
             </div>
             """
 
           "portrait" ->
             ~H"""
             <div class={{"content-wrapper portrait #{theme}"}}>
+              <PortraitNoBusInfoMessage prop={{assigns}}/>
             </div>
             """
 
@@ -904,14 +906,14 @@ defmodule DisplayWeb.DisplayLive do
           "landscape" ->
             ~H"""
             <div class={{"content-wrapper landscape #{theme}"}}>
-              <NoBusInfoMessage/>
+              <LandscapeNoBusInfoMessage prop={{assigns}}/>
             </div>
             """
 
           "portrait" ->
             ~H"""
             <div class={{"content-wrapper portrait #{theme}"}}>
-              <NoBusInfoMessage/>
+              <PortraitNoBusInfoMessage prop={{assigns}}/>
             </div>
             """
 
