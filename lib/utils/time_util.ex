@@ -220,10 +220,12 @@ defmodule Display.Utils.TimeUtil do
       true ->
         # Subtract two hours to get previous day
         now |> Timex.add(Timex.Duration.from_seconds(-@time_2_hours))
+
       _ ->
         now
     end
     |> Timex.format!("%Y-%m-%d", :strftime)
+
     # |> String.to_integer()
   end
 

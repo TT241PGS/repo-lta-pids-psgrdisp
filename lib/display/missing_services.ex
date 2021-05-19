@@ -12,7 +12,7 @@ defmodule Display.MissingServices do
       rsn_txt: reason,
       msng_svc_txt: missing_service,
       panel_id_num: panel_id,
-      op_day_txt: operating_day
+      op_day_dt: operating_day
     })
     |> Repo.insert()
   end

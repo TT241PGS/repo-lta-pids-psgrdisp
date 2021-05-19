@@ -3,7 +3,17 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   require Logger
 
-  alias Display.{Buses, Messages, Poi, RealTime, Scheduled, Templates, PredictionStatus, MissingServices}
+  alias Display.{
+    Buses,
+    Messages,
+    Poi,
+    RealTime,
+    Scheduled,
+    Templates,
+    PredictionStatus,
+    MissingServices
+  }
+
   alias Display.Utils.{TimeUtil, NaturalSort}
   alias DisplayWeb.DisplayLive.Utils
 
@@ -184,7 +194,7 @@ defmodule Display.Utils.DisplayLiveUtil do
             m_s,
             bus_stop_no,
             TimeUtil.get_operating_day_today()
-            )
+          )
         end
 
         socket =
