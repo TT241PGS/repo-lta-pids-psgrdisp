@@ -44,3 +44,7 @@ priv/repo/.DS_Store
 gen_cert.sh
 req*.cnf
 prediction-*
+
+.vscode
+
+*.pem

@@ -138,7 +138,9 @@ defmodule Display.Buses do
       distinct: [s.dpi_route_code, s.line_no, s.dest_code, s.direction],
       join: b in Meta.BaseVersion,
       on: s.base_version == b.base_version,
-      where: s.point_no == ^bus_stop_no and b.status == "live"
+      where:
+        s.point_no == ^bus_stop_no and b.status == "live" and
+          s.operating_day == ^Display.Utils.TimeUtil.get_operating_day_today()
     )
     |> Repo.all()
     |> Enum.reduce(%{}, fn service, acc ->
@@ -197,7 +199,9 @@ defmodule Display.Buses do
       distinct: [s.dpi_route_code, s.dest_code, s.no_of_stops],
       join: b in Meta.BaseVersion,
       on: s.base_version == b.base_version,
-      where: s.point_no == ^bus_stop_no and b.status == "live"
+      where:
+        s.point_no == ^bus_stop_no and b.status == "live" and
+          s.operating_day == ^Display.Utils.TimeUtil.get_operating_day_today()
     )
     |> Repo.all()
     |> Enum.reduce(%{}, fn service, acc ->
@@ -280,22 +284,24 @@ defmodule Display.Buses do
 
   # TODO: Query with BaseVersion, OperatingDay
   def get_last_bus_by_service_by_bus_stop(bus_stop_no) do
+    operating_day = Display.Utils.TimeUtil.get_operating_day_today()
     query = "
     select distinct on (dpi_route_code) dpi_route_code, dest_code, arriving_time
       from pids_schedule s
       inner join pids_base_version b on s.base_version = b.base_version
-      where s.point_no=#{bus_stop_no} and b.status = 'live'
+      where s.point_no=#{bus_stop_no} and s.operating_day=#{operating_day} and b.status = 'live'
       order by dpi_route_code, arriving_time desc;
     "
     SQL.query!(Repo, query, [])
   end
 
   def get_sequence_no_by_service_by_stop(bus_stop_no) do
+    operating_day = Display.Utils.TimeUtil.get_operating_day_today()
     query = "
     select distinct on (dpi_route_code, line_no, direction, visit_no, org_code, dest_code) dpi_route_code, line_no, direction, visit_no, sequence_no, org_code, dest_code
     from pids_schedule s
     inner join pids_base_version b on s.base_version = b.base_version
-    where s.point_no=#{bus_stop_no} and b.status = 'live'
+    where s.point_no=#{bus_stop_no} and s.operating_day=#{operating_day} and b.status = 'live'
     order by dpi_route_code desc
     "
     SQL.query!(Repo, query, [])
@@ -303,10 +309,11 @@ defmodule Display.Buses do
 
   # TODO: Query with BaseVersion
   def get_all_services_by_bus_stop(bus_stop_no) do
+    operating_day = Display.Utils.TimeUtil.get_operating_day_today()
     query = "
     select distinct dpi_route_code, dest_code from pids_schedule s
     inner join pids_base_version b on s.base_version = b.base_version
-    where s.point_no=#{bus_stop_no} and b.status = 'live'
+    where s.point_no=#{bus_stop_no} and s.operating_day=#{operating_day} and b.status = 'live'
     "
     SQL.query!(Repo, query, [])
   end
@@ -321,13 +328,14 @@ defmodule Display.Buses do
   # TODO: Query with BaseVersion, OperatingDay
 
   def get_realtime_quickest_way_to_by_bus_stop(bus_stop_no) do
+    operating_day = Display.Utils.TimeUtil.get_operating_day_today()
     query = "
     select distinct on(poi_cd_txt, org_code, dest_code, svc_txt, direction_num, visit_no_num) poi_cd_txt, org_code, dest_code, svc_txt, direction_num, visit_no_num, tm_taken_num from
       (select psm.poi_cd_txt, qwt_poi.poi_stop_num, qwt_poi.org_code, qwt_poi.dest_code, qwt_poi.svc_txt, qwt_poi.direction_num, qwt_poi.visit_no_num, qwt_poi.tm_taken_num
       FROM pids_quickest_way_to_poi qwt_poi
       inner join pids_poi_stops_map psm
       on psm.pt_no_num = poi_stop_num
-      where depart_stop_num=#{bus_stop_no}
+      where depart_stop_num=#{bus_stop_no} and qwt_poi.operating_day=#{operating_day}
       group by psm.poi_cd_txt, qwt_poi.poi_stop_num, qwt_poi.org_code, qwt_poi.dest_code, qwt_poi.svc_txt, qwt_poi.direction_num, qwt_poi.visit_no_num, qwt_poi.tm_taken_num
       order by psm.poi_cd_txt, qwt_poi.poi_stop_num, qwt_poi.org_code, qwt_poi.dest_code, qwt_poi.svc_txt, qwt_poi.direction_num, qwt_poi.visit_no_num, tm_taken_num) r
     order by poi_cd_txt, org_code, dest_code, svc_txt, direction_num, visit_no_num, tm_taken_num

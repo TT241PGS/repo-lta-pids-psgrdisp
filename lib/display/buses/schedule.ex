@@ -7,6 +7,7 @@ defmodule Display.Buses.Schedule do
   @primary_key false
   schema "pids_schedule" do
     field :base_version, :integer
+    field :operating_day, :integer
     field :line_no, :integer
     field :route_abbr, :string
     field :direction, :integer
@@ -25,6 +26,7 @@ defmodule Display.Buses.Schedule do
 
   @field [
     :base_version,
+    :operating_day,
     :operating_day_desc,
     :line_no,
     :route_abbr,

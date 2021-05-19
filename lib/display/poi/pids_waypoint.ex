@@ -4,6 +4,8 @@ defmodule Display.Poi.Waypoint do
 
   @primary_key false
   schema "pids_waypoint" do
+    field :base_version, :integer
+    field :operating_day, :integer
     field(:cur_stop_no, :integer)
     field(:dpi_route_code, :string)
     field(:direction, :integer)
@@ -16,6 +18,8 @@ defmodule Display.Poi.Waypoint do
   end
 
   @field [
+    :base_version,
+    :operating_day,
     :cur_stop_no,
     :dpi_route_code,
     :direction,

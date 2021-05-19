@@ -4,6 +4,8 @@ defmodule Display.QuickestWayTo.QuickestWayTo do
 
   @primary_key false
   schema "pids_quickest_way_to" do
+    field :base_version, :integer
+    field :operating_day, :integer
     field :bus_stop_code, :integer, source: :bus_stop_cd_num
     field :sort_order, :integer, source: :sort_ordr_num
     field :poi_code, :string, source: :poi_cd_txt
@@ -16,6 +18,8 @@ defmodule Display.QuickestWayTo.QuickestWayTo do
   end
 
   @field [
+    :base_version,
+    :operating_day,
     :bus_stop_code,
     :sort_order,
     :poi_code,
