@@ -108,7 +108,9 @@ defmodule Display.Poi do
     from(w in Waypoint,
       join: p in Poi,
       on: w.poi_stop_txt == p.code,
-      where: w.cur_stop_no == ^bus_stop_no and p.code not in subquery(current_poi_query),
+      where:
+        w.cur_stop_no == ^bus_stop_no and p.code not in subquery(current_poi_query) and
+          w.operating_day == ^Display.Utils.TimeUtil.get_operating_day_today(),
       select: %{
         dpi_route_code: w.dpi_route_code,
         direction: w.direction,
