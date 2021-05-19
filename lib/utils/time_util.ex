@@ -7,6 +7,7 @@ defmodule Display.Utils.TimeUtil do
   @one_day_in_seconds 86400
   @two_hours_in_seconds 7200
   @one_hour_in_seconds 3600
+  @time_2_hours 7200
 
   def get_timezone do
     Timezone.get("Asia/Singapore")
@@ -211,5 +212,22 @@ defmodule Display.Utils.TimeUtil do
       # Covers 12am to 2am on next day but same operating day
       do: next_hour_in_seconds_past_today + @one_day_in_seconds,
       else: next_hour_in_seconds_past_today
+  end
+
+  def get_operating_day(now) do
+    # If time less than 2am, operating day is previous day
+    case get_seconds_past_today() < @time_2_hours do
+      true ->
+        # Subtract two hours to get previous day
+        now |> Timex.add(Timex.Duration.from_seconds(-@time_2_hours))
+      _ ->
+        now
+    end
+    |> Timex.format!("%Y-%m-%d", :strftime)
+    # |> String.to_integer()
+  end
+
+  def get_operating_day_today() do
+    get_time_now() |> get_operating_day()
   end
 end

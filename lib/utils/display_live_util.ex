@@ -3,7 +3,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   require Logger
 
-  alias Display.{Buses, Messages, Poi, RealTime, Scheduled, Templates, PredictionStatus}
+  alias Display.{Buses, Messages, Poi, RealTime, Scheduled, Templates, PredictionStatus, MissingServices}
   alias Display.Utils.{TimeUtil, NaturalSort}
   alias DisplayWeb.DisplayLive.Utils
 
@@ -161,6 +161,31 @@ defmodule Display.Utils.DisplayLiveUtil do
 
             {service_no, destination, waypoints}
           end)
+
+        # log missing services to pids_miss_svc_log
+        universal_set =
+          service_direction_map
+          |> Enum.map(fn {k, _} -> k end)
+          |> Enum.map(fn {svc, _} -> svc end)
+          |> MapSet.new()
+
+        service_set =
+          service_arrival_map
+          |> Enum.map(fn {k, _} -> k end)
+          |> Enum.map(fn {svc, _, _} -> svc end)
+          |> MapSet.new()
+
+        missing_services = MapSet.difference(universal_set, service_set)
+
+        for m_s <- missing_services do
+          MissingServices.create_missing_services_log(
+            "missing service",
+            "service not in arrival map",
+            m_s,
+            bus_stop_no,
+            TimeUtil.get_operating_day_today()
+            )
+        end
 
         socket =
           socket
