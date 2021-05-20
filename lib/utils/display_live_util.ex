@@ -326,7 +326,8 @@ defmodule Display.Utils.DisplayLiveUtil do
       MapSet.difference(universal_set, service_set)
       |> MapSet.to_list()
 
-    date = to_string(TimeUtil.get_operating_day_today()) # conv to str so can use .slice
+    # conv to str so can use .slice
+    date = to_string(TimeUtil.get_operating_day_today())
 
     y = date |> String.slice(0..3) |> String.to_integer()
     m = date |> String.slice(4..5) |> String.to_integer()
@@ -335,14 +336,15 @@ defmodule Display.Utils.DisplayLiveUtil do
     {:ok, operating_day} = Date.new(y, m, d)
 
     case MissingServices.create_missing_services_log(
-      "missing service",
-      "service not in arrival map",
-      missing_services,
-      bus_stop_no,
-      operating_day
-    ) do
+           "missing service",
+           "service not in arrival map",
+           missing_services,
+           bus_stop_no,
+           operating_day
+         ) do
       {:ok, _} ->
         Logger.info("Message service logged successfully")
+
       {:error, _} ->
         Logger.error("Message services logging unsuccessful")
     end
