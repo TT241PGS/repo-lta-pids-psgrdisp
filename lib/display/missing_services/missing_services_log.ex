@@ -9,7 +9,7 @@ defmodule Display.MissingServices.MissingServicesLog do
     field :rsn_txt, :string
     field :msng_svcs_txt, {:array, :string}, default: []
     field :bus_stop_no_num, :integer
-    field :op_day_dt, :string
+    field :op_day_dt, :date
 
     timestamps(inserted_at_source: :crt_dttm, updated_at_source: :upd_dttm)
   end

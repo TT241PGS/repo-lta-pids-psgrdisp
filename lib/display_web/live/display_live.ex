@@ -178,6 +178,8 @@ defmodule DisplayWeb.DisplayLive do
       is_prediction_next_slide_scheduled: is_prediction_next_slide_scheduled
     } = socket.assigns
 
+
+
     case skip_realtime do
       "true" ->
         DisplayLiveUtil.show_scheduled_predictions(

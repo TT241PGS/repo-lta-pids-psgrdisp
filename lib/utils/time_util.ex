@@ -224,9 +224,8 @@ defmodule Display.Utils.TimeUtil do
       _ ->
         now
     end
-    |> Timex.format!("%Y-%m-%d", :strftime)
-
-    # |> String.to_integer()
+    |> Timex.format!("%Y%m%d", :strftime)
+    |> String.to_integer()
   end
 
   def get_operating_day_today() do

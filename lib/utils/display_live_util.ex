@@ -172,7 +172,12 @@ defmodule Display.Utils.DisplayLiveUtil do
             {service_no, destination, waypoints}
           end)
 
-        log_missing_services(service_direction_map, service_arrival_map, bus_stop_no)
+        Task.Supervisor.async_nolink(
+          Display.TaskSupervisor,
+          __MODULE__,
+          :log_missing_services,
+          [service_direction_map, service_arrival_map, bus_stop_no]
+        )
 
         socket =
           socket
@@ -321,12 +326,20 @@ defmodule Display.Utils.DisplayLiveUtil do
       MapSet.difference(universal_set, service_set)
       |> MapSet.to_list()
 
+    date = to_string(TimeUtil.get_operating_day_today()) # conv to str so can use .slice
+
+    y = date |> String.slice(0..3) |> String.to_integer()
+    m = date |> String.slice(4..5) |> String.to_integer()
+    d = date |> String.slice(6..7) |> String.to_integer()
+
+    {:ok, operating_day} = Date.new(y, m, d)
+
     case MissingServices.create_missing_services_log(
       "missing service",
       "service not in arrival map",
       missing_services,
       bus_stop_no,
-      TimeUtil.get_operating_day_today()
+      operating_day
     ) do
       {:ok, _} ->
         Logger.info("Message service logged successfully")

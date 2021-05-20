@@ -6,6 +6,7 @@ defmodule Display.Application do
   use Application
 
   def start(_type, _args) do
+
     children = [
       # Start the Ecto repository
       Display.Repo,
@@ -21,7 +22,9 @@ defmodule Display.Application do
       DisplayWeb.Endpoint,
       # Start a worker by calling: Display.Worker.start_link(arg)
       # {Display.Worker, arg}
-      {Registry, keys: :unique, name: AdvisoryRegistry}
+      {Registry, keys: :unique, name: AdvisoryRegistry},
+      # task supervisor for missing services logger
+      {Task.Supervisor, name: Display.TaskSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
