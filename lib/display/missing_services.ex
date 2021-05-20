@@ -5,13 +5,13 @@ defmodule Display.MissingServices do
   alias Display.MissingServices.MissingServicesLog
 
   # create
-  def create_missing_services_log(error_type, reason, missing_service, panel_id, operating_day) do
+  def create_missing_services_log(error_type, reason, missing_service, bus_stop_no, operating_day) do
     %MissingServicesLog{}
     |> MissingServicesLog.changeset(%{
       err_typ_txt: error_type,
       rsn_txt: reason,
-      msng_svc_txt: missing_service,
-      panel_id_num: panel_id,
+      msng_svcs_txt: missing_service,
+      bus_stop_no_num: bus_stop_no,
       op_day_dt: operating_day
     })
     |> Repo.insert()

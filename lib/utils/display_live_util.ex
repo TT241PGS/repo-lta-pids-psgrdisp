@@ -172,30 +172,7 @@ defmodule Display.Utils.DisplayLiveUtil do
             {service_no, destination, waypoints}
           end)
 
-        # log missing services to pids_miss_svc_log
-        universal_set =
-          service_direction_map
-          |> Enum.map(fn {k, _} -> k end)
-          |> Enum.map(fn {svc, _} -> svc end)
-          |> MapSet.new()
-
-        service_set =
-          service_arrival_map
-          |> Enum.map(fn {k, _} -> k end)
-          |> Enum.map(fn {svc, _, _} -> svc end)
-          |> MapSet.new()
-
-        missing_services = MapSet.difference(universal_set, service_set)
-
-        for m_s <- missing_services do
-          MissingServices.create_missing_services_log(
-            "missing service",
-            "service not in arrival map",
-            m_s,
-            bus_stop_no,
-            TimeUtil.get_operating_day_today()
-          )
-        end
+        log_missing_services(service_direction_map, service_arrival_map, bus_stop_no)
 
         socket =
           socket
@@ -305,14 +282,6 @@ defmodule Display.Utils.DisplayLiveUtil do
           "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
         )
 
-        # if not end_of_operating_day do
-        #   PredictionStatus.create_poller_error_log(
-        #     "Cached_predictions not_found",
-        #     socket.assigns.panel_id,
-        #     "panel"
-        #   )
-        # end
-
         socket = show_blank_screen(socket)
 
         trigger_next_update_stops(is_trigger_next)
@@ -327,20 +296,42 @@ defmodule Display.Utils.DisplayLiveUtil do
           } -> #{inspect(error)}"
         )
 
-        # if not end_of_operating_day do
-        #   PredictionStatus.create_poller_error_log(
-        #     "#{inspect(error)}",
-        #     socket.assigns.panel_id,
-        #     "panel"
-        #   )
-        # end
-
         socket = show_blank_screen(socket)
 
         trigger_next_update_stops(is_trigger_next)
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
         Logger.info(":update_stops failed (#{elapsed_time})")
         {:noreply, socket}
+    end
+  end
+
+  def log_missing_services(service_direction_map, service_arrival_map, bus_stop_no) do
+    # log missing services to pids_miss_svc_log
+    universal_set =
+      service_direction_map
+      |> Enum.map(fn {k, _} -> elem(k, 0) end)
+      |> MapSet.new()
+
+    service_set =
+      service_arrival_map
+      |> Enum.map(fn {k, _} -> elem(k, 0) end)
+      |> MapSet.new()
+
+    missing_services =
+      MapSet.difference(universal_set, service_set)
+      |> MapSet.to_list()
+
+    case MissingServices.create_missing_services_log(
+      "missing service",
+      "service not in arrival map",
+      missing_services,
+      bus_stop_no,
+      TimeUtil.get_operating_day_today()
+    ) do
+      {:ok, _} ->
+        Logger.info("Message service logged successfully")
+      {:error, _} ->
+        Logger.error("Message services logging unsuccessful")
     end
   end
 
