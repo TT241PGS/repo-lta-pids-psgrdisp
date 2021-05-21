@@ -174,12 +174,17 @@ defmodule Display.Utils.DisplayLiveUtil do
             {service_no, destination, waypoints}
           end)
 
-        Task.Supervisor.async_nolink(
-          Display.TaskSupervisor,
-          __MODULE__,
-          :log_missing_services,
-          [service_direction_map, service_arrival_map, bus_stop_no]
-        )
+        missing_services = find_missing_services(service_direction_map, service_arrival_map)
+
+        # only log when there are missing services
+        if length(missing_services) > 0 do
+          Task.Supervisor.async_nolink(
+            Display.TaskSupervisor,
+            __MODULE__,
+            :log_missing_services,
+            [missing_services, bus_stop_no]
+          )
+        end
 
         socket =
           socket
@@ -312,23 +317,8 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
-  def log_missing_services(service_direction_map, service_arrival_map, bus_stop_no) do
+  def log_missing_services(missing_services, bus_stop_no) do
     # log missing services to pids_miss_svc_log
-    universal_set =
-      service_direction_map
-      |> Enum.map(fn {k, _} -> elem(k, 0) end)
-      |> MapSet.new()
-
-    service_set =
-      service_arrival_map
-      |> Enum.map(fn {k, _} -> elem(k, 0) end)
-      |> MapSet.new()
-
-    missing_services =
-      MapSet.difference(universal_set, service_set)
-      |> MapSet.to_list()
-
-    # conv to str so can use .slice
     date = to_string(TimeUtil.get_operating_day_today())
 
     y = date |> String.slice(0..3) |> String.to_integer()
@@ -350,6 +340,20 @@ defmodule Display.Utils.DisplayLiveUtil do
       {:error, _} ->
         Logger.error("Message services logging unsuccessful")
     end
+  end
+
+  defp find_missing_services(service_direction_map, service_arrival_map) do
+    universal_set =
+      service_direction_map
+      |> Enum.map(fn {k, _} -> elem(k, 0) end)
+      |> MapSet.new()
+
+    service_set =
+      service_arrival_map
+      |> Enum.map(fn {k, _} -> elem(k, 0) end)
+      |> MapSet.new()
+
+    MapSet.difference(universal_set, service_set) |> MapSet.to_list()
   end
 
   def show_blank_screen(socket) do
