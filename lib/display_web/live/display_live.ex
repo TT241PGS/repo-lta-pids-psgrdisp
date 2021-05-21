@@ -813,76 +813,103 @@ defmodule DisplayWeb.DisplayLive do
     cond do
       # svr and device online + data from datamall
       assigns.predictions_current != [] ->
-        case assigns.current_layout_value do
-          "landscape_one_pane" ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeOnePaneLayout prop={{assigns}}/>
-            </div>
-            """
+        # no suppressed msg
+        if is_nil(assigns.suppressed_messages[:global_message]) do
+          case assigns.current_layout_value do
+            "landscape_one_pane" ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <LandscapeOnePaneLayout prop={{assigns}}/>
+              </div>
+              """
 
-          "landscape_three_pane" ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeThreePaneLayout prop={{assigns}}/>
-            </div>
-            """
+            "landscape_three_pane" ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <LandscapeThreePaneLayout prop={{assigns}}/>
+              </div>
+              """
 
-          "landscape_four_pane_a" ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeFourPaneALayout prop={{assigns}}/>
-            </div>
-            """
+            "landscape_four_pane_a" ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <LandscapeFourPaneALayout prop={{assigns}}/>
+              </div>
+              """
 
-          "landscape_four_pane_b" ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeFourPaneBLayout prop={{assigns}}/>
-            </div>
-            """
+            "landscape_four_pane_b" ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <LandscapeFourPaneBLayout prop={{assigns}}/>
+              </div>
+              """
 
-          "portrait_one_pane" ->
-            ~H"""
-            <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitOnePaneLayout prop={{assigns}} service_per_page="11"/>
-            </div>
-            """
+            "portrait_one_pane" ->
+              ~H"""
+              <div class={{"content-wrapper portrait #{theme}"}}>
+                <PortraitOnePaneLayout prop={{assigns}} service_per_page="11"/>
+              </div>
+              """
 
-          "portrait_two_pane" ->
-            ~H"""
-            <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitTwoPaneLayout prop={{assigns}} service_per_page="9"/>
-            </div>
-            """
+            "portrait_two_pane" ->
+              ~H"""
+              <div class={{"content-wrapper portrait #{theme}"}}>
+                <PortraitTwoPaneLayout prop={{assigns}} service_per_page="9"/>
+              </div>
+              """
 
-          "portrait_three_pane" ->
-            ~H"""
-            <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitThreePaneALayout prop={{assigns}} service_per_page="7"/>
-            </div>
-            """
+            "portrait_three_pane" ->
+              ~H"""
+              <div class={{"content-wrapper portrait #{theme}"}}>
+                <PortraitThreePaneALayout prop={{assigns}} service_per_page="7"/>
+              </div>
+              """
 
-          "portrait_three_pane_b" ->
-            ~H"""
-            <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitThreePaneBLayout prop={{assigns}} service_per_page="5"/>
-            </div>
-            """
+            "portrait_three_pane_b" ->
+              ~H"""
+              <div class={{"content-wrapper portrait #{theme}"}}>
+                <PortraitThreePaneBLayout prop={{assigns}} service_per_page="5"/>
+              </div>
+              """
 
-          nil ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-              <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
-            </div>
-            """
+            nil ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
+              </div>
+              """
 
-          unknown_layout ->
-            ~H"""
-            <unknown_layout class={{"content-wrapper landscape #{theme}"}}>
-              <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
-            </unknown_layout>
-            """
+            unknown_layout ->
+              ~H"""
+              <unknown_layout class={{"content-wrapper landscape #{theme}"}}>
+                <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
+              </unknown_layout>
+              """
+          end
+
+          # suppressed msg exists
+        else
+          case assigns.layout_mode do
+            "landscape" ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <LandscapeSuppressedMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
+              </div>
+              """
+
+            "portrait" ->
+              ~H"""
+              <div class={{"content-wrapper portrait #{theme}"}}>
+                <PortraitSuppressedMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
+              </div>
+              """
+
+            nil ->
+              ~H"""
+              <div class={{"content-wrapper"}}>
+              </div>
+              """
+          end
         end
 
       # when its end of operating day - default is false so it'll be skipped over
