@@ -893,14 +893,14 @@ defmodule DisplayWeb.DisplayLive do
             "landscape" ->
               ~H"""
               <div class={{"content-wrapper landscape #{theme}"}}>
-                <LandscapeSuppressedMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
+                <LandscapeNoBusInfoMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
               </div>
               """
 
             "portrait" ->
               ~H"""
               <div class={{"content-wrapper portrait #{theme}"}}>
-                <PortraitSuppressedMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
+                <PortraitNoBusInfoMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
               </div>
               """
 
@@ -918,14 +918,14 @@ defmodule DisplayWeb.DisplayLive do
           "landscape" ->
             ~H"""
             <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeNoBusInfoMessage prop={{assigns}}/>
+              <LandscapeNoBusInfoMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
             </div>
             """
 
           "portrait" ->
             ~H"""
             <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitNoBusInfoMessage prop={{assigns}}/>
+              <PortraitNoBusInfoMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
             </div>
             """
 
