@@ -147,7 +147,7 @@ defmodule DisplayWeb.DisplayLive do
 
   def init_handlers(socket, start_time) do
     Process.send_after(self(), :update_stops_repeatedly, 0)
-    Process.send_after(self(), :update_layout_repeatedly, 0)
+    Process.send_after(self(), {:update_layout_repeatedly, "fetch"}, 0)
     Process.send_after(self(), :update_time_repeatedly, 0)
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info("Mount ended (#{elapsed_time})")
@@ -614,7 +614,7 @@ defmodule DisplayWeb.DisplayLive do
   @doc """
     This calls itself after certain period of time to update layout every n seconds
   """
-  def handle_info(:update_layout_repeatedly, socket) do
+  def handle_info({:update_layout_repeatedly, type}, socket) do
     start_time = Timex.now()
 
     Logger.info(":update_layout_repeatedly started")
@@ -624,7 +624,9 @@ defmodule DisplayWeb.DisplayLive do
       message: message,
       current_layout_index: current_layout_index,
       is_show_non_message_template: is_show_non_message_template,
-      preview_workflow: preview_workflow
+      preview_workflow: preview_workflow,
+      update_layout_timer: update_layout_timer,
+      multimedia_image_sequence_next_trigger_at: multimedia_image_sequence_next_trigger_at
     } = socket.assigns
 
     templates =
@@ -639,6 +641,8 @@ defmodule DisplayWeb.DisplayLive do
           )
           |> DisplayLiveUtil.discard_inactive_multimedia_layouts()
       end
+
+    prev_templates = socket.assigns[:templates]
 
     socket = socket |> assign(:templates, templates)
 
@@ -665,6 +669,43 @@ defmodule DisplayWeb.DisplayLive do
     # FOR DEVELOPMENT ONLY, not supposed to be commited
     # template_index = 0
 
+    case type do
+      "once" ->
+        {layouts, socket} =
+          prepare_to_refresh_layout(socket, templates, template_index, panel_id, layout_mode)
+
+        result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
+
+        elapsed_time = TimeUtil.get_elapsed_time(start_time)
+        Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
+
+        result
+
+      "fetch" ->
+        case prev_templates == templates do
+          true ->
+            {:noreply, socket}
+
+          false ->
+            {layouts, socket} =
+              prepare_to_refresh_layout(socket, templates, template_index, panel_id, layout_mode)
+
+            DisplayLiveUtil.reset_timer(multimedia_image_sequence_next_trigger_at)
+            DisplayLiveUtil.reset_timer(update_layout_timer)
+
+            result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
+
+            elapsed_time = TimeUtil.get_elapsed_time(start_time)
+            Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
+
+            result
+        end
+
+        schedule_work_update_layout_repeatedly()
+    end
+  end
+
+  defp prepare_to_refresh_layout(socket, templates, template_index, panel_id, layout_mode) do
     layouts = templates |> Enum.at(template_index) |> Map.get("layouts")
 
     message_layouts = templates |> Enum.at(1) |> Map.get("layouts")
@@ -681,12 +722,12 @@ defmodule DisplayWeb.DisplayLive do
       |> assign(:cycle_time, cycle_time)
       |> assign(:layout_mode, layout_mode)
 
-    result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
+    {layouts, socket}
+  end
 
-    elapsed_time = TimeUtil.get_elapsed_time(start_time)
-    Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
-
-    result
+  defp schedule_work_update_layout_repeatedly() do
+    # In 60 seconds
+    Process.send_after(self(), {:update_layout_repeatedly, "fetch"}, 60 * 1000)
   end
 
   def handle_info(:show_next_layout, socket) do
@@ -721,7 +762,7 @@ defmodule DisplayWeb.DisplayLive do
     update_layout_timer =
       Process.send_after(
         self(),
-        :update_layout_repeatedly,
+        {:update_layout_repeatedly, "once"},
         next_duration * 1000
       )
 

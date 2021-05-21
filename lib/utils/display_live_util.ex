@@ -1079,7 +1079,7 @@ defmodule Display.Utils.DisplayLiveUtil do
         update_layout_timer =
           Process.send_after(
             self(),
-            :update_layout_repeatedly,
+            {:update_layout_repeatedly, "once"},
             next_duration * 1000
           )
 
@@ -1322,5 +1322,15 @@ defmodule Display.Utils.DisplayLiveUtil do
       end,
       NaturalSort.sort_direction(:asc)
     )
+  end
+
+  def reset_timer(timer) do
+    case timer do
+      nil ->
+        nil
+
+      timer_ref ->
+        Process.cancel_timer(timer_ref)
+    end
   end
 end
