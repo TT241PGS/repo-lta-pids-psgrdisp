@@ -3,7 +3,17 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   require Logger
 
-  alias Display.{Buses, Messages, Poi, RealTime, Scheduled, Templates}
+  alias Display.{
+    Buses,
+    Messages,
+    Poi,
+    RealTime,
+    Scheduled,
+    Templates,
+    PredictionStatus,
+    MissingServices
+  }
+
   alias Display.Utils.{TimeUtil, NaturalSort}
   alias DisplayWeb.DisplayLive.Utils
 
@@ -164,6 +174,13 @@ defmodule Display.Utils.DisplayLiveUtil do
             {service_no, destination, waypoints}
           end)
 
+        Task.Supervisor.async_nolink(
+          Display.TaskSupervisor,
+          __MODULE__,
+          :log_missing_services,
+          [service_direction_map, service_arrival_map, bus_stop_no]
+        )
+
         socket =
           socket
           |> Phoenix.LiveView.assign(:is_bus_interchange, is_bus_interchange)
@@ -292,6 +309,46 @@ defmodule Display.Utils.DisplayLiveUtil do
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
         Logger.info(":update_stops failed (#{elapsed_time})")
         {:noreply, socket}
+    end
+  end
+
+  def log_missing_services(service_direction_map, service_arrival_map, bus_stop_no) do
+    # log missing services to pids_miss_svc_log
+    universal_set =
+      service_direction_map
+      |> Enum.map(fn {k, _} -> elem(k, 0) end)
+      |> MapSet.new()
+
+    service_set =
+      service_arrival_map
+      |> Enum.map(fn {k, _} -> elem(k, 0) end)
+      |> MapSet.new()
+
+    missing_services =
+      MapSet.difference(universal_set, service_set)
+      |> MapSet.to_list()
+
+    # conv to str so can use .slice
+    date = to_string(TimeUtil.get_operating_day_today())
+
+    y = date |> String.slice(0..3) |> String.to_integer()
+    m = date |> String.slice(4..5) |> String.to_integer()
+    d = date |> String.slice(6..7) |> String.to_integer()
+
+    {:ok, operating_day} = Date.new(y, m, d)
+
+    case MissingServices.create_missing_services_log(
+           "missing service",
+           "service not in arrival map",
+           missing_services,
+           bus_stop_no,
+           operating_day
+         ) do
+      {:ok, _} ->
+        Logger.info("Message service logged successfully")
+
+      {:error, _} ->
+        Logger.error("Message services logging unsuccessful")
     end
   end
 

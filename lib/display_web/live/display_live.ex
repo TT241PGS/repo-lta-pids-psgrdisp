@@ -154,6 +154,15 @@ defmodule DisplayWeb.DisplayLive do
     {:ok, socket}
   end
 
+  def handle_info({ref, _return_value}, socket) do
+    Process.demonitor(ref, [:flush])
+    {:noreply, socket}
+  end
+
+  def handle_info({_, _, _, _, _}, socket) do
+    {:noreply, socket}
+  end
+
   @doc """
     This is called after "arrival_predictions_updated" broadcast event
     This does not schedule update stops to be called after certain period again

@@ -27,6 +27,7 @@ defmodule DisplayWeb.Router do
     pipe_through :api
 
     post "/notifications", NotificationController, :create
+    post "/poller-prediction-errors", ErrorLogController, :handle
   end
 
   # Enables LiveDashboard only for development
