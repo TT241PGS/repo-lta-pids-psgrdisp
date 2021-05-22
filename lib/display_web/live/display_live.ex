@@ -149,18 +149,10 @@ defmodule DisplayWeb.DisplayLive do
     Process.send_after(self(), :update_stops_repeatedly, 0)
     Process.send_after(self(), {:update_layout_repeatedly, "fetch"}, 0)
     Process.send_after(self(), :update_time_repeatedly, 0)
+
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info("Mount ended (#{elapsed_time})")
     {:ok, socket}
-  end
-
-  def handle_info({ref, _return_value}, socket) do
-    Process.demonitor(ref, [:flush])
-    {:noreply, socket}
-  end
-
-  def handle_info({_, _, _, _, _}, socket) do
-    {:noreply, socket}
   end
 
   @doc """
@@ -537,22 +529,6 @@ defmodule DisplayWeb.DisplayLive do
     {:noreply, socket}
   end
 
-  defp determine_prediction_next_index(list, index) do
-    cond do
-      length(list) == 0 ->
-        nil
-
-      index == nil ->
-        0
-
-      index >= 0 and index < length(list) - 1 ->
-        index + 1
-
-      true ->
-        0
-    end
-  end
-
   def handle_info(
         :show_next_image_sequence,
         %{
@@ -684,6 +660,7 @@ defmodule DisplayWeb.DisplayLive do
       "fetch" ->
         case prev_templates == templates do
           true ->
+            schedule_work_update_layout_repeatedly()
             {:noreply, socket}
 
           false ->
@@ -697,37 +674,10 @@ defmodule DisplayWeb.DisplayLive do
 
             elapsed_time = TimeUtil.get_elapsed_time(start_time)
             Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
-
+            schedule_work_update_layout_repeatedly()
             result
         end
-
-        schedule_work_update_layout_repeatedly()
     end
-  end
-
-  defp prepare_to_refresh_layout(socket, templates, template_index, panel_id, layout_mode) do
-    layouts = templates |> Enum.at(template_index) |> Map.get("layouts")
-
-    message_layouts = templates |> Enum.at(1) |> Map.get("layouts")
-
-    cycle_time = DisplayLiveUtil.get_cycle_time_from_layouts(message_layouts)
-
-    GenServer.cast(
-      {:via, Registry, {AdvisoryRegistry, "advisory_timeline_generator_#{panel_id}"}},
-      {:cycle_time, cycle_time}
-    )
-
-    socket =
-      socket
-      |> assign(:cycle_time, cycle_time)
-      |> assign(:layout_mode, layout_mode)
-
-    {layouts, socket}
-  end
-
-  defp schedule_work_update_layout_repeatedly() do
-    # In 60 seconds
-    Process.send_after(self(), {:update_layout_repeatedly, "fetch"}, 60 * 1000)
   end
 
   def handle_info(:show_next_layout, socket) do
@@ -838,6 +788,15 @@ defmodule DisplayWeb.DisplayLive do
     # For debug
     |> assign(:messages, %{timeline: timeline, message_map: message_map})
     |> DisplayLiveUtil.update_layout(layouts, current_layout_index)
+  end
+
+  def handle_info({ref, _return_value}, socket) do
+    Process.demonitor(ref, [:flush])
+    {:noreply, socket}
+  end
+
+  def handle_info({_, _, _, _, _}, socket) do
+    {:noreply, socket}
   end
 
   def render(assigns = %{debug: "true"}) do
@@ -1002,5 +961,46 @@ defmodule DisplayWeb.DisplayLive do
             """
         end
     end
+  end
+
+  defp determine_prediction_next_index(list, index) do
+    cond do
+      length(list) == 0 ->
+        nil
+
+      index == nil ->
+        0
+
+      index >= 0 and index < length(list) - 1 ->
+        index + 1
+
+      true ->
+        0
+    end
+  end
+
+  defp prepare_to_refresh_layout(socket, templates, template_index, panel_id, layout_mode) do
+    layouts = templates |> Enum.at(template_index) |> Map.get("layouts")
+
+    message_layouts = templates |> Enum.at(1) |> Map.get("layouts")
+
+    cycle_time = DisplayLiveUtil.get_cycle_time_from_layouts(message_layouts)
+
+    GenServer.cast(
+      {:via, Registry, {AdvisoryRegistry, "advisory_timeline_generator_#{panel_id}"}},
+      {:cycle_time, cycle_time}
+    )
+
+    socket =
+      socket
+      |> assign(:cycle_time, cycle_time)
+      |> assign(:layout_mode, layout_mode)
+
+    {layouts, socket}
+  end
+
+  defp schedule_work_update_layout_repeatedly() do
+    # In 60 seconds
+    Process.send_after(self(), {:update_layout_repeatedly, "fetch"}, 60 * 1000)
   end
 end
