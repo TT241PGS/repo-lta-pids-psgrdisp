@@ -144,9 +144,8 @@ defmodule Display.Utils.DisplayLiveUtil do
 
         incoming_buses = get_incoming_buses(cached_predictions, suppressed_messages)
 
-        cached_predictions =
-          update_cached_predictions(cached_predictions, bus_stop_no)
-          |> sort_predictions_by_service_no_asc
+        cached_predictions = update_cached_predictions(cached_predictions, bus_stop_no)
+        # |> sort_predictions_by_service_no_asc
 
         is_bus_interchange =
           Enum.reduce_while(cached_predictions, false, fn x, acc ->
@@ -1110,25 +1109,10 @@ defmodule Display.Utils.DisplayLiveUtil do
     with config <- Buses.get_panel_configuration_by_panel_id(panel_id),
          false <- is_nil(config) do
       %{
-        service_group_type: group_type,
-        day_group: day_group,
-        night_group: night_group,
         service_group: service_group
       } = config
 
-      cond do
-        group_type == "SERVICE_GROUP" ->
-          filter_groups(service_group, predictions)
-
-        group_type == "DAY_NIGHT_GROUP" and TimeUtil.is_day_now() ->
-          filter_groups(day_group, predictions)
-
-        group_type == "DAY_NIGHT_GROUP" and not TimeUtil.is_day_now() ->
-          filter_groups(night_group, predictions)
-
-        true ->
-          predictions
-      end
+      filter_groups(service_group, predictions)
     else
       _ -> predictions
     end
