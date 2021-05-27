@@ -147,8 +147,9 @@ defmodule DisplayWeb.DisplayLive do
 
   def init_handlers(socket, start_time) do
     Process.send_after(self(), :update_stops_repeatedly, 0)
-    Process.send_after(self(), :update_layout_repeatedly, 0)
+    Process.send_after(self(), {:update_layout_repeatedly, "fetch"}, 0)
     Process.send_after(self(), :update_time_repeatedly, 0)
+
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
     Logger.info("Mount ended (#{elapsed_time})")
     {:ok, socket}
@@ -528,22 +529,6 @@ defmodule DisplayWeb.DisplayLive do
     {:noreply, socket}
   end
 
-  defp determine_prediction_next_index(list, index) do
-    cond do
-      length(list) == 0 ->
-        nil
-
-      index == nil ->
-        0
-
-      index >= 0 and index < length(list) - 1 ->
-        index + 1
-
-      true ->
-        0
-    end
-  end
-
   def handle_info(
         :show_next_image_sequence,
         %{
@@ -605,7 +590,7 @@ defmodule DisplayWeb.DisplayLive do
   @doc """
     This calls itself after certain period of time to update layout every n seconds
   """
-  def handle_info(:update_layout_repeatedly, socket) do
+  def handle_info({:update_layout_repeatedly, type}, socket) do
     start_time = Timex.now()
 
     Logger.info(":update_layout_repeatedly started")
@@ -615,7 +600,9 @@ defmodule DisplayWeb.DisplayLive do
       message: message,
       current_layout_index: current_layout_index,
       is_show_non_message_template: is_show_non_message_template,
-      preview_workflow: preview_workflow
+      preview_workflow: preview_workflow,
+      update_layout_timer: update_layout_timer,
+      multimedia_image_sequence_next_trigger_at: multimedia_image_sequence_next_trigger_at
     } = socket.assigns
 
     templates =
@@ -630,6 +617,8 @@ defmodule DisplayWeb.DisplayLive do
           )
           |> DisplayLiveUtil.discard_inactive_multimedia_layouts()
       end
+
+    prev_templates = socket.assigns[:templates]
 
     socket = socket |> assign(:templates, templates)
 
@@ -656,28 +645,39 @@ defmodule DisplayWeb.DisplayLive do
     # FOR DEVELOPMENT ONLY, not supposed to be commited
     # template_index = 0
 
-    layouts = templates |> Enum.at(template_index) |> Map.get("layouts")
+    case type do
+      "once" ->
+        {layouts, socket} =
+          prepare_to_refresh_layout(socket, templates, template_index, panel_id, layout_mode)
 
-    message_layouts = templates |> Enum.at(1) |> Map.get("layouts")
+        result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
 
-    cycle_time = DisplayLiveUtil.get_cycle_time_from_layouts(message_layouts)
+        elapsed_time = TimeUtil.get_elapsed_time(start_time)
+        Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
 
-    GenServer.cast(
-      {:via, Registry, {AdvisoryRegistry, "advisory_timeline_generator_#{panel_id}"}},
-      {:cycle_time, cycle_time}
-    )
+        result
 
-    socket =
-      socket
-      |> assign(:cycle_time, cycle_time)
-      |> assign(:layout_mode, layout_mode)
+      "fetch" ->
+        case prev_templates == templates do
+          true ->
+            schedule_work_update_layout_repeatedly()
+            {:noreply, socket}
 
-    result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
+          false ->
+            {layouts, socket} =
+              prepare_to_refresh_layout(socket, templates, template_index, panel_id, layout_mode)
 
-    elapsed_time = TimeUtil.get_elapsed_time(start_time)
-    Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
+            DisplayLiveUtil.reset_timer(multimedia_image_sequence_next_trigger_at)
+            DisplayLiveUtil.reset_timer(update_layout_timer)
 
-    result
+            result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
+
+            elapsed_time = TimeUtil.get_elapsed_time(start_time)
+            Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
+            schedule_work_update_layout_repeatedly()
+            result
+        end
+    end
   end
 
   def handle_info(:show_next_layout, socket) do
@@ -712,7 +712,7 @@ defmodule DisplayWeb.DisplayLive do
     update_layout_timer =
       Process.send_after(
         self(),
-        :update_layout_repeatedly,
+        {:update_layout_repeatedly, "once"},
         next_duration * 1000
       )
 
@@ -790,6 +790,15 @@ defmodule DisplayWeb.DisplayLive do
     |> DisplayLiveUtil.update_layout(layouts, current_layout_index)
   end
 
+  def handle_info({ref, _return_value}, socket) do
+    Process.demonitor(ref, [:flush])
+    {:noreply, socket}
+  end
+
+  def handle_info({_, _, _, _, _}, socket) do
+    {:noreply, socket}
+  end
+
   def render(assigns = %{debug: "true"}) do
     ~H"""
     <div style="color: white">
@@ -804,76 +813,103 @@ defmodule DisplayWeb.DisplayLive do
     cond do
       # svr and device online + data from datamall
       assigns.predictions_current != [] ->
-        case assigns.current_layout_value do
-          "landscape_one_pane" ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeOnePaneLayout prop={{assigns}}/>
-            </div>
-            """
+        # no suppressed msg
+        if is_nil(assigns.suppressed_messages[:global_message]) do
+          case assigns.current_layout_value do
+            "landscape_one_pane" ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <LandscapeOnePaneLayout prop={{assigns}}/>
+              </div>
+              """
 
-          "landscape_three_pane" ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeThreePaneLayout prop={{assigns}}/>
-            </div>
-            """
+            "landscape_three_pane" ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <LandscapeThreePaneLayout prop={{assigns}}/>
+              </div>
+              """
 
-          "landscape_four_pane_a" ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeFourPaneALayout prop={{assigns}}/>
-            </div>
-            """
+            "landscape_four_pane_a" ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <LandscapeFourPaneALayout prop={{assigns}}/>
+              </div>
+              """
 
-          "landscape_four_pane_b" ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeFourPaneBLayout prop={{assigns}}/>
-            </div>
-            """
+            "landscape_four_pane_b" ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <LandscapeFourPaneBLayout prop={{assigns}}/>
+              </div>
+              """
 
-          "portrait_one_pane" ->
-            ~H"""
-            <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitOnePaneLayout prop={{assigns}} service_per_page="11"/>
-            </div>
-            """
+            "portrait_one_pane" ->
+              ~H"""
+              <div class={{"content-wrapper portrait #{theme}"}}>
+                <PortraitOnePaneLayout prop={{assigns}} service_per_page="11"/>
+              </div>
+              """
 
-          "portrait_two_pane" ->
-            ~H"""
-            <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitTwoPaneLayout prop={{assigns}} service_per_page="9"/>
-            </div>
-            """
+            "portrait_two_pane" ->
+              ~H"""
+              <div class={{"content-wrapper portrait #{theme}"}}>
+                <PortraitTwoPaneLayout prop={{assigns}} service_per_page="9"/>
+              </div>
+              """
 
-          "portrait_three_pane" ->
-            ~H"""
-            <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitThreePaneALayout prop={{assigns}} service_per_page="7"/>
-            </div>
-            """
+            "portrait_three_pane" ->
+              ~H"""
+              <div class={{"content-wrapper portrait #{theme}"}}>
+                <PortraitThreePaneALayout prop={{assigns}} service_per_page="7"/>
+              </div>
+              """
 
-          "portrait_three_pane_b" ->
-            ~H"""
-            <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitThreePaneBLayout prop={{assigns}} service_per_page="5"/>
-            </div>
-            """
+            "portrait_three_pane_b" ->
+              ~H"""
+              <div class={{"content-wrapper portrait #{theme}"}}>
+                <PortraitThreePaneBLayout prop={{assigns}} service_per_page="5"/>
+              </div>
+              """
 
-          nil ->
-            ~H"""
-            <div class={{"content-wrapper landscape #{theme}"}}>
-              <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
-            </div>
-            """
+            nil ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Loading...</div>
+              </div>
+              """
 
-          unknown_layout ->
-            ~H"""
-            <unknown_layout class={{"content-wrapper landscape #{theme}"}}>
-              <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
-            </unknown_layout>
-            """
+            unknown_layout ->
+              ~H"""
+              <unknown_layout class={{"content-wrapper landscape #{theme}"}}>
+                <div style="font-size: 30px;text-align: center;color: white;margin-top: 50px;">Layout "{{unknown_layout}}" not implemented</div>
+              </unknown_layout>
+              """
+          end
+
+          # suppressed msg exists
+        else
+          case assigns.layout_mode do
+            "landscape" ->
+              ~H"""
+              <div class={{"content-wrapper landscape #{theme}"}}>
+                <LandscapeNoBusInfoMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
+              </div>
+              """
+
+            "portrait" ->
+              ~H"""
+              <div class={{"content-wrapper portrait #{theme}"}}>
+                <PortraitNoBusInfoMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
+              </div>
+              """
+
+            nil ->
+              ~H"""
+              <div class={{"content-wrapper"}}>
+              </div>
+              """
+          end
         end
 
       # when its end of operating day - default is false so it'll be skipped over
@@ -882,14 +918,14 @@ defmodule DisplayWeb.DisplayLive do
           "landscape" ->
             ~H"""
             <div class={{"content-wrapper landscape #{theme}"}}>
-              <LandscapeNoBusInfoMessage prop={{assigns}}/>
+              <LandscapeNoBusInfoMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
             </div>
             """
 
           "portrait" ->
             ~H"""
             <div class={{"content-wrapper portrait #{theme}"}}>
-              <PortraitNoBusInfoMessage prop={{assigns}}/>
+              <PortraitNoBusInfoMessage prop={{assigns}} suppressed_msg={{get_in(assigns.suppressed_messages, [:global_message])}}/>
             </div>
             """
 
@@ -925,5 +961,46 @@ defmodule DisplayWeb.DisplayLive do
             """
         end
     end
+  end
+
+  defp determine_prediction_next_index(list, index) do
+    cond do
+      length(list) == 0 ->
+        nil
+
+      index == nil ->
+        0
+
+      index >= 0 and index < length(list) - 1 ->
+        index + 1
+
+      true ->
+        0
+    end
+  end
+
+  defp prepare_to_refresh_layout(socket, templates, template_index, panel_id, layout_mode) do
+    layouts = templates |> Enum.at(template_index) |> Map.get("layouts")
+
+    message_layouts = templates |> Enum.at(1) |> Map.get("layouts")
+
+    cycle_time = DisplayLiveUtil.get_cycle_time_from_layouts(message_layouts)
+
+    GenServer.cast(
+      {:via, Registry, {AdvisoryRegistry, "advisory_timeline_generator_#{panel_id}"}},
+      {:cycle_time, cycle_time}
+    )
+
+    socket =
+      socket
+      |> assign(:cycle_time, cycle_time)
+      |> assign(:layout_mode, layout_mode)
+
+    {layouts, socket}
+  end
+
+  defp schedule_work_update_layout_repeatedly() do
+    # In 60 seconds
+    Process.send_after(self(), {:update_layout_repeatedly, "fetch"}, 60 * 1000)
   end
 end
