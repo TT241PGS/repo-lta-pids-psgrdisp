@@ -302,7 +302,9 @@ defmodule Display.Utils.DisplayLiveUtil do
 
       {:error, error} ->
         Logger.error(
-          "Error fetching cached_predictions for bus stop: #{inspect({bus_stop_no, bus_stop_name})} -> #{inspect(error)}"
+          "Error fetching cached_predictions for bus stop: #{
+            inspect({bus_stop_no, bus_stop_name})
+          } -> #{inspect(error)}"
         )
 
         socket = show_blank_screen(socket)
@@ -1080,15 +1082,9 @@ defmodule Display.Utils.DisplayLiveUtil do
         update_layout_timer =
           Process.send_after(
             self(),
-            {:update_layout_repeatedly, "once"},
+            :show_next_layout,
             next_duration * 1000
           )
-
-        Process.send_after(
-          self(),
-          :show_next_layout,
-          next_duration * 1000
-        )
 
         socket =
           socket
