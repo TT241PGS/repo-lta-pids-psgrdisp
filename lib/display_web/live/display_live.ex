@@ -147,7 +147,7 @@ defmodule DisplayWeb.DisplayLive do
 
   def init_handlers(socket, start_time) do
     Process.send_after(self(), :update_stops_repeatedly, 0)
-    Process.send_after(self(), {:update_layout_repeatedly, "fetch"}, 0)
+    Process.send_after(self(), :update_layout_repeatedly, 0)
     Process.send_after(self(), :update_time_repeatedly, 0)
 
     elapsed_time = TimeUtil.get_elapsed_time(start_time)
@@ -590,7 +590,7 @@ defmodule DisplayWeb.DisplayLive do
   @doc """
     This calls itself after certain period of time to update layout every n seconds
   """
-  def handle_info({:update_layout_repeatedly, type}, socket) do
+  def handle_info(:update_layout_repeatedly, socket) do
     start_time = Timex.now()
 
     Logger.info(":update_layout_repeatedly started")
@@ -645,38 +645,24 @@ defmodule DisplayWeb.DisplayLive do
     # FOR DEVELOPMENT ONLY, not supposed to be commited
     # template_index = 0
 
-    case type do
-      "once" ->
+    case prev_templates == templates do
+      true ->
+        schedule_work_update_layout_repeatedly()
+        {:noreply, socket}
+
+      false ->
         {layouts, socket} =
           prepare_to_refresh_layout(socket, templates, template_index, panel_id, layout_mode)
+
+        DisplayLiveUtil.reset_timer(multimedia_image_sequence_next_trigger_at)
+        DisplayLiveUtil.reset_timer(update_layout_timer)
 
         result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
 
         elapsed_time = TimeUtil.get_elapsed_time(start_time)
         Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
-
+        schedule_work_update_layout_repeatedly()
         result
-
-      "fetch" ->
-        case prev_templates == templates do
-          true ->
-            schedule_work_update_layout_repeatedly()
-            {:noreply, socket}
-
-          false ->
-            {layouts, socket} =
-              prepare_to_refresh_layout(socket, templates, template_index, panel_id, layout_mode)
-
-            DisplayLiveUtil.reset_timer(multimedia_image_sequence_next_trigger_at)
-            DisplayLiveUtil.reset_timer(update_layout_timer)
-
-            result = DisplayLiveUtil.update_layout(socket, layouts, current_layout_index)
-
-            elapsed_time = TimeUtil.get_elapsed_time(start_time)
-            Logger.info(":update_layout_repeatedly ended successfully (#{elapsed_time})")
-            schedule_work_update_layout_repeatedly()
-            result
-        end
     end
   end
 
@@ -712,15 +698,9 @@ defmodule DisplayWeb.DisplayLive do
     update_layout_timer =
       Process.send_after(
         self(),
-        {:update_layout_repeatedly, "once"},
+        :show_next_layout,
         next_duration * 1000
       )
-
-    Process.send_after(
-      self(),
-      :show_next_layout,
-      next_duration * 1000
-    )
 
     socket =
       socket
@@ -1001,6 +981,6 @@ defmodule DisplayWeb.DisplayLive do
 
   defp schedule_work_update_layout_repeatedly() do
     # In 60 seconds
-    Process.send_after(self(), {:update_layout_repeatedly, "fetch"}, 60 * 1000)
+    Process.send_after(self(), :update_layout_repeatedly, 60 * 1000)
   end
 end

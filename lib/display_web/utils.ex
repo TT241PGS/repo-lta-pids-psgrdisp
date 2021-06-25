@@ -82,7 +82,9 @@ defmodule DisplayWeb.DisplayLive.Utils do
         false -> []
       end
 
-    style = color ++ size
+    break_word = ["overflow-wrap: break-word"]
+
+    style = color ++ size ++ break_word
     style |> Enum.join(";")
   end
 
