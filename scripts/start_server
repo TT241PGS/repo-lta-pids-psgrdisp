@@ -3,9 +3,9 @@
 docker image prune -a --force --filter "until=1h" > /dev/null 2> /dev/null < /dev/null
 
 # Stop and remove old container
-docker stop ec2-display > /dev/null 2> /dev/null < /dev/null
-docker rm ec2-display > /dev/null 2> /dev/null < /dev/null
+docker stop pids-display > /dev/null 2> /dev/null < /dev/null
+docker rm pids-display > /dev/null 2> /dev/null < /dev/null
 
 # Pull new image and run the container
-docker pull 485380287493.dkr.ecr.ap-southeast-1.amazonaws.com/ec2-display:latest > /dev/null 2> /dev/null < /dev/null
-docker run -d -p 4000:4000 --name ec2-display -v /mnt/efs/fs1:/tmp/efs/fs1 485380287493.dkr.ecr.ap-southeast-1.amazonaws.com/ec2-display > /dev/null 2> /dev/null < /dev/null
+docker pull 485380287493.dkr.ecr.ap-southeast-1.amazonaws.com/pids-display:latest > /dev/null 2> /dev/null < /dev/null
+docker run -d -p 4000:4000 --name pids-display -v /mnt/efs/fs1:/tmp/efs/fs1 485380287493.dkr.ecr.ap-southeast-1.amazonaws.com/pids-display > /dev/null 2> /dev/null < /dev/null

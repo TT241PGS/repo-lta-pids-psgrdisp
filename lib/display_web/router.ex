@@ -16,6 +16,8 @@ defmodule DisplayWeb.Router do
 
   forward "/alive", HealthCheckup
 
+  forward "/test", HealthCheckup, resp_body: "I'm up!"
+
   scope "/", DisplayWeb do
     pipe_through :browser
 
