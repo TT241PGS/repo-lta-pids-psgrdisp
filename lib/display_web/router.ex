@@ -14,9 +14,7 @@ defmodule DisplayWeb.Router do
     plug :accepts, ["json"]
   end
 
-  #forward "/alive", HealthCheckup
-
-  forward "/test", HealthCheckup, resp_body: "I'm up again!"
+  forward "/alive", HealthCheckup
 
   scope "/", DisplayWeb do
     pipe_through :browser
