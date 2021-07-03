@@ -10,5 +10,5 @@ docker rm pids-display > /dev/null 2> /dev/null < /dev/null
 aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 485380287493.dkr.ecr.ap-southeast-1.amazonaws.com > /dev/null 2> /dev/null < /dev/nul
 
 # Pull new image and run the container
-docker pull 485380287493.dkr.ecr.ap-southeast-1.amazonaws.com/pids-display:latest > /dev/null 2> /dev/null < /dev/null
+docker pull 485380287493.dkr.ecr.ap-southeast-1.amazonaws.com/pids-display:latest
 docker run -d -p 4000:4000 --name pids-display -v /mnt/efs/fs1:/tmp/efs/fs1 485380287493.dkr.ecr.ap-southeast-1.amazonaws.com/pids-display:latest > /dev/null 2> /dev/null < /dev/null
