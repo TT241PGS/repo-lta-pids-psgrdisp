@@ -26,7 +26,7 @@
 on:
   push:
     branches:
-      - KYAL-change-port-for-AWS
+      - develop
 
 name: Deploy to Amazon EC2 instance for PIDS Elixir Apps
 
@@ -74,5 +74,3 @@ jobs:
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --ignore-application-stop-failures \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
-
-
