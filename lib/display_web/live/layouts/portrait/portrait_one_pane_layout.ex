@@ -27,6 +27,7 @@ defmodule PortraitOnePaneLayout do
       <MultimediaPortrait
       onePane=true
       multimedia={{@prop.multimedia}}
+      panel_audio_lvl={{@prop.panel_audio_lvl}}
       image_sequence_url={{@prop.multimedia_image_sequence_current_url}}
       :if={{get_in(@prop.current_layout_panes, ["pane1", "type", "value"]) == "multimedia"}}
     />
