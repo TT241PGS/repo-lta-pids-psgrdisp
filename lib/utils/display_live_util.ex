@@ -575,7 +575,9 @@ defmodule Display.Utils.DisplayLiveUtil do
 
   def get_panel_audio_level(panel_id) do
     case do_get_panel_audio_level(panel_id) do
-      audio_lvl -> audio_lvl
+      audio_lvl ->
+        audio_lvl
+
       nil ->
         Logger.error("Could not fetch audio level. Assigning a default value.")
         # return a default

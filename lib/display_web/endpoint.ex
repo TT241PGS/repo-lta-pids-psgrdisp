@@ -15,8 +15,7 @@ defmodule DisplayWeb.Endpoint do
     longpoll: false
 
   socket "/live", Phoenix.LiveView.Socket,
-    websocket: [connect_info: [session: @session_options], compress: true],
-    check_origin: ["http://ec2-13-213-248-80.ap-southeast-1.compute.amazonaws.com:4000"]
+    websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
