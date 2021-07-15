@@ -325,6 +325,13 @@ defmodule Display.Buses do
     |> Repo.one()
   end
 
+  def get_panel_audio_lvl_configuration_by_panel_id(panel_id) do
+    from(p in Buses.PanelAudioLevelConfiguration,
+      where: p.panel_id == ^panel_id
+    )
+    |> Repo.one()
+  end
+
   # TODO: Query with BaseVersion, OperatingDay
 
   def get_realtime_quickest_way_to_by_bus_stop(bus_stop_no) do
