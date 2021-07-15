@@ -176,7 +176,7 @@ defmodule DisplayWeb.DisplayLive do
         audio_lvl_struct ->
           case audio_lvl_struct.audio_lvl do
             "LEVEL_1" -> 0.2
-            "LEVEL_2" -> 0.6
+            "LEVEL_2" -> 0.5
             "LEVEL_3" -> 1.0
             _ -> nil
           end
@@ -240,7 +240,7 @@ defmodule DisplayWeb.DisplayLive do
         audio_lvl_struct ->
           case audio_lvl_struct.audio_lvl do
             "LEVEL_1" -> 0.2
-            "LEVEL_2" -> 0.6
+            "LEVEL_2" -> 0.5
             "LEVEL_3" -> 1.0
             _ -> nil
           end
