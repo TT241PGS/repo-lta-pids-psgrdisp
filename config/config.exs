@@ -13,6 +13,7 @@ config :display,
 # Configures the endpoint
 config :display, DisplayWeb.Endpoint,
   url: [host: "localhost"],
+  # url: [host: "ec2-13-213-248-80.ap-southeast-1.compute.amazonaws.com"],
   secret_key_base: "uuYw0MzXd7UWC5b3AYhZW+WrU4LZy1a6c5bs7am1k59wl2riCmWWbdzocef5F/2o",
   render_errors: [view: DisplayWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Display.PubSub,

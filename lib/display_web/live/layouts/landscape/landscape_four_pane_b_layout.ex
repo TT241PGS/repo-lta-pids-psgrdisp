@@ -31,7 +31,7 @@ defmodule LandscapeFourPaneBLayout do
             <QuickestWayToLandscape
               :if={{get_in(@prop.current_layout_panes, ["pane2", "type", "value"]) == "quickest_way_to"}}
                maxLength=1 qwts={{@prop.quickest_way_to}} :if={{length(@prop.quickest_way_to) > 0}} />
-            <MultimediaLandscape multimedia={{@prop.multimedia}} image_sequence_url={{@prop.multimedia_image_sequence_current_url}} :if={{get_in(@prop.current_layout_panes, ["pane3", "type", "value"]) == "multimedia"}}/>
+            <MultimediaLandscape panel_audio_lvl={{@prop.panel_audio_lvl}} multimedia={{@prop.multimedia}} image_sequence_url={{@prop.multimedia_image_sequence_current_url}} :if={{get_in(@prop.current_layout_panes, ["pane3", "type", "value"]) == "multimedia"}}/>
           </div>
         </div>
         <div class="column right-column">

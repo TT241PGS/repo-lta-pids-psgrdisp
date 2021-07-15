@@ -48,3 +48,8 @@ prediction-*
 .vscode
 
 *.pem
+
+.idea
+terraform/.terraform
+terraform.tfstate.backup
+

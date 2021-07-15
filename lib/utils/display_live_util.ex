@@ -302,9 +302,7 @@ defmodule Display.Utils.DisplayLiveUtil do
 
       {:error, error} ->
         Logger.error(
-          "Error fetching cached_predictions for bus stop: #{
-            inspect({bus_stop_no, bus_stop_name})
-          } -> #{inspect(error)}"
+          "Error fetching cached_predictions for bus stop: #{inspect({bus_stop_no, bus_stop_name})} -> #{inspect(error)}"
         )
 
         socket = show_blank_screen(socket)
@@ -572,6 +570,33 @@ defmodule Display.Utils.DisplayLiveUtil do
   def trigger_next_update_stops(is_trigger) do
     if is_trigger == true do
       Process.send_after(self(), :update_stops_repeatedly, 30_000)
+    end
+  end
+
+  def get_panel_audio_level(panel_id) do
+    case do_get_panel_audio_level(panel_id) do
+      audio_lvl ->
+        audio_lvl
+
+      nil ->
+        Logger.error("Could not fetch audio level. Assigning a default value.")
+        # return a default
+        0.5
+    end
+  end
+
+  def do_get_panel_audio_level(panel_id) do
+    case Buses.get_panel_audio_lvl_configuration_by_panel_id(panel_id) do
+      audio_lvl_struct ->
+        case audio_lvl_struct.audio_lvl do
+          "LEVEL_1" -> 0.2
+          "LEVEL_2" -> 0.5
+          "LEVEL_3" -> 1.0
+          _ -> nil
+        end
+
+      _ ->
+        nil
     end
   end
 
