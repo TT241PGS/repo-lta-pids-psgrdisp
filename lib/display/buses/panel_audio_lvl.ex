@@ -15,7 +15,7 @@ defmodule Display.Buses.PanelAudioLevelConfiguration do
     :panel_id,
     :audio_lvl,
     :audio_enable_str_tm,
-    :audio_enable_end_tm,
+    :audio_enable_end_tm
   ]
   def changeset(panel_bus, params \\ %{}) do
     cast(panel_bus, params, @field)

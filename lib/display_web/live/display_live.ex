@@ -92,7 +92,7 @@ defmodule DisplayWeb.DisplayLive do
         multimedia_image_sequence_next_trigger_at: nil,
         multimedia_image_sequence_current_index: nil,
         multimedia_image_sequence_current_url: nil,
-        panel_audio_lvl: nil,
+        panel_audio_lvl: 0.5,
         waypoints: [],
         zoom: assigns["zoom"] || 0.17,
         preview_workflow: assigns["preview_workflow"] || nil,
@@ -170,29 +170,16 @@ defmodule DisplayWeb.DisplayLive do
 
     bus_stop_name = Buses.get_bus_hub_or_stop_name_by_no(bus_stop_no)
 
-    ###### SET AUDIO LEVEL PANEL ID ######
     panel_audio_lvl =
-      case Buses.get_panel_audio_lvl_configuration_by_panel_id(socket.assigns.panel_id) do
-        audio_lvl_struct ->
-          case audio_lvl_struct.audio_lvl do
-            "LEVEL_1" -> 0.2
-            "LEVEL_2" -> 0.5
-            "LEVEL_3" -> 1.0
-            _ -> nil
-          end
-        _ -> nil
-      end
-
-    IO.inspect(panel_audio_lvl)
-
-    socket =
-      socket
-      |> assign(:panel_audio_lvl, panel_audio_lvl)
+      if socket.assigns.multimedia.type == "VIDEO",
+        do: DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id),
+        else: socket.assigns.panel_audio_lvl
 
     socket =
       socket
       |> assign(:bus_stop_no, bus_stop_no)
       |> assign(:bus_stop_name, bus_stop_name)
+      |> assign(:panel_audio_lvl, panel_audio_lvl)
 
     %{
       skip_realtime: skip_realtime,
@@ -234,29 +221,16 @@ defmodule DisplayWeb.DisplayLive do
 
     bus_stop_name = Buses.get_bus_hub_or_stop_name_by_no(bus_stop_no)
 
-    ###### SET AUDIO LEVEL PANEL ID ######
     panel_audio_lvl =
-      case Buses.get_panel_audio_lvl_configuration_by_panel_id(socket.assigns.panel_id) do
-        audio_lvl_struct ->
-          case audio_lvl_struct.audio_lvl do
-            "LEVEL_1" -> 0.2
-            "LEVEL_2" -> 0.5
-            "LEVEL_3" -> 1.0
-            _ -> nil
-          end
-        _ -> nil
-      end
-
-    IO.inspect(panel_audio_lvl)
-
-    socket =
-      socket
-      |> assign(:panel_audio_lvl, panel_audio_lvl)
+      if socket.assigns.multimedia.type == "VIDEO",
+        do: DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id),
+        else: socket.assigns.panel_audio_lvl
 
     socket =
       socket
       |> assign(:bus_stop_no, bus_stop_no)
       |> assign(:bus_stop_name, bus_stop_name)
+      |> assign(:panel_audio_lvl, panel_audio_lvl)
 
     %{
       skip_realtime: skip_realtime,
