@@ -573,6 +573,28 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
+  defp get_audio_start_time(panel_id) do
+    case Buses.get_panel_audio_lvl_configuration_by_panel_id(panel_id) do
+      audio_struct -> audio_struct.audio_enable_str_tm
+      _ -> nil
+    end
+  end
+
+  defp get_audio_end_time(panel_id) do
+    case Buses.get_panel_audio_lvl_configuration_by_panel_id(panel_id) do
+      audio_struct -> audio_struct.audio_enable_end_tm
+      _ -> nil
+    end
+  end
+
+  def audio_time_is_in_between?(panel_id) do
+    start_time = get_audio_start_time(panel_id)
+    end_time = get_audio_end_time(panel_id)
+    {:ok, now} = TimeUtil.get_current_time_hh_mm_ss() |> Time.from_iso8601()
+
+    Time.compare(now, start_time) == :gt and Time.compare(now, end_time) == :lt
+  end
+
   def get_panel_audio_level(panel_id) do
     case do_get_panel_audio_level(panel_id) do
       audio_lvl ->
@@ -585,7 +607,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
-  def do_get_panel_audio_level(panel_id) do
+  defp do_get_panel_audio_level(panel_id) do
     case Buses.get_panel_audio_lvl_configuration_by_panel_id(panel_id) do
       audio_lvl_struct ->
         case audio_lvl_struct.audio_lvl do

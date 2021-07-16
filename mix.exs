@@ -63,7 +63,7 @@ defmodule Display.MixProject do
       {:cachex, "~> 3.3"},
       {:husky, "~> 1.0", only: :dev, runtime: false},
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:cortex, "~> 0.1", only: [:dev]}
+      {:cortex, "~> 0.1", only: [:dev]},
     ]
   end
 
