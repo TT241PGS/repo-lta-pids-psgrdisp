@@ -302,7 +302,9 @@ defmodule Display.Utils.DisplayLiveUtil do
 
       {:error, error} ->
         Logger.error(
-          "Error fetching cached_predictions for bus stop: #{inspect({bus_stop_no, bus_stop_name})} -> #{inspect(error)}"
+          "Error fetching cached_predictions for bus stop: #{
+            inspect({bus_stop_no, bus_stop_name})
+          } -> #{inspect(error)}"
         )
 
         socket = show_blank_screen(socket)
