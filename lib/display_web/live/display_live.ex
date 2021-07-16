@@ -171,9 +171,19 @@ defmodule DisplayWeb.DisplayLive do
     bus_stop_name = Buses.get_bus_hub_or_stop_name_by_no(bus_stop_no)
 
     panel_audio_lvl =
+<<<<<<< HEAD
       if socket.assigns.multimedia.type == "VIDEO",
         do: DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id),
         else: socket.assigns.panel_audio_lvl
+=======
+      if socket.assigns.multimedia.type == "VIDEO" do
+        if DisplayLiveUtil.audio_time_is_in_between?(socket.assigns.panel_id) do
+          DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id)
+        else
+          0.5
+        end
+      end
+>>>>>>> develop
 
     socket =
       socket
@@ -222,9 +232,13 @@ defmodule DisplayWeb.DisplayLive do
     bus_stop_name = Buses.get_bus_hub_or_stop_name_by_no(bus_stop_no)
 
     panel_audio_lvl =
-      if socket.assigns.multimedia.type == "VIDEO",
-        do: DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id),
-        else: socket.assigns.panel_audio_lvl
+      if socket.assigns.multimedia.type == "VIDEO" do
+        if DisplayLiveUtil.audio_time_is_in_between?(socket.assigns.panel_id) do
+          DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id)
+        else
+          0.5
+        end
+      end
 
     socket =
       socket
