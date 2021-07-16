@@ -258,11 +258,7 @@ defmodule Display.RealTime do
 
           Enum.each(value, fn service ->
             Logger.info(
-              "QWT Log, #{bus_stop_no}, #{poi_code}, #{timestamp}, #{dpi_route_code}, #{direction}, #{
-                visit_no
-              }, #{get_in(service, ["arriving_time_at_origin"])}, #{
-                get_in(service, ["travel_time"])
-              }"
+              "QWT Log, #{bus_stop_no}, #{poi_code}, #{timestamp}, #{dpi_route_code}, #{direction}, #{visit_no}, #{get_in(service, ["arriving_time_at_origin"])}, #{get_in(service, ["travel_time"])}"
             )
           end)
 

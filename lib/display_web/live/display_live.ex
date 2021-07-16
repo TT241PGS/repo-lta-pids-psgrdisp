@@ -186,6 +186,7 @@ defmodule DisplayWeb.DisplayLive do
             true -> DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id)
             _ -> 0.5
           end
+
         false ->
           0.5
       end
@@ -252,6 +253,7 @@ defmodule DisplayWeb.DisplayLive do
             true -> DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id)
             _ -> 0.5
           end
+
         false ->
           0.5
       end
