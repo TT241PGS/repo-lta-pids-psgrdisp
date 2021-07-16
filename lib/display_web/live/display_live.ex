@@ -188,6 +188,7 @@ defmodule DisplayWeb.DisplayLive do
           end
         false ->
           0.5
+      end
 
     socket =
       socket
@@ -253,6 +254,7 @@ defmodule DisplayWeb.DisplayLive do
           end
         false ->
           0.5
+      end
 
     socket =
       socket
