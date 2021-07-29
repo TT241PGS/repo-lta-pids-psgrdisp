@@ -168,7 +168,7 @@ defmodule Display.Messages do
           text: alert["text"],
           line:
             Application.get_env(:display, :multimedia_base_url) <>
-              String.trim(alert["line"]) <> ".png",
+              String.trim(alert["line"] || "CCL") <> ".png",
           type: "MRT"
         }
       end)
