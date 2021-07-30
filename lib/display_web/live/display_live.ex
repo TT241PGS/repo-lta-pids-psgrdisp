@@ -162,7 +162,7 @@ defmodule DisplayWeb.DisplayLive do
   """
   def handle_info(:update_stops_once, socket) do
     start_time = Timex.now()
-    Logger.info(":update_stops started")
+    Logger.info(":update_stops started #{socket.assigns.panel_id}")
 
     bus_stop_no =
       Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
@@ -217,7 +217,7 @@ defmodule DisplayWeb.DisplayLive do
   """
   def handle_info(:update_stops_repeatedly, socket) do
     start_time = Timex.now()
-    Logger.info(":update_stops started")
+    Logger.info(":update_stops started #{socket.assigns.panel_id}")
 
     bus_stop_no =
       Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
