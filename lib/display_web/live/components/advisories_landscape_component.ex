@@ -13,7 +13,7 @@ defmodule AdvisoriesLandscape do
     <div class="advisories-container m-top-component">
       <div class="floating-heading">Message Board</div>
       <div id={{get_in(@message, [:text])}} style={{Utils.get_message_style(@panes, @current_pane, @message)}} class={{Utils.get_message_class_names(@panes, @current_pane, @message)}}>
-        <span>{{get_in(@message, [:text])}}</span>
+        <span><img src={{get_in(@message, [:line])}} > {{get_in(@message, [:text])}}</span>
       </div>
     </div>
     """
