@@ -162,7 +162,7 @@ defmodule DisplayWeb.DisplayLive do
   """
   def handle_info(:update_stops_once, socket) do
     start_time = Timex.now()
-    Logger.info(":update_stops started")
+    Logger.info(":update_stops started #{socket.assigns.panel_id}")
 
     bus_stop_no =
       Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
@@ -180,15 +180,12 @@ defmodule DisplayWeb.DisplayLive do
     #   end
 
     panel_audio_lvl =
-      case socket.assigns.multimedia.type == "VIDEO" do
-        true ->
-          case DisplayLiveUtil.audio_time_is_in_between?(socket.assigns.panel_id) do
-            true -> DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id)
-            _ -> 0.5
-          end
-
-        false ->
+      if socket.assigns.multimedia.type == "VIDEO" do
+        if DisplayLiveUtil.audio_time_is_in_between?(socket.assigns.panel_id) do
+          DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id)
+        else
           0.5
+        end
       end
 
     socket =
@@ -229,7 +226,7 @@ defmodule DisplayWeb.DisplayLive do
   """
   def handle_info(:update_stops_repeatedly, socket) do
     start_time = Timex.now()
-    Logger.info(":update_stops started")
+    Logger.info(":update_stops started #{socket.assigns.panel_id}")
 
     bus_stop_no =
       Buses.get_bus_stop_from_panel_id(socket.assigns.panel_id)
@@ -247,15 +244,12 @@ defmodule DisplayWeb.DisplayLive do
     #   end
 
     panel_audio_lvl =
-      case socket.assigns.multimedia.type == "VIDEO" do
-        true ->
-          case DisplayLiveUtil.audio_time_is_in_between?(socket.assigns.panel_id) do
-            true -> DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id)
-            _ -> 0.5
-          end
-
-        false ->
+      if socket.assigns.multimedia.type == "VIDEO" do
+        if DisplayLiveUtil.audio_time_is_in_between?(socket.assigns.panel_id) do
+          DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id)
+        else
           0.5
+        end
       end
 
     socket =
