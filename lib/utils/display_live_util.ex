@@ -302,7 +302,9 @@ defmodule Display.Utils.DisplayLiveUtil do
 
       {:error, error} ->
         Logger.error(
-          "Error fetching cached_predictions for bus stop: #{inspect({bus_stop_no, bus_stop_name})} -> #{inspect(error)}"
+          "Error fetching cached_predictions for bus stop: #{
+            inspect({bus_stop_no, bus_stop_name})
+          } -> #{inspect(error)}"
         )
 
         socket = show_blank_screen(socket)
@@ -611,7 +613,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     case Buses.get_panel_audio_lvl_configuration_by_panel_id(panel_id) do
       audio_lvl_struct ->
         case audio_lvl_struct.audio_lvl do
-          "LEVEL_1" -> 0.2
+          "LEVEL_1" -> 0.1
           "LEVEL_2" -> 0.5
           "LEVEL_3" -> 1.0
           _ -> nil
