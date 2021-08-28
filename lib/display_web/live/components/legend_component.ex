@@ -5,7 +5,8 @@ defmodule Legend do
   def render(assigns) do
     ~H"""
     <div class="legend">
-      <div class="no-wheelchair"><svg xmlns="http://www.w3.org/2000/svg" width="42.989" height="42.989"
+      <div class="no-wheelchair">
+        <svg xmlns="http://www.w3.org/2000/svg" width="90" height="90"
           viewBox="0 0 42.989 42.989">
           <g transform="translate(0 0)">
             <path

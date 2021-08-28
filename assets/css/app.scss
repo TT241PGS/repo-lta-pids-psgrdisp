@@ -1,35 +1,35 @@
-@import 'variables.scss';
-@import 'mixins.scss';
+@import "variables.scss";
+@import "mixins.scss";
 
-@import 'fonts.scss';
-@import 'colors.scss';
+@import "fonts.scss";
+@import "colors.scss";
 
-@import 'layout/main.scss';
-@import 'layout/header.scss';
-@import 'layout/footer.scss';
-@import 'layout/utils.scss';
+@import "layout/main.scss";
+@import "layout/header.scss";
+@import "layout/footer.scss";
+@import "layout/utils.scss";
 
-@import 'components/busStopInfo.scss';
-@import 'components/clockWithDateHorizontal.scss';
-@import 'components/portraitClock.scss';
-@import 'components/headingInfo.scss';
-@import 'components/busInfo.scss';
-@import 'components/nextBuses.scss';
-@import 'components/nextBus.scss';
-@import 'components/berth.scss';
-@import 'components/busInfoMessage.scss';
-@import 'components/destinationCard.scss';
-@import 'components/tag.scss';
-@import 'components/instructionCard.scss';
-@import 'components/busCard.scss';
-@import 'components/destinationWithMultiTags.scss';
-@import 'components/stationWithTags.scss';
-@import 'components/carousel.scss';
-@import 'components/advisories.scss';
-@import 'components/destinationBusStop.scss';
-@import 'components/image.scss';
-@import 'components/quickestWay.scss';
-@import 'components/legend.scss';
+@import "components/busStopInfo.scss";
+@import "components/clockWithDateHorizontal.scss";
+@import "components/portraitClock.scss";
+@import "components/headingInfo.scss";
+@import "components/busInfo.scss";
+@import "components/nextBuses.scss";
+@import "components/nextBus.scss";
+@import "components/berth.scss";
+@import "components/busInfoMessage.scss";
+@import "components/destinationCard.scss";
+@import "components/tag.scss";
+@import "components/instructionCard.scss";
+@import "components/busCard.scss";
+@import "components/destinationWithMultiTags.scss";
+@import "components/stationWithTags.scss";
+@import "components/carousel.scss";
+@import "components/advisories.scss";
+@import "components/destinationBusStop.scss";
+@import "components/image.scss";
+@import "components/quickestWay.scss";
+@import "components/legend.scss";
 
 @import "../node_modules/nprogress/nprogress.css";
 
@@ -79,13 +79,12 @@
   }
 }
 
-
 @keyframes waypoint-ticker {
   0% {
     margin-left: 100%;
   }
   100% {
-      margin-left: -100%;
+    margin-left: -100%;
   }
 }
 
@@ -125,7 +124,7 @@ body {
 }
 
 .m-top-component {
-  margin-top: 13px; 
+  margin-top: 13px;
 }
 
 .debug section {
@@ -140,8 +139,8 @@ body {
   white-space: nowrap;
   height: 50px;
   img {
-    padding-right: 10px;
-    height: 34px;
+    padding-right: 5px;
+    height: 36px;
   }
 }
 
@@ -178,15 +177,14 @@ body {
     }
 
     img {
-      margin-top: 8px;
-      padding: 0 10px;
-      height: 24px;
+      margin-top: -2px;
+      padding: 0px 10px;
+      height: 36px;
     }
   }
 }
 
 .landscape {
-
   .incoming-buses {
     justify-content: flex-start;
 
