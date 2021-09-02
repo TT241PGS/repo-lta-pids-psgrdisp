@@ -171,9 +171,6 @@ defmodule Display.Messages do
         }
       end)
 
-    IO.inspect("************************************")
-    IO.inspect(mrt_alerts)
-
     mrt_alerts ++ messages
   end
 
