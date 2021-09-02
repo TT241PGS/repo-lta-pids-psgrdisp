@@ -166,14 +166,20 @@ defmodule Display.Messages do
         %{
           pm: mrt_alert_pm,
           text: alert["text"],
-          line:
-            Application.get_env(:display, :multimedia_base_url) <>
-              String.trim(alert["line"] || "CCL") <> ".png",
+          line: get_line(alert),
           type: "MRT"
         }
       end)
 
     mrt_alerts ++ messages
+  end
+
+  defp get_line(alert) do
+    if is_nil(alert["line"]) do
+      ""
+    else
+      Application.get_env(:display, :multimedia_base_url) <> String.trim(alert["line"]) <> ".png"
+    end
   end
 
   def get_message_timings([], _cycle_time) do
