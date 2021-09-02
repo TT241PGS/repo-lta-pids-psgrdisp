@@ -156,7 +156,7 @@ defmodule Display.Messages do
   def merge_all_messages(mrt_alerts, messages) do
     mrt_alert_pm =
       case Enum.max_by(messages, fn msg -> msg.pm end, fn -> nil end) do
-        nil -> 100
+        nil -> 50
         alert -> alert.pm
       end
 
