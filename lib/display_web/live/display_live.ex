@@ -769,6 +769,24 @@ defmodule DisplayWeb.DisplayLive do
 
   def handle_info(
         %Phoenix.Socket.Broadcast{
+          event: "refresh_panel",
+          payload: %{"panel_id" => panel_id},
+          topic: "poller"
+        },
+        socket
+      ) do
+
+    case socket.assigns.panel_id == panel_id do
+      true ->
+        Logger.info("Panel #{socket.assigns.panel_id} redirected to " <> "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5")
+        {:noreply, push_redirect(socket, to: "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5")}
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_info(
+        %Phoenix.Socket.Broadcast{
           event: "show_message",
           payload: %{message: message, timeline: timeline, message_map: message_map},
           topic: "message:" <> panel_id

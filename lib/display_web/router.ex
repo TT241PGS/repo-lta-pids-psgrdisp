@@ -28,6 +28,7 @@ defmodule DisplayWeb.Router do
 
     post "/notifications", NotificationController, :create
     post "/poller-prediction-errors", ErrorLogController, :handle
+    get "/panel-refresh", PanelRefreshController, :handle
   end
 
   # Enables LiveDashboard only for development
