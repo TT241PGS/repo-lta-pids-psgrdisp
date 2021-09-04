@@ -178,7 +178,7 @@ defmodule Display.Messages do
     if is_nil(alert["line"]) do
       ""
     else
-      Application.get_env(:display, :multimedia_base_url) <> String.trim(alert["line"] || "CCL") <> ".png"
+      Application.get_env(:display, :multimedia_base_url) <> String.trim(alert["line"]) <> ".png"
     end
   end
 
