@@ -776,13 +776,7 @@ defmodule DisplayWeb.DisplayLive do
         socket
       ) do
 
-    case socket.assigns.panel_id == panel_id do
-      true ->
-        Logger.info("Panel #{socket.assigns.panel_id} redirected to " <> "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5")
-        {:noreply, push_redirect(socket, to: "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5")}
-      _ ->
-        {:noreply, socket}
-    end
+    refresh_panel(panel_id, socket)
   end
 
   def handle_info(
@@ -1039,5 +1033,19 @@ defmodule DisplayWeb.DisplayLive do
   defp schedule_work_update_layout_repeatedly() do
     # In 60 seconds
     Process.send_after(self(), :update_layout_repeatedly, 60 * 1000)
+  end
+
+  defp refresh_panel("all", socket) do
+    {:noreply, push_redirect(socket, to: "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5")}
+  end
+
+  defp refresh_panel(panel_id, socket) do
+    case socket.assigns.panel_id == panel_id do
+      true ->
+        Logger.info("Panel #{socket.assigns.panel_id} redirected to " <> "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5")
+        {:noreply, push_redirect(socket, to: "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5")}
+      _ ->
+        {:noreply, socket}
+    end
   end
 end
