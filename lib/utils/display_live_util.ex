@@ -613,7 +613,7 @@ defmodule Display.Utils.DisplayLiveUtil do
     case Buses.get_panel_audio_lvl_configuration_by_panel_id(panel_id) do
       audio_lvl_struct ->
         case audio_lvl_struct.audio_lvl do
-          "LEVEL_1" -> 0.1
+          "LEVEL_1" -> 0.0
           "LEVEL_2" -> 0.5
           "LEVEL_3" -> 1.0
           _ -> nil

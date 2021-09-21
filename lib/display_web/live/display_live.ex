@@ -184,7 +184,7 @@ defmodule DisplayWeb.DisplayLive do
         if DisplayLiveUtil.audio_time_is_in_between?(socket.assigns.panel_id) do
           DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id)
         else
-          0.5
+          0.0
         end
       end
 
@@ -248,7 +248,7 @@ defmodule DisplayWeb.DisplayLive do
         if DisplayLiveUtil.audio_time_is_in_between?(socket.assigns.panel_id) do
           DisplayLiveUtil.get_panel_audio_level(socket.assigns.panel_id)
         else
-          0.5
+          0.0
         end
       end
 
