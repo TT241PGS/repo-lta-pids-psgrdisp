@@ -92,7 +92,7 @@ defmodule DisplayWeb.DisplayLive do
         multimedia_image_sequence_next_trigger_at: nil,
         multimedia_image_sequence_current_index: nil,
         multimedia_image_sequence_current_url: nil,
-        panel_audio_lvl: 0.5,
+        panel_audio_lvl: 0.0,
         waypoints: [],
         zoom: assigns["zoom"] || 0.17,
         preview_workflow: assigns["preview_workflow"] || nil,

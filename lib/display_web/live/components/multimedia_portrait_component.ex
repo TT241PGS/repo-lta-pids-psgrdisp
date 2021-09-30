@@ -11,7 +11,7 @@ defmodule MultimediaPortrait do
     ~H"""
     <div class={{Utils.one_pane_multimedia(@onePane)}} >
       <img :if={{@multimedia.type == "IMAGE"}} src="{{@multimedia.content}}" alt="">
-      <video width="100%" :if={{@multimedia.type == "VIDEO"}} oncanplaythrough="this.volume={{ @panel_audio_lvl }}" autoplay loop>
+      <video width="100%" :if={{@multimedia.type == "VIDEO"}} oncanplaythrough="this.volume={{ @panel_audio_lvl || 0.0 }}" autoplay loop>
         <source src="{{@multimedia.content}}" type="video/mp4" />
       </video>
       <img :if={{@multimedia.type == "IMAGE SEQUENCE"}} src="{{@image_sequence_url}}" alt="">

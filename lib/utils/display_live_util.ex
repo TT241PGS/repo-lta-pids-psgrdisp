@@ -605,7 +605,7 @@ defmodule Display.Utils.DisplayLiveUtil do
       nil ->
         Logger.error("Could not fetch audio level. Assigning a default value.")
         # return a default
-        0.5
+        0.0
     end
   end
 
