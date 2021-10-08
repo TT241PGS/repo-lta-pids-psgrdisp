@@ -17,6 +17,8 @@ defmodule Display.Utils.DisplayLiveUtil do
   alias Display.Utils.{TimeUtil, NaturalSort}
   alias DisplayWeb.DisplayLive.Utils
 
+  @two_hours_in_seconds 7200
+
   def incoming_bus_reducer(service, acc, next_bus) do
     next_bus_time =
       if get_in(service, [next_bus, "EstimatedArrival"]) in [nil, ""],
@@ -72,16 +74,26 @@ defmodule Display.Utils.DisplayLiveUtil do
         is_prediction_next_slide_scheduled
       ) do
     last_bus_map = Buses.get_last_buses_map(bus_stop_no)
+    last_bus_list = generate_running_last_bus_list_from_map(last_bus_map)
 
-    # end of service for the day - show no more messages
     last_bus_in_seconds =
-      Enum.map(last_bus_map, fn {_, v} -> v["time_seconds"] end)
+      Enum.map(last_bus_list, fn {_, time} -> time["time_seconds"] end)
       |> Enum.sort()
       |> List.last()
 
     # handling message when there are no more buses (time after the last bus)
     current_in_seconds = TimeUtil.now_in_seconds()
     end_of_operating_day = current_in_seconds > last_bus_in_seconds
+
+    # auto_refresh_panel trigger at end of operating day
+    if end_of_operating_day do
+      Task.Supervisor.async_nolink(
+        Display.TaskSupervisor,
+        __MODULE__,
+        :auto_refresh_panel,
+        [bus_stop_no, socket.assigns.panel_id]
+      )
+    end
 
     socket = Phoenix.LiveView.assign(socket, :end_of_operating_day, end_of_operating_day)
 
@@ -173,17 +185,32 @@ defmodule Display.Utils.DisplayLiveUtil do
             {service_no, destination, waypoints}
           end)
 
-        missing_services = find_missing_services(service_direction_map, service_arrival_map)
+        ################ FOR TESTING #################################
+        # key = "daily-" <> get_operating_day() <> ":#{bus_stop_no}"
+        # IO.inspect("!!!KEY#{inspect key}")
 
-        # only log when there are missing services
-        if length(missing_services) > 0 do
-          Task.Supervisor.async_nolink(
-            Display.TaskSupervisor,
-            __MODULE__,
-            :log_missing_services,
-            [missing_services, bus_stop_no]
-          )
-        end
+        # service_set = service_arrival_map |> Enum.map(fn {k, _} -> elem(k, 0) end)
+        # Logger.info("#{inspect service_set}")
+        # Display.Redix.command(["SET", key,  Jason.encode!(%{services: service_set})])
+        # Logger.info("SET to redis - #{inspect service_set}")
+
+        # ran_services = Display.Redix.command(["GET", key])
+
+        # convert to mapset
+        # {:ok, data} = ran_services
+        # %{"services" => ran_services_list} = Jason.decode!(data)
+        # today_ran_services_set = ran_services_list |> MapSet.new()
+        # Logger.info("TODAY RAN(CP): #{inspect today_ran_services_set} - #{inspect length(MapSet.to_list(today_ran_services_set))}")
+
+        ############## END FOR TESTING#######################################
+
+        # record all the services of the day to redis
+        Task.Supervisor.async_nolink(
+          Display.TaskSupervisor,
+          __MODULE__,
+          :record_services_of_the_day,
+          [service_arrival_map, bus_stop_no]
+        )
 
         socket =
           socket
@@ -293,6 +320,24 @@ defmodule Display.Utils.DisplayLiveUtil do
           "Cached_predictions :not_found for bus stop: #{inspect({bus_stop_no, bus_stop_name})}"
         )
 
+        service_direction_map = Buses.get_service_direction_map(bus_stop_no)
+
+        # if it's end of operating day and time is still before 0200 - run the logging for that operating day
+        if end_of_operating_day and TimeUtil.get_seconds_past_today() < @two_hours_in_seconds do
+          Logger.info(
+            "WILL LOG MISSING SERVICES NOW:: #{
+              end_of_operating_day and TimeUtil.get_seconds_past_today() < @two_hours_in_seconds
+            }"
+          )
+
+          Task.Supervisor.async_nolink(
+            Display.TaskSupervisor,
+            __MODULE__,
+            :log_missing_services_of_the_day,
+            [service_direction_map, bus_stop_no]
+          )
+        end
+
         socket = show_blank_screen(socket)
 
         trigger_next_update_stops(is_trigger_next)
@@ -316,7 +361,27 @@ defmodule Display.Utils.DisplayLiveUtil do
     end
   end
 
-  def log_missing_services(missing_services, bus_stop_no) do
+  def get_missing_services_by_operating_day(missing_services, bus_stop_no) do
+    date = to_string(TimeUtil.get_operating_day_today())
+
+    y = date |> String.slice(0..3) |> String.to_integer()
+    m = date |> String.slice(4..5) |> String.to_integer()
+    d = date |> String.slice(6..7) |> String.to_integer()
+
+    {_, operating_day} = Date.new(y, m, d)
+
+    case MissingServices.read_missing_services_log(
+           missing_services,
+           operating_day,
+           bus_stop_no
+         ) do
+      result ->
+        Logger.info("Missing service read successful")
+        result
+    end
+  end
+
+  def log_missing_services(missing_source, missing_services, bus_stop_no) do
     # log missing services to pids_miss_svc_log
     date = to_string(TimeUtil.get_operating_day_today())
 
@@ -328,31 +393,198 @@ defmodule Display.Utils.DisplayLiveUtil do
 
     case MissingServices.create_missing_services_log(
            "missing service",
-           "service not in arrival map",
+           "missing services from #{missing_source}",
            missing_services,
            bus_stop_no,
            operating_day
          ) do
       {:ok, _} ->
-        Logger.info("Message service logged successfully")
+        Logger.info("Missing service logged successfully")
 
       {:error, _} ->
-        Logger.error("Message services logging unsuccessful")
+        Logger.error("Missing services logging unsuccessful")
     end
   end
 
-  defp find_missing_services(service_direction_map, service_arrival_map) do
-    universal_set =
-      service_direction_map
-      |> Enum.map(fn {k, _} -> elem(k, 0) end)
-      |> MapSet.new()
+  defp get_operating_day() do
+    date = to_string(TimeUtil.get_operating_day_today())
+    y = date |> String.slice(0..3) |> String.to_integer()
+    m = date |> String.slice(4..5) |> String.to_integer()
+    d = date |> String.slice(6..7) |> String.to_integer()
+    {_, operating_day} = Date.new(y, m, d)
+    operating_day
+  end
 
-    service_set =
-      service_arrival_map
-      |> Enum.map(fn {k, _} -> elem(k, 0) end)
-      |> MapSet.new()
+  def auto_refresh_panel(bus_stop_no, panel_id) do
+    {frequency, _} = Application.get_env(:display, :panel_refresh_frequency) |> Integer.parse()
+    today = get_operating_day() |> Date.to_string()
 
-    MapSet.difference(universal_set, service_set) |> MapSet.to_list()
+    # may need to make it more unique if >1 panels with same ID
+    flag_key = "r_flag:#{bus_stop_no}"
+
+    {:ok, flag} = Display.Redix.command(["GET", flag_key])
+
+    # initial condition
+    if is_nil(flag) or flag == "false" do
+      next_refresh_date = get_operating_day() |> Date.add(frequency) |> Date.to_string()
+      Display.Redix.command(["SET", flag_key, Jason.encode!(%{next_refresh: next_refresh_date})])
+      Logger.info("NEXT_REFRESH_DATE - #{inspect(next_refresh_date)}")
+
+      HTTPoison.get!(
+        Application.get_env(:display, :server) <> "/panel-refresh?panel_id=#{panel_id}"
+      )
+    else
+      %{"next_refresh" => next_refresh_date} = Jason.decode!(flag)
+
+      if today == next_refresh_date do
+        Logger.info("TODAY IS REFRESH DATE")
+        new_next_refresh_date = get_operating_day() |> Date.add(frequency) |> Date.to_string()
+
+        Display.Redix.command([
+          "SET",
+          flag_key,
+          Jason.encode!(%{next_refresh: new_next_refresh_date})
+        ])
+
+        Logger.info("NEXT_REFRESH_DATE - #{inspect(new_next_refresh_date)}")
+
+        HTTPoison.get!(
+          Application.get_env(:display, :server) <> "/panel-refresh?panel_id=#{panel_id}"
+        )
+      else
+        Logger.info("NEXT REFRESH DATE - #{next_refresh_date}")
+      end
+    end
+  end
+
+  def record_services_of_the_day(service_arrival_map, bus_stop_no) do
+    operating_day = get_operating_day() |> Date.to_string()
+    key = "daily-" <> operating_day <> ":#{bus_stop_no}"
+
+    # get date:runningservicesliststring
+    case Display.Redix.command(["GET", key]) do
+      # if nil -> first entry -> set
+      {:ok, nil} ->
+        service_set = service_arrival_map |> Enum.map(fn {k, _} -> elem(k, 0) end)
+        Display.Redix.command(["SET", key, Jason.encode!(%{services: service_set})])
+        Logger.info("FE_SET CP to redis - #{inspect(service_set)}")
+
+      # if no nil
+      {:ok, data} ->
+        new_service_set = service_arrival_map |> Enum.map(fn {k, _} -> elem(k, 0) end)
+        %{"services" => current_service_set} = Jason.decode!(data)
+
+        latest_service_set =
+          current_service_set ++
+            Enum.filter(new_service_set, fn svc -> not Enum.member?(current_service_set, svc) end)
+
+        Display.Redix.command(["SET", key, Jason.encode!(%{services: latest_service_set})])
+        Logger.info("SET CP to redis - #{inspect(latest_service_set)}")
+
+      {:error, any} ->
+        Logger.info("GET #{key} from redis failed - #{inspect(any)}")
+    end
+  end
+
+  def log_missing_services_of_the_day(service_direction_map, bus_stop_no) do
+    # get the today's ran services from redis
+    operating_day = get_operating_day() |> Date.to_string()
+    Logger.info("LOGGING MISSING SERVICES FOR:: #{operating_day}")
+    key = "daily-" <> operating_day <> ":#{bus_stop_no}"
+
+    case Display.Redix.command(["GET", key]) do
+      {:ok, nil} ->
+        Logger.info("Value nil for key: #{key}")
+
+      {:ok, data} ->
+        # convert to mapset
+        %{"services" => ran_services_list} = Jason.decode!(data)
+        today_ran_services_set = ran_services_list |> MapSet.new()
+
+        Logger.info(
+          "TODAY RAN(CP): #{inspect(today_ran_services_set)} - #{
+            inspect(length(MapSet.to_list(today_ran_services_set)))
+          }"
+        )
+
+        # create the operating services set - intersection
+        universal_set =
+          service_direction_map
+          |> Enum.map(fn {k, _} -> elem(k, 0) end)
+          |> MapSet.new()
+
+        # hardcoded operating services
+        running_set = get_operating_services() |> MapSet.new()
+        # get an intersection between the universal set(ST) and the running list API
+        operating_services_set = MapSet.intersection(running_set, universal_set)
+
+        Logger.info(
+          "OPERATING SERVICES: #{inspect(operating_services_set)} - #{
+            inspect(length(MapSet.to_list(operating_services_set)))
+          }"
+        )
+
+        # find the difference btwn the operating services set and the running set
+        missing_services =
+          MapSet.difference(operating_services_set, today_ran_services_set) |> MapSet.to_list()
+
+        missing_source =
+          cond do
+            # if u_set > s_set -> there are some missing svs in s_set - datamall
+            length(MapSet.to_list(operating_services_set)) >
+                length(MapSet.to_list(today_ran_services_set)) ->
+              "datamall"
+
+            # if u_set < s_set -> there are some missing svs in u_set - schedule_table
+            length(MapSet.to_list(operating_services_set)) <
+                length(MapSet.to_list(today_ran_services_set)) ->
+              "schedule_table"
+
+            # if both are of same len - there are no missing services
+            length(MapSet.to_list(operating_services_set)) ==
+                length(MapSet.to_list(today_ran_services_set)) ->
+              nil
+          end
+
+        Logger.info("MISSING_SOURCE: #{inspect(missing_source)}")
+
+        # only log when there are missing services
+        if length(missing_services) > 0 do
+          Logger.info("MISSING SERVICES=#{inspect(missing_services)}")
+          # query from DB for the missing_services and the operating day
+          # if the missing services exists for this operating day -> dont insert -> else -> insert new
+          exists = get_missing_services_by_operating_day(missing_services, bus_stop_no)
+          Logger.info("MISSING SERVICES ALREADY EXIST IN DB=#{inspect(exists)}")
+
+          if not exists do
+            Logger.info("LOGGING MISSING SERVICES TO DB NOW...")
+
+            Task.Supervisor.async_nolink(
+              Display.TaskSupervisor,
+              __MODULE__,
+              :log_missing_services,
+              [missing_source, missing_services, bus_stop_no]
+            )
+          end
+        end
+
+      {:error, any} ->
+        Logger.info("GET #{key} from redis failed - #{inspect(any)}")
+    end
+  end
+
+  defp generate_running_last_bus_list_from_map(last_bus_map) do
+    # get a set of last buses service numbers
+    last_buses_set = Enum.map(last_bus_map, fn {{svc_no, _}, _} -> svc_no end) |> MapSet.new()
+    # get actual running services by intersecting
+    actual_last_buses_list =
+      MapSet.intersection(get_operating_services() |> MapSet.new(), last_buses_set)
+      |> MapSet.to_list()
+
+    # produce a list of running last services with their times in second - iff svc_no from map belongs to actual last buses list
+    Enum.filter(last_bus_map, fn {{svc_no, _}, _} ->
+      Enum.member?(actual_last_buses_list, svc_no)
+    end)
   end
 
   def show_blank_screen(socket) do
@@ -1363,5 +1595,510 @@ defmodule Display.Utils.DisplayLiveUtil do
       timer_ref ->
         Process.cancel_timer(timer_ref)
     end
+  end
+
+  def get_operating_services() do
+    [
+      "118",
+      "118",
+      "118A",
+      "118B",
+      "119",
+      "12",
+      "12",
+      "12e",
+      "12e",
+      "136",
+      "136",
+      "15",
+      "15A",
+      "17",
+      "17",
+      "17A",
+      "2",
+      "2",
+      "2A",
+      "3",
+      "3",
+      "34",
+      "34A",
+      "34B",
+      "354",
+      "358",
+      "359",
+      "36",
+      "36A",
+      "36B",
+      "381",
+      "382",
+      "382",
+      "382A",
+      "382G",
+      "382W",
+      "384",
+      "386",
+      "386A",
+      "3A",
+      "403",
+      "43",
+      "43",
+      "43e",
+      "43e",
+      "43M",
+      "518",
+      "518A",
+      "6",
+      "62",
+      "62A",
+      "661",
+      "661",
+      "666",
+      "666",
+      "68",
+      "68A",
+      "68B",
+      "82",
+      "83",
+      "83T",
+      "84",
+      "85",
+      "85",
+      "85A",
+      "10",
+      "10",
+      "100",
+      "100",
+      "100A",
+      "101",
+      "102",
+      "103",
+      "103",
+      "105",
+      "105",
+      "105B",
+      "107",
+      "107",
+      "107M",
+      "109",
+      "109",
+      "109A",
+      "10e",
+      "10e",
+      "11",
+      "111",
+      "112",
+      "112A",
+      "113",
+      "113A",
+      "114",
+      "115",
+      "116",
+      "116A",
+      "117",
+      "117",
+      "117A",
+      "117B",
+      "120",
+      "121",
+      "122",
+      "123",
+      "123",
+      "123M",
+      "124",
+      "124",
+      "125",
+      "125A",
+      "127",
+      "127A",
+      "129",
+      "129",
+      "13",
+      "13",
+      "130",
+      "130",
+      "130A",
+      "131",
+      "131",
+      "131A",
+      "131M",
+      "132",
+      "132",
+      "133",
+      "133",
+      "134",
+      "135",
+      "135",
+      "137",
+      "137",
+      "137A",
+      "138",
+      "138A",
+      "138B",
+      "139",
+      "139",
+      "139M",
+      "13A",
+      "14",
+      "14",
+      "140",
+      "141",
+      "141",
+      "142",
+      "142A",
+      "145",
+      "145",
+      "145A",
+      "147",
+      "147",
+      "147A",
+      "14A",
+      "14e",
+      "14e",
+      "150",
+      "151",
+      "151",
+      "151e",
+      "151e",
+      "153",
+      "153",
+      "154",
+      "154",
+      "154A",
+      "154B",
+      "155",
+      "155",
+      "156",
+      "156",
+      "157",
+      "157",
+      "158",
+      "158A",
+      "159",
+      "159",
+      "159A",
+      "159B",
+      "16",
+      "16",
+      "160",
+      "160A",
+      "160M",
+      "161",
+      "161",
+      "162",
+      "162",
+      "162M",
+      "163",
+      "163",
+      "163A",
+      "165",
+      "165",
+      "166",
+      "166",
+      "168",
+      "168",
+      "16M",
+      "16M",
+      "170",
+      "170",
+      "170A",
+      "170X",
+      "170X",
+      "174",
+      "174",
+      "174e",
+      "174e",
+      "175",
+      "175",
+      "179",
+      "179A",
+      "18",
+      "181",
+      "181M",
+      "182",
+      "182M",
+      "185",
+      "185",
+      "186",
+      "186",
+      "19",
+      "191",
+      "192",
+      "192",
+      "193",
+      "193",
+      "194",
+      "195",
+      "195A",
+      "196",
+      "196",
+      "196A",
+      "196e",
+      "196e",
+      "197",
+      "197",
+      "198",
+      "198",
+      "198A",
+      "199",
+      "1N",
+      "20",
+      "200",
+      "200A",
+      "201",
+      "21",
+      "21",
+      "21A",
+      "22",
+      "22",
+      "222",
+      "222A",
+      "222B",
+      "225G",
+      "225W",
+      "228",
+      "229",
+      "23",
+      "231",
+      "232",
+      "235",
+      "238",
+      "24",
+      "240",
+      "240A",
+      "240M",
+      "241",
+      "241A",
+      "242",
+      "243G",
+      "243W",
+      "246",
+      "247",
+      "248",
+      "248M",
+      "249",
+      "25",
+      "25",
+      "251",
+      "252",
+      "253",
+      "254",
+      "255",
+      "257",
+      "258",
+      "26",
+      "26",
+      "261",
+      "262",
+      "265",
+      "268",
+      "268A",
+      "268B",
+      "268C",
+      "269",
+      "269A",
+      "27",
+      "272",
+      "273",
+      "27A",
+      "28",
+      "28",
+      "29",
+      "291",
+      "291T",
+      "292",
+      "293",
+      "293T",
+      "298",
+      "29A",
+      "2N",
+      "30",
+      "30",
+      "30e",
+      "30e",
+      "31",
+      "31",
+      "315",
+      "317",
+      "31A",
+      "32",
+      "32",
+      "324",
+      "325",
+      "329",
+      "33",
+      "33",
+      "33A",
+      "33B",
+      "35",
+      "35M",
+      "37",
+      "371",
+      "372",
+      "374",
+      "38",
+      "38",
+      "39",
+      "39",
+      "3N",
+      "4",
+      "40",
+      "400",
+      "401",
+      "405",
+      "410",
+      "410",
+      "410G",
+      "410W",
+      "42",
+      "45",
+      "45",
+      "45A",
+      "46",
+      "46",
+      "47",
+      "48",
+      "48",
+      "4N",
+      "5",
+      "5",
+      "50",
+      "50",
+      "502",
+      "502A",
+      "506",
+      "506",
+      "51",
+      "51",
+      "513",
+      "513",
+      "51A",
+      "52",
+      "52",
+      "53",
+      "53A",
+      "53M",
+      "54",
+      "54",
+      "55",
+      "55",
+      "55B",
+      "56",
+      "56",
+      "57",
+      "57",
+      "58",
+      "58",
+      "58A",
+      "58B",
+      "59",
+      "59",
+      "5N",
+      "60",
+      "60A",
+      "60T",
+      "63",
+      "63A",
+      "63M",
+      "64",
+      "65",
+      "65",
+      "652",
+      "652",
+      "654",
+      "654",
+      "655",
+      "655",
+      "660",
+      "660",
+      "667",
+      "667",
+      "668",
+      "668",
+      "671",
+      "671",
+      "672",
+      "672",
+      "69",
+      "6N",
+      "7",
+      "7",
+      "70",
+      "70",
+      "70A",
+      "70B",
+      "70M",
+      "71",
+      "72",
+      "72",
+      "72A",
+      "72B",
+      "73",
+      "73T",
+      "74",
+      "74",
+      "74e",
+      "74e",
+      "76",
+      "76",
+      "7A",
+      "7B",
+      "8",
+      "8",
+      "80",
+      "80",
+      "800",
+      "803",
+      "804",
+      "805",
+      "806",
+      "807",
+      "807A",
+      "807B",
+      "80A",
+      "81",
+      "811",
+      "811A",
+      "811T",
+      "812",
+      "812T",
+      "850E",
+      "850E",
+      "851",
+      "851",
+      "851e",
+      "851e",
+      "852",
+      "852",
+      "86",
+      "86",
+      "860",
+      "860T",
+      "87",
+      "87",
+      "88",
+      "88",
+      "88A",
+      "88B",
+      "89",
+      "89A",
+      "89e",
+      "89e",
+      "9",
+      "90",
+      "90A",
+      "91",
+      "92",
+      "92A",
+      "92B",
+      "92M",
+      "93",
+      "93",
+      "94",
+      "94A",
+      "95",
+      "95B",
+      "974",
+      "974A"
+    ]
   end
 end

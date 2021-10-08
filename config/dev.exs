@@ -22,7 +22,9 @@ config :display, Display.Repo,
   pool_size: System.fetch_env!("POSTGRES_POOL_SIZE") |> String.to_integer()
 
 config :display,
-  multimedia_base_url: System.fetch_env!("MULTIMEDIA_BASE_URL")
+  multimedia_base_url: System.fetch_env!("MULTIMEDIA_BASE_URL"),
+  panel_refresh_frequency: System.fetch_env!("PANEL_REFRESH_FREQUENCY"),
+  server: System.fetch_env!("SERVER")
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

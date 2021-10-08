@@ -19,7 +19,8 @@
     color: #fff;
   }
 
-  .incoming-bus-card, .incoming-bus-conditions {
+  .incoming-bus-card,
+  .incoming-bus-conditions {
     position: absolute;
   }
 
@@ -68,10 +69,37 @@
       border-radius: 12.5px;
       font-size: 80px;
       font-weight: bold;
-      background-image: url('/images/landscape-incoming-bus.png');
       background-size: cover;
       background-repeat: no-repeat;
       background-position: 1px 0;
+    }
+
+    .base-number {
+      border-radius: 0px 8px 8px 0px;
+      font-size: 80px;
+      background: #99db53;
+      color: #303030;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 120px;
+      margin-left: 28px;
+      margin-top: 8px;
+      position: relative;
+      width: 260px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .base-number:before {
+      border-right: 33px solid #99db53;
+      border-top: 60px solid transparent;
+      border-bottom: 60px solid transparent;
+      content: "";
+      height: 0;
+      left: 0;
+      position: absolute;
+      left: -32px;
+      width: 0;
     }
   }
 
@@ -120,7 +148,6 @@
       line-height: 120px;
       border-radius: 25px;
       font-size: 80px;
-      background-image: url('/images/landscape-incoming-bus.png');
       background-size: contain;
       background-repeat: no-repeat;
       background-position: 1px 0;
@@ -129,20 +156,47 @@
     }
 
     &:after {
-      content: '';
+      content: "";
       position: absolute;
       bottom: 0;
       right: 0;
       height: 120px;
       width: 100%;
-      background-image: url('/images/landscape-incoming-bus.png');
       background-size: contain;
       background-repeat: no-repeat;
       background-position: right;
       z-index: 0;
     }
+
+    .base-number {
+      border-radius: 0px 8px 8px 0px;
+      font-size: 80px;
+      background: #99db53;
+      color: #303030;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 120px;
+      margin-left: 28px;
+      margin-top: 8px;
+      position: relative;
+      width: 300px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .base-number:before {
+      border-right: 33px solid #99db53;
+      border-top: 60px solid transparent;
+      border-bottom: 60px solid transparent;
+      content: "";
+      height: 0;
+      left: 0;
+      position: absolute;
+      left: -32px;
+      width: 0;
+    }
   }
-  
+
   .incoming-bus-card {
     top: -70px;
     left: -4px;

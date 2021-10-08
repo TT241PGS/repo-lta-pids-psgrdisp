@@ -775,7 +775,6 @@ defmodule DisplayWeb.DisplayLive do
         },
         socket
       ) do
-
     refresh_panel(panel_id, socket)
   end
 
@@ -1042,8 +1041,14 @@ defmodule DisplayWeb.DisplayLive do
   defp refresh_panel(panel_id, socket) do
     case socket.assigns.panel_id == panel_id do
       true ->
-        Logger.info("Panel #{socket.assigns.panel_id} redirected to " <> "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5")
-        {:noreply, push_redirect(socket, to: "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5")}
+        Logger.info(
+          "Panel #{socket.assigns.panel_id} redirected to " <>
+            "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5"
+        )
+
+        {:noreply,
+         push_redirect(socket, to: "/display?panel_id=#{socket.assigns.panel_id}&zoom=0.5")}
+
       _ ->
         {:noreply, socket}
     end

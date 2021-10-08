@@ -16,4 +16,16 @@ defmodule Display.MissingServices do
     })
     |> Repo.insert()
   end
+
+  # read
+  def read_missing_services_log(missing_services, operating_day, bus_stop_no) do
+    query =
+      from ms in MissingServicesLog,
+        where:
+          ms.msng_svcs_txt == ^missing_services and
+            ms.op_day_dt == ^operating_day and
+            ms.bus_stop_no_num == ^bus_stop_no
+
+    Repo.exists?(query)
+  end
 end
